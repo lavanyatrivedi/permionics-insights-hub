@@ -33,11 +33,6 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       }
     }
 
-    // Set headers for SSE
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-
     const messages = [
       { role: "system", content: systemContext },
       ...history.map((h: any) => ({
@@ -47,40 +42,28 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       { role: "user", content: message }
     ];
 
-    const stream = await groq.chat.completions.create({
+    const completion = await groq.chat.completions.create({
       messages: messages as any,
       model: "llama3-8b-8192",
-      stream: true,
+      stream: false,
     });
 
-    let fullResponse = "";
-    
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      if (content) {
-        fullResponse += content;
-        res.write(`data: ${JSON.stringify({ content })}\n\n`);
-      }
-    }
+    const fullResponse = completion.choices[0]?.message?.content || "No response generated.";
 
     // Save chat history
-    if (fullResponse) {
-      try {
-        await supabase.from("chats").insert([
-          { role: "user", content: message },
-          { role: "assistant", content: fullResponse }
-        ]);
-      } catch (err) {
-        req.log.error({ err }, "Failed to save chat history to database");
-      }
+    try {
+      await supabase.from("chats").insert([
+        { role: "user", content: message },
+        { role: "assistant", content: fullResponse }
+      ]);
+    } catch (err) {
+      req.log.error({ err }, "Failed to save chat history to database");
     }
 
-    res.write("data: [DONE]\n\n");
-    res.end();
+    res.json({ answer: fullResponse, sources: [] });
   } catch (err: any) {
     req.log.error({ err }, "Chat Error");
-    res.write(`data: ${JSON.stringify({ error: err.message || "An error occurred" })}\n\n`);
-    res.end();
+    res.status(500).json({ error: err.message || "An error occurred" });
   }
 });
 
