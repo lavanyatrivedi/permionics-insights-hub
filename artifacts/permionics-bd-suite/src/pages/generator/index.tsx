@@ -169,19 +169,18 @@ export default function GeneratorPage() {
                     <FormItem><FormLabel>Client Testimonial (Optional)</FormLabel><FormControl><Textarea placeholder="Quote from the client..." {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
 
-                  {/* using a standard input for tags to simulate z.string().transform behavior for demo purposes */}
-                  <FormItem>
-                    <FormLabel>Tags (Comma separated)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="ZLD, High COD, Fast Execution..." 
-                        onChange={(e) => {
-                          const val = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                          form.setValue("tags", val as any);
-                        }} 
-                      />
-                    </FormControl>
-                  </FormItem>
+                  {/* Tags — uses plain Label because form.setValue is called manually, not via FormField */}
+                  <div className="space-y-2">
+                    <Label htmlFor="tags-input">Tags (Comma separated)</Label>
+                    <Input
+                      id="tags-input"
+                      placeholder="ZLD, High COD, Fast Execution..."
+                      onChange={(e) => {
+                        const val = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                        form.setValue("tags", val as any);
+                      }}
+                    />
+                  </div>
                 </div>
               </form>
             </Form>

@@ -28,7 +28,7 @@ function getSectorColor(sector: string) {
 }
 
 export default function DashboardPage() {
-  const { data: stats, isLoading } = useGetDashboardStats();
+  const { data: stats, isLoading, isError } = useGetDashboardStats();
 
   if (isLoading) {
     return (
@@ -51,7 +51,28 @@ export default function DashboardPage() {
     );
   }
 
-  if (!stats) return null;
+  if (isError || !stats) {
+    return (
+      <div className="flex-1 p-8 pt-6">
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <CardHeader>
+            <CardTitle className="text-amber-800 dark:text-amber-300 text-lg">Database setup required</CardTitle>
+            <CardDescription className="text-amber-700 dark:text-amber-400">
+              The Supabase tables have not been created yet. Run the migration SQL to get started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              Open your Supabase project, go to <strong>SQL Editor</strong>, paste the contents of <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">supabase-migration.sql</code> from this workspace, and run it.
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              This creates the <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">case_studies</code> and <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">questionnaires</code> tables and seeds 4 demo projects.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Mock sector distribution data since it's not provided explicitly in stats
   // In a real app this would come from the API
