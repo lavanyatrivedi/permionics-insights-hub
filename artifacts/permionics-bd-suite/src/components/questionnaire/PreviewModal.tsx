@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Question, Section, ClientInfo } from '@/types/questionnaire';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import logoUrl from '@assets/logo-01_(1)_1783575156427.png';
-import { Printer, Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { generatePdf } from './PdfExport';
 
 interface PreviewModalProps {
@@ -23,17 +23,17 @@ export function PreviewModal({
   questions,
   sections
 }: PreviewModalProps) {
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
+    setIsExporting(true);
     try {
       await generatePdf(sectorName, clientInfo, questions, sections, logoUrl);
     } catch (error) {
       console.error('PDF export failed:', error);
+    } finally {
+      setIsExporting(false);
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   // Organize questions by section for rendering
@@ -49,19 +49,13 @@ export function PreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] h-full flex flex-col p-0 overflow-hidden bg-white print:max-w-none print:h-auto print:bg-white print:p-0 print:border-none print:shadow-none">
-        <DialogHeader className="px-6 py-4 border-b border-border bg-secondary/30 flex-shrink-0 flex flex-row items-center justify-between print:hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] h-full flex flex-col p-0 overflow-hidden bg-white">
+        <DialogHeader className="px-6 py-4 border-b border-border bg-secondary/30 flex-shrink-0 flex flex-row items-center justify-between">
           <DialogTitle className="text-lg font-medium text-primary">Preview: {sectorName} Questionnaire</DialogTitle>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="w-4 h-4 mr-2" />
-              Print
-            </Button>
-            <Button size="sm" onClick={handleExport} className="bg-primary hover:bg-primary/90">
-              <Download className="w-4 h-4 mr-2" />
-              Export PDF
-            </Button>
-          </div>
+          <Button size="sm" onClick={handleExport} disabled={isExporting} className="bg-primary hover:bg-primary/90">
+            {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            {isExporting ? 'Generating PDF...' : 'Download PDF'}
+          </Button>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-8 print:p-0 print:overflow-visible font-sans bg-white print:bg-white">
