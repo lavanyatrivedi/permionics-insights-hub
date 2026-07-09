@@ -8,17 +8,37 @@ const router: IRouter = Router();
 const apiKey = process.env["GROQ_API_KEY"] ?? "";
 const groq = new Groq({ apiKey });
 
-// Helper to sanitize search term and compute relevance score
+// List of common English stop words and general UI/context words to exclude from keyword scoring
+const STOP_WORDS = new Set([
+  "what", "where", "how", "why", "when", "who", "which", "whose", "whom", 
+  "that", "this", "these", "those", "have", "has", "had", "do", "does", "did", 
+  "shall", "will", "should", "would", "may", "might", "must", "can", "could", 
+  "about", "above", "across", "after", "against", "along", "among", "around", "at", 
+  "before", "behind", "below", "beneath", "beside", "between", "beyond", "but", "by", 
+  "down", "during", "except", "for", "from", "in", "inside", "into", "like", "near", 
+  "of", "off", "on", "onto", "out", "outside", "over", "past", "through", "throughout", 
+  "till", "to", "toward", "under", "underneath", "until", "up", "upon", "with", "within", 
+  "without", "give", "show", "tell", "summarize", "summary", "case", "study", "studies", 
+  "project", "projects", "client", "clients", "information", "detail", "details", 
+  "document", "documents", "file", "files", "pdf", "pdfs", "please", "you", "our", 
+  "their", "them", "they", "we", "us", "i", "a", "an", "the", "and", "or", "but", "is", 
+  "are", "was", "were", "be", "been", "being", "get", "got", "make", "made", "take", "took"
+]);
+
+// Helper to compute keyword relevance score
 function computeRelevanceScore(text: string, searchTerms: string[]): number {
   if (!text || searchTerms.length === 0) return 0;
   const lowerText = text.toLowerCase();
   let score = 0;
+  
   searchTerms.forEach(term => {
+    // Exact word boundary matching gets very high weight (10 points)
     const regex = new RegExp(`\\b${term}\\b`, 'g');
     const wordMatches = lowerText.match(regex);
     if (wordMatches) {
-      score += wordMatches.length * 5; // high weight for exact word match
+      score += wordMatches.length * 10;
     } else if (lowerText.includes(term)) {
+      // Substring match gets low weight (2 points)
       score += 2;
     }
   });
@@ -34,12 +54,12 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       return;
     }
 
-    // Extract search terms (words of length >= 3)
+    // Extract search terms (words of length >= 3, excluding common stop words)
     const searchTerms = message
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
-      .filter((w: string) => w.length >= 3);
+      .filter((w: string) => w.length >= 3 && !STOP_WORDS.has(w));
 
     // ── 1. Pull all uploaded PDF documents ─────────────────────────────────
     const { data: uploadedDocs } = await supabase
@@ -59,10 +79,10 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       .select("id, name, data, updated_at")
       .order("updated_at", { ascending: false });
 
-    // ── 4. Score all documents for keyword relevance ───────────────────────
+    // ── 4. Score all documents in the entire database ───────────────────────
     const allScoredItems: any[] = [];
 
-    // Map and score uploaded PDFs
+    // Score uploaded PDFs
     (uploadedDocs ?? []).forEach(doc => {
       const score = computeRelevanceScore(`${doc.title} ${doc.content}`, searchTerms);
       allScoredItems.push({
@@ -75,7 +95,7 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       });
     });
 
-    // Map and score Library Case Studies
+    // Score Library Case Studies
     (caseStudies ?? []).forEach(cs => {
       const fullTextToSearch = `${cs.client_name} ${cs.sector} ${cs.challenge} ${cs.solution} ${cs.results} ${cs.full_text} ${cs.technology_stack}`;
       const score = computeRelevanceScore(fullTextToSearch, searchTerms);
@@ -101,7 +121,7 @@ DETAILS: ${cs.full_text || ""}`;
       });
     });
 
-    // Map and score Creator Projects
+    // Score Creator Projects
     (creatorProjects ?? []).forEach(proj => {
       if (!proj.data) return;
       const d = proj.data as any;
@@ -128,33 +148,29 @@ TECHNOLOGIES: ${(d.technologies || []).join(", ")}`;
       });
     });
 
-    // ── 5. Select items to include in Context (Smart Union) ──────────────────
+    // ── 5. Select the best context matches ─────────────────────────────────
     const selectedItemsMap = new Map<string, any>();
 
-    // A. Always include the 2 most recently uploaded PDFs (so chatbot has access to current uploads)
-    const recentUploads = allScoredItems.filter(item => item.type === "uploaded").slice(0, 2);
-    recentUploads.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+    // A. Add high-relevance matched items first (score > 0)
+    // Sort all scored items descending by relevance
+    const rankedMatches = allScoredItems
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score);
 
-    // B. Always include the 2 most recent Library Case Studies
-    const recentLibrary = allScoredItems.filter(item => item.type === "library").slice(0, 2);
-    recentLibrary.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+    // Pick top 4 best matches from the entire database
+    const topMatches = rankedMatches.slice(0, 4);
+    topMatches.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
 
-    // C. Always include the 1 most recent Creator Project
-    const recentCreator = allScoredItems.filter(item => item.type === "creator").slice(0, 1);
-    recentCreator.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+    // B. If context space permits, fill the remaining space with the most recent entries
+    if (selectedItemsMap.size < 3) {
+      // Pull recent uploaded document
+      const recentUpload = allScoredItems.filter(item => item.type === "uploaded" && !selectedItemsMap.has(`${item.type}-${item.id}`)).slice(0, 1);
+      recentUpload.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
 
-    // D. Add any other items that have high keyword relevance score (> 5) and aren't already included
-    const highRelevanceItems = allScoredItems
-      .filter(item => item.score >= 5)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 2); // limit to 2 additional relevant matches to conserve tokens
-    
-    highRelevanceItems.forEach(item => {
-      const key = `${item.type}-${item.id}`;
-      if (!selectedItemsMap.has(key)) {
-        selectedItemsMap.set(key, item);
-      }
-    });
+      // Pull recent library case
+      const recentLib = allScoredItems.filter(item => item.type === "library" && !selectedItemsMap.has(`${item.type}-${item.id}`)).slice(0, 1);
+      recentLib.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+    }
 
     const finalSelectedItems = Array.from(selectedItemsMap.values());
 
