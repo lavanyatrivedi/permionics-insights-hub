@@ -13,6 +13,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPalette, setNewPalette] = useState("ocean-blue");
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -37,7 +38,7 @@ export default function ProjectsPage() {
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
-    setIsCreating(true);
+    setIsSubmitting(true);
     try {
       const res: any = await customFetch("/api/case-studies", {
         method: "POST",
@@ -47,14 +48,15 @@ export default function ProjectsPage() {
           data: DEFAULT_DATA,
         }),
       });
-      navigate(`/generator/editor/${res.id}`);
+      // wouter navigate is relative to the nested base when inside a nested Route
+      navigate(`/editor/${res.id}`);
     } catch (err: any) {
       toast({
         title: "Failed to create",
         description: err.message,
         variant: "destructive",
       });
-      setIsCreating(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -158,10 +160,10 @@ export default function ProjectsPage() {
                 </button>
                 <button
                   onClick={handleCreate}
-                  disabled={!newName.trim() || isCreating} // Fixed typing logic mentally
+                  disabled={!newName.trim() || isSubmitting}
                   style={{ padding: "8px 20px", border: "none", borderRadius: "7px", background: newName.trim() ? "#003466" : "#94a3b8", color: "white", fontSize: "13px", fontWeight: 600, cursor: newName.trim() ? "pointer" : "not-allowed" }}
                 >
-                  {isCreating ? "Creating..." : "Create"}
+                  {isSubmitting ? "Creating..." : "Create"}
                 </button>
               </div>
             </div>
