@@ -23,7 +23,7 @@ export default function EditorPage({ projectId }: Props) {
   const latestDataRef = useRef<{ data: CaseStudyData; palette: string } | null>(null);
 
   useEffect(() => {
-    customFetch(`/api/case-studies/${projectId}`)
+    customFetch(`/api/case-creator/${projectId}`)
       .then((res: any) => {
         setProject(res);
         setData(res.data as unknown as CaseStudyData);
@@ -39,7 +39,7 @@ export default function EditorPage({ projectId }: Props) {
   const doSave = useCallback(async (saveData: CaseStudyData, savePalette: string) => {
     setSaveStatus("saving");
     try {
-      await customFetch(`/api/case-studies/${projectId}`, {
+      await customFetch(`/api/case-creator/${projectId}`, {
         method: "PUT",
         body: JSON.stringify({ data: saveData, palette: savePalette }),
       });

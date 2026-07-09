@@ -21,7 +21,7 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      const res: any = await customFetch("/api/case-studies");
+      const res: any = await customFetch("/api/case-creator");
       setProjects(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error(err);
@@ -37,7 +37,7 @@ export default function ProjectsPage() {
     if (!newName.trim()) return;
     setIsSubmitting(true);
     try {
-      const res: any = await customFetch("/api/case-studies", {
+      const res: any = await customFetch("/api/case-creator", {
         method: "POST",
         body: JSON.stringify({ name: newName.trim(), palette: newPalette, data: DEFAULT_DATA }),
       });
@@ -52,7 +52,7 @@ export default function ProjectsPage() {
     if (deleteId === null) return;
     setIsDeleting(true);
     try {
-      await customFetch(`/api/case-studies/${deleteId}`, { method: "DELETE" });
+      await customFetch(`/api/case-creator/${deleteId}`, { method: "DELETE" });
       setDeleteId(null);
       toast({ title: "Deleted", description: "Case study removed." });
       await fetchProjects();
