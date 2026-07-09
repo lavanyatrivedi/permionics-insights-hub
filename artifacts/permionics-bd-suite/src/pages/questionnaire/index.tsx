@@ -22,10 +22,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
-async function apiFetch(path: string, opts?: RequestInit) {
-  // Use customFetch which handles the base URL and auth correctly
-  return customFetch(`/api${path}`, opts);
-}
+// Remove apiFetch
 
 function deepCopyState(state: SectorState): SectorState {
   return JSON.parse(JSON.stringify(state));
@@ -62,7 +59,7 @@ export default function QuestionnairePage() {
   const loadProjects = useCallback(async () => {
     setLoadingProjects(true);
     try {
-      const data = await apiFetch('/projects');
+      const data = await customFetch<SavedProject[]>('/api/projects');
       setProjects(data ?? []);
     } catch {
       toast({ title: 'Error', description: 'Could not load projects.', variant: 'destructive' });
@@ -77,7 +74,7 @@ export default function QuestionnairePage() {
   // ── Open project ───────────────────────────────────────────────────────────
   const openProject = async (id: number) => {
     try {
-      const proj = await apiFetch(`/projects/${id}`);
+      const proj = await customFetch<SavedProject>(`/api/projects/${id}`);
       setActiveSectorId(proj.sector);
       const savedState = proj.data && Object.keys(proj.data).length > 0
         ? (proj.data as SectorState)
@@ -94,7 +91,7 @@ export default function QuestionnairePage() {
   const createProject = async () => {
     if (!newProjectName.trim()) return;
     try {
-      const proj = await apiFetch('/projects', {
+      const proj = await customFetch<SavedProject>('/api/projects', {
         method: 'POST',
         body: JSON.stringify({ name: newProjectName.trim(), sector: newProjectSector, data: initState(newProjectSector) }),
       });
@@ -111,7 +108,7 @@ export default function QuestionnairePage() {
     if (!activeProjectId) return;
     setIsSaving(true);
     try {
-      await apiFetch(`/projects/${activeProjectId}`, {
+      await customFetch(`/api/projects/${activeProjectId}`, {
         method: 'PUT',
         body: JSON.stringify({ data: sectorState }),
       });
@@ -127,9 +124,12 @@ export default function QuestionnairePage() {
   // ── Delete project ─────────────────────────────────────────────────────────
   const deleteProject = async (id: number) => {
     try {
-      await apiFetch(`/projects/${id}`, { method: 'DELETE' });
-      setProjects((p) => p.filter((x) => x.id !== id));
-      toast({ title: 'Deleted', description: 'Project removed.' });
+      await customFetch(`/api/projects/${id}`, { method: 'DELETE' });
+      toast({ title: 'Deleted', description: 'Project deleted successfully.' });
+      if (activeProjectId === id) {
+        setActiveProjectId(null);
+      }
+      await loadProjects();
     } catch {
       toast({ title: 'Error', description: 'Could not delete project.', variant: 'destructive' });
     }

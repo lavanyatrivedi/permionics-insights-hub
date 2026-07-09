@@ -32,7 +32,11 @@ export interface SavedProject {
   id: number;
   name: string;
   companyName: string;
+  contactPerson?: string;
+  location?: string;
+  date?: string;
   sector: string;
+  data?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }
