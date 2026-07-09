@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, User, Upload, FileText, Trash2, Loader2 } from "lucide-react";
-import { useSendChatMessage, ChatSource } from "@workspace/api-client-react";
+import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -45,10 +45,8 @@ export default function AssistantPage() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch("/api/assistant/documents");
-      if (res.ok) {
-        setDocuments(await res.json());
-      }
+      const data = await customFetch<Document[]>("/api/assistant/documents");
+      setDocuments(data);
     } catch (e) {
       console.error("Failed to fetch documents", e);
     }
@@ -85,17 +83,13 @@ export default function AssistantPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/assistant/upload", {
+      await customFetch("/api/assistant/upload", {
         method: "POST",
         body: formData,
       });
 
-      if (res.ok) {
-        toast({ title: "Success", description: "Document uploaded and OCR processed successfully." });
-        fetchDocuments();
-      } else {
-        throw new Error("Upload failed");
-      }
+      toast({ title: "Success", description: "Document uploaded and OCR processed successfully." });
+      fetchDocuments();
     } catch (error) {
       toast({ title: "Upload Error", description: "Failed to process the document.", variant: "destructive" });
     } finally {
@@ -106,11 +100,9 @@ export default function AssistantPage() {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      const res = await fetch(`/api/assistant/documents/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        toast({ title: "Deleted", description: "Document removed from library." });
-        fetchDocuments();
-      }
+      await customFetch(`/api/assistant/documents/${id}`, { method: "DELETE" });
+      toast({ title: "Deleted", description: "Document removed from library." });
+      fetchDocuments();
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete document.", variant: "destructive" });
     }

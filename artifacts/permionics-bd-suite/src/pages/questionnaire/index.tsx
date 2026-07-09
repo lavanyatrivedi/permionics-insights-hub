@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { customFetch } from '@workspace/api-client-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
@@ -21,17 +22,9 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
-const API_BASE = '/api';
-
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
-    ...opts,
-  });
-  if (!res.ok) throw new Error(await res.text());
-  if (res.status === 204) return null;
-  return res.json();
+  // Use customFetch which handles the base URL and auth correctly
+  return customFetch(`/api${path}`, opts);
 }
 
 function deepCopyState(state: SectorState): SectorState {
