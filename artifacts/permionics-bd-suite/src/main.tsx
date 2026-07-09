@@ -6,9 +6,8 @@ import App from './App';
 import './index.css';
 
 // For production builds (like on Vercel), point API calls to the remote backend
-const apiUrl = import.meta.env.VITE_API_URL || 'https://permionics-insights-hub-api.onrender.com';
-if (import.meta.env.PROD) {
-  setBaseUrl(apiUrl);
+if (import.meta.env.PROD && import.meta.env.VITE_API_URL) {
+  setBaseUrl(import.meta.env.VITE_API_URL);
 }
 
 createRoot(document.getElementById('root')!).render(<App />);
