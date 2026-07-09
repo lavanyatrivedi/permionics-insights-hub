@@ -90,8 +90,8 @@ export default function AssistantPage() {
 
       toast({ title: "Success", description: "Document uploaded and OCR processed successfully." });
       fetchDocuments();
-    } catch (error) {
-      toast({ title: "Upload Error", description: "Failed to process the document.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Upload Error", description: error?.message || "Failed to process the document.", variant: "destructive" });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

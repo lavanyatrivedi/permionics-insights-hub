@@ -55,7 +55,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/generator">
+      <Route path="/generator" nest>
         <ProtectedRoute>
           <AppLayout>
             <GeneratorPage />

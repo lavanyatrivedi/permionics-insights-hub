@@ -61,8 +61,8 @@ export default function QuestionnairePage() {
     try {
       const data = await customFetch<SavedProject[]>('/api/projects');
       setProjects(data ?? []);
-    } catch {
-      toast({ title: 'Error', description: 'Could not load projects.', variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Could not load projects.', variant: 'destructive' });
     } finally {
       setLoadingProjects(false);
     }
@@ -82,8 +82,8 @@ export default function QuestionnairePage() {
       setSectorState(deepCopyState(savedState));
       setActiveProjectId(id);
       setView('builder');
-    } catch {
-      toast({ title: 'Error', description: 'Could not open project.', variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Could not open project.', variant: 'destructive' });
     }
   };
 
@@ -98,8 +98,8 @@ export default function QuestionnairePage() {
       setNewProjectOpen(false);
       setNewProjectName('');
       await openProject(proj.id);
-    } catch {
-      toast({ title: 'Error', description: 'Could not create project.', variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Could not create project.', variant: 'destructive' });
     }
   };
 
@@ -114,8 +114,8 @@ export default function QuestionnairePage() {
       });
       toast({ title: 'Saved', description: 'Project saved successfully.' });
       loadProjects();
-    } catch {
-      toast({ title: 'Error', description: 'Could not save project.', variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Could not save project.', variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
