@@ -4,12 +4,20 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
 import os from "os";
-// @ts-ignore
-import pdf from "pdf-parse";
+import PDFParser from "pdf2json";
 
 const router: IRouter = Router();
 
 const upload = multer({ dest: os.tmpdir() });
+
+const extractPdfText = (filePath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const pdfParser = new (PDFParser as any)(null, 1);
+    pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
+    pdfParser.on("pdfParser_dataReady", () => resolve(pdfParser.getRawTextContent()));
+    pdfParser.loadPDF(filePath);
+  });
+};
 
 router.post("/assistant/upload", requireAuth, upload.single("file"), async (req, res): Promise<void> => {
   if (!req.file) {
@@ -20,10 +28,8 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
   const { path: tempPath, originalname } = req.file;
 
   try {
-    // 1. Read PDF file and extract text locally
-    const dataBuffer = fs.readFileSync(tempPath);
-    const pdfData = await pdf(dataBuffer);
-    const extractedText = pdfData.text;
+    // 1. Read PDF file and extract text locally using pdf2json
+    const extractedText = await extractPdfText(tempPath);
 
     // 2. Save to database
     const { data, error } = await supabase
