@@ -14,13 +14,12 @@ function computeRelevanceScore(text: string, searchTerms: string[]): number {
   const lowerText = text.toLowerCase();
   let score = 0;
   searchTerms.forEach(term => {
-    // Exact word matches get higher weight
     const regex = new RegExp(`\\b${term}\\b`, 'g');
     const wordMatches = lowerText.match(regex);
     if (wordMatches) {
-      score += wordMatches.length * 3;
+      score += wordMatches.length * 5; // high weight for exact word match
     } else if (lowerText.includes(term)) {
-      score += 1;
+      score += 2;
     }
   });
   return score;
@@ -45,28 +44,38 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
     // ── 1. Pull all uploaded PDF documents ─────────────────────────────────
     const { data: uploadedDocs } = await supabase
       .from("assistant_documents")
-      .select("id, title, content");
+      .select("id, title, content, created_at")
+      .order("created_at", { ascending: false });
 
     // ── 2. Pull all case studies from the Library ───────────────────────────
     const { data: caseStudies } = await supabase
       .from("case_studies")
-      .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text");
+      .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text, updated_at")
+      .order("updated_at", { ascending: false });
 
     // ── 3. Pull all Case Study Creator projects ─────────────────────────────
     const { data: creatorProjects } = await supabase
       .from("case_creator_projects")
-      .select("id, name, data, updated_at");
+      .select("id, name, data, updated_at")
+      .order("updated_at", { ascending: false });
 
-    // ── 4. Rank and select relevant documents ──────────────────────────────
-    const scoredDocs: any[] = [];
+    // ── 4. Score all documents for keyword relevance ───────────────────────
+    const allScoredItems: any[] = [];
 
-    // Score uploaded PDFs
+    // Map and score uploaded PDFs
     (uploadedDocs ?? []).forEach(doc => {
       const score = computeRelevanceScore(`${doc.title} ${doc.content}`, searchTerms);
-      scoredDocs.push({ type: "uploaded", title: doc.title, content: doc.content, score, doc });
+      allScoredItems.push({
+        id: doc.id,
+        type: "uploaded",
+        title: doc.title,
+        content: doc.content,
+        score,
+        date: doc.created_at || ""
+      });
     });
 
-    // Score Library Case Studies
+    // Map and score Library Case Studies
     (caseStudies ?? []).forEach(cs => {
       const fullTextToSearch = `${cs.client_name} ${cs.sector} ${cs.challenge} ${cs.solution} ${cs.results} ${cs.full_text} ${cs.technology_stack}`;
       const score = computeRelevanceScore(fullTextToSearch, searchTerms);
@@ -82,10 +91,17 @@ RESULTS: ${cs.results || ""}
 TESTIMONIAL: ${cs.testimonial || ""}
 DETAILS: ${cs.full_text || ""}`;
 
-      scoredDocs.push({ type: "library", title: cs.client_name, content: formatted, score, doc: cs });
+      allScoredItems.push({
+        id: String(cs.id),
+        type: "library",
+        title: cs.client_name,
+        content: formatted,
+        score,
+        date: cs.updated_at || ""
+      });
     });
 
-    // Score Creator Projects
+    // Map and score Creator Projects
     (creatorProjects ?? []).forEach(proj => {
       if (!proj.data) return;
       const d = proj.data as any;
@@ -102,23 +118,47 @@ SOLUTION: ${d.solution || ""}
 KEY OUTCOMES: ${(d.bullets || []).join(" | ")}
 TECHNOLOGIES: ${(d.technologies || []).join(", ")}`;
 
-      scoredDocs.push({ type: "creator", title: proj.name, content: formatted, score, doc: proj });
+      allScoredItems.push({
+        id: String(proj.id),
+        type: "creator",
+        title: proj.name,
+        content: formatted,
+        score,
+        date: proj.updated_at || ""
+      });
     });
 
-    // Sort by score descending
-    scoredDocs.sort((a, b) => b.score - a.score);
+    // ── 5. Select items to include in Context (Smart Union) ──────────────────
+    const selectedItemsMap = new Map<string, any>();
 
-    // Pick top 3 most relevant documents (score > 0)
-    let selectedDocs = scoredDocs.filter(d => d.score > 0).slice(0, 3);
+    // A. Always include the 2 most recently uploaded PDFs (so chatbot has access to current uploads)
+    const recentUploads = allScoredItems.filter(item => item.type === "uploaded").slice(0, 2);
+    recentUploads.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
 
-    // Fallback: If no document matched the keywords, pick the 2 most recent Library/Creator projects as generic context
-    if (selectedDocs.length === 0) {
-      const recentLibrary = scoredDocs.filter(d => d.type === "library").slice(0, 1);
-      const recentCreator = scoredDocs.filter(d => d.type === "creator").slice(0, 1);
-      selectedDocs = [...recentLibrary, ...recentCreator];
-    }
+    // B. Always include the 2 most recent Library Case Studies
+    const recentLibrary = allScoredItems.filter(item => item.type === "library").slice(0, 2);
+    recentLibrary.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
 
-    // ── 5. Build system prompt with selected context ────────────────────────
+    // C. Always include the 1 most recent Creator Project
+    const recentCreator = allScoredItems.filter(item => item.type === "creator").slice(0, 1);
+    recentCreator.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+
+    // D. Add any other items that have high keyword relevance score (> 5) and aren't already included
+    const highRelevanceItems = allScoredItems
+      .filter(item => item.score >= 5)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2); // limit to 2 additional relevant matches to conserve tokens
+    
+    highRelevanceItems.forEach(item => {
+      const key = `${item.type}-${item.id}`;
+      if (!selectedItemsMap.has(key)) {
+        selectedItemsMap.set(key, item);
+      }
+    });
+
+    const finalSelectedItems = Array.from(selectedItemsMap.values());
+
+    // ── 6. Build system prompt ──────────────────────────────────────────────
     let systemContext = `You are OSMOS BD Assistant — an expert Business Development AI for Permionics Membranes Pvt. Ltd., a leading membrane technology company specialising in Reverse Osmosis (RO), Ultrafiltration (UF), Nanofiltration (NF), MBR, and Zero Liquid Discharge (ZLD) systems.
 
 Your role:
@@ -127,17 +167,18 @@ Your role:
 
 Always be concise, professional, and specific. Prefer bullet points for technical specs. Cite client names and capacity numbers from the reference documents.`;
 
-    if (selectedDocs.length > 0) {
+    if (finalSelectedItems.length > 0) {
       systemContext += `\n\nUse the following provided reference documents (most relevant to the user query) to answer the user's questions:\n`;
-      selectedDocs.forEach((item, idx) => {
-        systemContext += `\n--- Document ${idx + 1}: ${item.title} (${item.type.toUpperCase()}) ---\n${item.content.slice(0, 3000)}\n`;
+      finalSelectedItems.forEach((item, idx) => {
+        // Keep document snippet size safe (max 2500 chars) to prevent context token overflow
+        systemContext += `\n--- Document ${idx + 1}: ${item.title} (${item.type.toUpperCase()}) ---\n${item.content.slice(0, 2500)}\n`;
       });
     }
 
-    // ── 6. Build messages ───────────────────────────────────────────────────
+    // ── 7. Build messages ───────────────────────────────────────────────────
     const messages = [
       { role: "system", content: systemContext },
-      ...history.slice(-8).map((h: any) => ({
+      ...history.slice(-6).map((h: any) => ({
         role: h.role === "user" ? "user" : "assistant",
         content: h.content,
       })),
@@ -168,10 +209,10 @@ Always be concise, professional, and specific. Prefer bullet points for technica
       answer: fullResponse,
       sources: [],
       contextSummary: {
-        uploadedDocs: selectedDocs.filter(d => d.type === "uploaded").length,
-        caseStudies: selectedDocs.filter(d => d.type === "library").length,
-        creatorProjects: selectedDocs.filter(d => d.type === "creator").length,
-        total: selectedDocs.length,
+        uploadedDocs: finalSelectedItems.filter(d => d.type === "uploaded").length,
+        caseStudies: finalSelectedItems.filter(d => d.type === "library").length,
+        creatorProjects: finalSelectedItems.filter(d => d.type === "creator").length,
+        total: finalSelectedItems.length,
       },
     });
   } catch (err: any) {
