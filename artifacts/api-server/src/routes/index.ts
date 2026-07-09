@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import dashboardRouter from "./dashboard";
 import caseStudiesRouter from "./caseStudies";
 import questionnairesRouter from "./questionnaires";
+import projectsRouter from "./projects";
 import chatRouter from "./chat";
 import settingsRouter from "./settings";
 
@@ -14,6 +15,7 @@ router.use(authRouter);
 router.use(dashboardRouter);
 router.use(caseStudiesRouter);
 router.use(questionnairesRouter);
+router.use(projectsRouter);
 router.use(chatRouter);
 router.use(settingsRouter);
 

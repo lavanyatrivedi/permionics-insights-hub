@@ -1,13 +1,11 @@
 import { Router, type IRouter } from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 
 const router: IRouter = Router();
 
-const anthropic = new Anthropic({
-  apiKey: process.env["ANTHROPIC_API_KEY"],
-});
+const genAI = new GoogleGenerativeAI(process.env["GEMINI_API_KEY"] ?? "");
 
 type HistoryItem = { role: string; content: string };
 
@@ -21,35 +19,23 @@ function scoreRelevance(caseStudy: Record<string, unknown>, query: string): numb
   const tags = ((caseStudy["tags"] as string[]) ?? []).join(" ").toLowerCase();
 
   let score = 0;
-
-  // Exact client name match is a strong signal
   if (clientName && queryLower.includes(clientName)) score += 10;
-
-  // Sector match
   if (sector && queryLower.includes(sector)) score += 5;
-
-  // Technology match
   if (techStack) {
     const techTerms = techStack.split(/[,\s\/]+/);
     for (const term of techTerms) {
       if (term.length > 1 && queryLower.includes(term)) score += 3;
     }
   }
-
-  // Tag match
   if (tags) {
     const tagList = tags.split(/[,\s]+/);
     for (const tag of tagList) {
       if (tag.length > 2 && queryLower.includes(tag)) score += 2;
     }
   }
-
-  // Full text keyword matching
   for (const word of queryWords) {
     if (fullText.includes(word)) score += 1;
   }
-
-  // Check for capacity mentions (e.g. "500 KLD", "1000 m3")
   const capacityMatch = query.match(/(\d+)\s*(kld|mld|m3|lph|lpm|lpd)/i);
   if (capacityMatch) {
     const requestedVal = parseInt(capacityMatch[1], 10);
@@ -60,7 +46,6 @@ function scoreRelevance(caseStudy: Record<string, unknown>, query: string): numb
       if (csVal >= requestedVal) score += 4;
     }
   }
-
   return score;
 }
 
@@ -100,7 +85,6 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       }))
       .sort((a, b) => b.score - a.score);
 
-    // Take top 3 relevant case studies (score > 0)
     const relevant = scored.filter((s) => s.score > 0).slice(0, 3);
     const sources = relevant.map((s) => ({
       id: s.cs.id,
@@ -109,7 +93,6 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       technologyStack: s.cs.technology_stack,
     }));
 
-    // Build context string from relevant case studies
     let context = "";
     if (relevant.length > 0) {
       context =
@@ -125,13 +108,12 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
         "No directly relevant case studies were found in the Permionics database for this specific query.";
     }
 
-    // Build system prompt
-    const systemPrompt = `You are the Permionics BD Assistant, an expert internal tool for the business development team at Permionics Membranes Pvt. Ltd. - a leading manufacturer of customized membrane filtration solutions in India.
+    const systemInstruction = `You are the Permionics BD Assistant, an expert internal tool for the business development team at Permionics Membranes Pvt. Ltd. - a leading manufacturer of customised membrane filtration solutions in India.
 
 Your role is to help the BD team by answering questions about Permionics projects, technical capabilities, and sector-specific solutions.
 
 STRICT RULES:
-1. Base your answers ONLY on the case studies provided as context. Do not invent project details, client names, or technical specifications that are not present in the provided data.
+1. Base your answers ONLY on the case studies provided as context. Do not invent project details, client names, or technical specifications not present in the data.
 2. If no relevant case study is found, say so clearly and suggest adding a new case study for that scenario.
 3. Always cite which case study or studies you are drawing from.
 4. You may provide general membrane technology knowledge as background, but always distinguish it from specific Permionics project data.
@@ -141,37 +123,24 @@ STRICT RULES:
 
 ${context}`;
 
-    // Build message history for Claude
-    const messages: Anthropic.MessageParam[] = [];
+    // Build Gemini model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction,
+    });
 
-    // Add conversation history (up to last 8 turns to keep context manageable)
+    // Build chat history for Gemini (role must be "user" | "model")
     const recentHistory = history.slice(-8);
-    for (const h of recentHistory) {
-      if (h.role === "user" || h.role === "assistant") {
-        messages.push({
-          role: h.role as "user" | "assistant",
-          content: h.content,
-        });
-      }
-    }
+    const geminiHistory = recentHistory
+      .filter((h) => h.role === "user" || h.role === "assistant")
+      .map((h) => ({
+        role: h.role === "assistant" ? "model" : "user",
+        parts: [{ text: h.content }],
+      }));
 
-    // Add current user message
-    messages.push({
-      role: "user",
-      content: message,
-    });
-
-    const claudeResponse = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
-    });
-
-    const answer =
-      claudeResponse.content[0]?.type === "text"
-        ? claudeResponse.content[0].text
-        : "Unable to generate a response.";
+    const chat = model.startChat({ history: geminiHistory });
+    const result = await chat.sendMessage(message);
+    const answer = result.response.text() || "Unable to generate a response.";
 
     res.json({ answer, sources });
   } catch (err) {

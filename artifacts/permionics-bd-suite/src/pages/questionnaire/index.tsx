@@ -1,264 +1,452 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Printer, CheckCircle2, Save, FileText, ClipboardList } from "lucide-react";
-import { useCreateQuestionnaire, useListQuestionnaires } from "@workspace/api-client-react";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { SECTORS, Question, Section, SectorState, SavedProject, ClientInfo } from '@/types/questionnaire';
+import { DEFAULT_SECTOR_STATES } from '@/data/defaultQuestions';
+import { SectionBlock } from '@/components/questionnaire/SectionBlock';
+import { PreviewModal } from '@/components/questionnaire/PreviewModal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Plus, Eye, Save, Loader2, FolderOpen, Trash2, MoreVertical, ClipboardList, ArrowLeft,
+} from 'lucide-react';
+import { format } from 'date-fns';
 
-// Sector predefined questions
-const SECTOR_QUESTIONS: Record<string, string[]> = {
-  "Pharma/Herbal": [
-    "Water source and current quality parameters (TDS, pH, conductivity)?",
-    "Daily/hourly flow rate requirement (m3/day)?",
-    "Current treatment method in place?",
-    "Regulated contaminants of concern (endotoxins, heavy metals, microbial)?",
-    "Required output water quality standard (USP, IP, WHO-GMP)?",
-    "Budget range and project timeline?",
-    "Plant location and utility availability (power, compressed air)?",
-    "Compliance certifications required?"
-  ],
-  "Textile": [
-    "Effluent volume generated per day (KLD)?",
-    "Current COD/BOD/TDS levels in effluent?",
-    "Color and dye load in wastewater?",
-    "Existing primary treatment in place?",
-    "ZLD requirement — yes/no? Target reuse percentage?",
-    "Type of dyes/chemicals used?",
-    "Available land area for plant?",
-    "Timeline and budget range?"
-  ],
-  "CETP/Municipal": [
-    "Total design capacity required (MLD)?",
-    "Number of member industries and their sectors?",
-    "Current inlet quality parameters (COD, BOD, TSS, TDS)?",
-    "Effluent discharge standard to comply with (CPCB, state PCB)?",
-    "Existing infrastructure available?",
-    "Land availability and site constraints?",
-    "Operating budget and STP/ETP operator availability?",
-    "Future expansion provisions needed?"
-  ],
-  "Food & Beverage": [
-    "Type of F&B process (dairy, beverages, brewing, packaged food)?",
-    "Process water requirement vs. effluent treatment need?",
-    "Key contaminants (BOD, fats/oils/grease, sugars, salts)?",
-    "Current treatment method?",
-    "Recovery percentage target for water reuse?",
-    "Seasonal variation in production and effluent volume?",
-    "Food-grade membrane requirement?",
-    "Regulatory compliance requirements?"
-  ]
-};
+const API_BASE = '/api';
+
+async function apiFetch(path: string, opts?: RequestInit) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
+    ...opts,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function deepCopyState(state: SectorState): SectorState {
+  return JSON.parse(JSON.stringify(state));
+}
+
+function initState(sectorId: string): SectorState {
+  const template = DEFAULT_SECTOR_STATES[sectorId];
+  if (!template) return { sections: [], questions: [], clientInfo: { companyName: '', contactPerson: '', date: '', location: '' } };
+  return deepCopyState(template);
+}
 
 export default function QuestionnairePage() {
-  const [activeSector, setActiveSector] = useState("Pharma/Herbal");
-  const [clientName, setClientName] = useState("");
-  const [customQuestion, setCustomQuestion] = useState("");
-  const [additionalQuestions, setAdditionalQuestions] = useState<string[]>([]);
-  
   const { toast } = useToast();
-  const createMutation = useCreateQuestionnaire();
-  const { data: savedQuestionnaires, refetch } = useListQuestionnaires();
 
-  const handleAddQuestion = () => {
-    if (customQuestion.trim()) {
-      setAdditionalQuestions([...additionalQuestions, customQuestion.trim()]);
-      setCustomQuestion("");
+  // ── Project list state ─────────────────────────────────────────────────────
+  const [view, setView] = useState<'list' | 'builder'>('list');
+  const [projects, setProjects] = useState<SavedProject[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // ── New project dialog ─────────────────────────────────────────────────────
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectSector, setNewProjectSector] = useState('pharma');
+
+  // ── Builder state ──────────────────────────────────────────────────────────
+  const [activeSectorId, setActiveSectorId] = useState('pharma');
+  const [sectorState, setSectorState] = useState<SectorState>(() => initState('pharma'));
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [draggedQId, setDraggedQId] = useState<string | null>(null);
+
+  // ── Load projects ──────────────────────────────────────────────────────────
+  const loadProjects = useCallback(async () => {
+    setLoadingProjects(true);
+    try {
+      const data = await apiFetch('/projects');
+      setProjects(data ?? []);
+    } catch {
+      toast({ title: 'Error', description: 'Could not load projects.', variant: 'destructive' });
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, [toast]);
+
+  // Load on mount
+  useState(() => { loadProjects(); });
+
+  // ── Open project ───────────────────────────────────────────────────────────
+  const openProject = async (id: number) => {
+    try {
+      const proj = await apiFetch(`/projects/${id}`);
+      setActiveSectorId(proj.sector);
+      const savedState = proj.data && Object.keys(proj.data).length > 0
+        ? (proj.data as SectorState)
+        : initState(proj.sector);
+      setSectorState(deepCopyState(savedState));
+      setActiveProjectId(id);
+      setView('builder');
+    } catch {
+      toast({ title: 'Error', description: 'Could not open project.', variant: 'destructive' });
     }
   };
 
-  const handleSave = () => {
-    if (!clientName.trim()) {
-      toast({ title: "Client Name Required", description: "Please enter a client name to save.", variant: "destructive" });
-      return;
+  // ── Create project ─────────────────────────────────────────────────────────
+  const createProject = async () => {
+    if (!newProjectName.trim()) return;
+    try {
+      const proj = await apiFetch('/projects', {
+        method: 'POST',
+        body: JSON.stringify({ name: newProjectName.trim(), sector: newProjectSector, data: initState(newProjectSector) }),
+      });
+      setNewProjectOpen(false);
+      setNewProjectName('');
+      await openProject(proj.id);
+    } catch {
+      toast({ title: 'Error', description: 'Could not create project.', variant: 'destructive' });
     }
+  };
 
-    const allQuestions = [
-      ...(SECTOR_QUESTIONS[activeSector] || []),
-      ...additionalQuestions
-    ];
+  // ── Save current project ───────────────────────────────────────────────────
+  const saveProject = async () => {
+    if (!activeProjectId) return;
+    setIsSaving(true);
+    try {
+      await apiFetch(`/projects/${activeProjectId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ data: sectorState }),
+      });
+      toast({ title: 'Saved', description: 'Project saved successfully.' });
+      loadProjects();
+    } catch {
+      toast({ title: 'Error', description: 'Could not save project.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-    const questionsPayload = allQuestions.map((q, i) => ({
-      id: `q-${i}`,
-      question: q,
-      type: "text"
+  // ── Delete project ─────────────────────────────────────────────────────────
+  const deleteProject = async (id: number) => {
+    try {
+      await apiFetch(`/projects/${id}`, { method: 'DELETE' });
+      setProjects((p) => p.filter((x) => x.id !== id));
+      toast({ title: 'Deleted', description: 'Project removed.' });
+    } catch {
+      toast({ title: 'Error', description: 'Could not delete project.', variant: 'destructive' });
+    }
+  };
+
+  // ── Sector state helpers ───────────────────────────────────────────────────
+  const updateClientInfo = (field: keyof ClientInfo, value: string) => {
+    setSectorState((prev) => ({ ...prev, clientInfo: { ...prev.clientInfo, [field]: value } }));
+  };
+
+  const updateSection = (id: string, updates: Partial<Section>) => {
+    setSectorState((prev) => ({ ...prev, sections: prev.sections.map((s) => s.id === id ? { ...s, ...updates } : s) }));
+  };
+
+  const deleteSection = (id: string) => {
+    setSectorState((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((s) => s.id !== id),
+      questions: prev.questions.filter((q) => q.sectionId !== id),
     }));
+  };
 
-    createMutation.mutate({
-      data: {
-        clientName,
-        sector: activeSector,
-        questions: questionsPayload,
-        answers: {},
-        notes: null
-      }
-    }, {
-      onSuccess: () => {
-        toast({ title: "Saved Successfully", description: "Questionnaire added to your saved list." });
-        setClientName("");
-        setAdditionalQuestions([]);
-        refetch();
-      }
+  const addSection = () => {
+    const id = `s-${Date.now()}`;
+    setSectorState((prev) => ({ ...prev, sections: [...prev.sections, { id, title: 'New Section', isExpanded: true }] }));
+  };
+
+  const addQuestion = (sectionId?: string) => {
+    setSectorState((prev) => {
+      const maxNum = prev.questions.reduce((m, q) => Math.max(m, q.number), 0);
+      const newQ: Question = {
+        id: `q-${Date.now()}`, number: maxNum + 1, text: 'New question...', type: 'Text', required: false, sectionId,
+      };
+      return { ...prev, questions: [...prev.questions, newQ] };
     });
   };
 
-  const currentQuestions = [...(SECTOR_QUESTIONS[activeSector] || []), ...additionalQuestions];
+  const updateQuestion = (id: string, updates: Partial<Question>) => {
+    setSectorState((prev) => ({ ...prev, questions: prev.questions.map((q) => q.id === id ? { ...q, ...updates } : q) }));
+  };
 
-  return (
-    <div className="max-w-6xl mx-auto p-8 space-y-8 print-full">
-      <div className="flex items-center justify-between print-hide">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Questionnaire Builder</h1>
-          <p className="text-muted-foreground mt-1">Generate sector-specific requirements gathering forms.</p>
+  const deleteQuestion = (id: string) => {
+    setSectorState((prev) => {
+      const filtered = prev.questions.filter((q) => q.id !== id);
+      return { ...prev, questions: filtered.map((q, i) => ({ ...q, number: i + 1 })) };
+    });
+  };
+
+  const moveQuestion = (id: string, direction: 'up' | 'down') => {
+    setSectorState((prev) => {
+      const qs = [...prev.questions];
+      const idx = qs.findIndex((q) => q.id === id);
+      if (idx < 0) return prev;
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= qs.length) return prev;
+      [qs[idx], qs[targetIdx]] = [qs[targetIdx], qs[idx]];
+      return { ...prev, questions: qs.map((q, i) => ({ ...q, number: i + 1 })) };
+    });
+  };
+
+  // drag-and-drop
+  const handleDragStart = (_e: React.DragEvent, id: string) => setDraggedQId(id);
+  const handleDragOver = (e: React.DragEvent, _id: string) => { e.preventDefault(); };
+  const handleDrop = (_e: React.DragEvent, targetId: string) => {
+    if (!draggedQId || draggedQId === targetId) return;
+    setSectorState((prev) => {
+      const qs = [...prev.questions];
+      const fromIdx = qs.findIndex((q) => q.id === draggedQId);
+      const toIdx = qs.findIndex((q) => q.id === targetId);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      const [moved] = qs.splice(fromIdx, 1);
+      qs.splice(toIdx, 0, moved);
+      return { ...prev, questions: qs.map((q, i) => ({ ...q, number: i + 1 })) };
+    });
+    setDraggedQId(null);
+  };
+
+  const activeSector = SECTORS.find((s) => s.id === activeSectorId);
+
+  // ── RENDER: Project list ───────────────────────────────────────────────────
+  if (view === 'list') {
+    return (
+      <div className="max-w-5xl mx-auto p-8 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-primary">Questionnaire Builder</h1>
+            <p className="text-muted-foreground mt-1">Manage and build sector-specific technical questionnaire projects.</p>
+          </div>
+          <Button onClick={() => { setNewProjectOpen(true); }} className="bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4 mr-2" /> New Project
+          </Button>
         </div>
-      </div>
 
-      <div className="grid md:grid-cols-12 gap-8">
-        {/* Left Side: Builder (hidden when printing) */}
-        <div className="md:col-span-4 space-y-6 print-hide">
-          <Card>
-            <CardHeader>
-              <CardTitle>Client Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Client / Project Name</Label>
-                  <Input 
-                    placeholder="Enter client name..." 
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                  />
-                </div>
+        {loadingProjects ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="text-center py-20 border border-dashed rounded-xl bg-muted/10">
+            <ClipboardList className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" />
+            <p className="font-medium text-muted-foreground mb-2">No projects yet</p>
+            <p className="text-sm text-muted-foreground mb-6">Create your first questionnaire project to get started.</p>
+            <Button onClick={() => setNewProjectOpen(true)}><Plus className="w-4 h-4 mr-2" /> Create Project</Button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {projects.map((p) => {
+              const sector = SECTORS.find((s) => s.id === p.sector);
+              return (
+                <Card key={p.id} className="hover:border-primary/40 transition-colors cursor-pointer group" onClick={() => openProject(p.id)}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base leading-tight">{p.name}</CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openProject(p.id); }}>
+                            <FolderOpen className="w-4 h-4 mr-2" /> Open
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <Badge variant="secondary" className="w-fit text-xs">{sector?.name ?? p.sector}</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground">{p.companyName || 'No company set'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Updated {format(new Date(p.updatedAt), 'MMM d, yyyy')}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* New Project Dialog */}
+        <Dialog open={newProjectOpen} onOpenChange={setNewProjectOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>New Questionnaire Project</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>Project Name</Label>
+                <Input placeholder="e.g. Waaree Energies — Pharma Water" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && createProject()} autoFocus />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Sector Selection</CardTitle>
-              <CardDescription>Select a sector to load standard questions.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Tabs value={activeSector} onValueChange={(v) => { setActiveSector(v); setAdditionalQuestions([]); }} orientation="vertical" className="w-full border-t">
-                <TabsList className="flex flex-col h-auto bg-transparent p-0 rounded-none w-full">
-                  {Object.keys(SECTOR_QUESTIONS).map((sector) => (
-                    <TabsTrigger 
-                      key={sector} 
-                      value={sector}
-                      className="w-full justify-start rounded-none border-b px-6 py-4 data-[state=active]:bg-primary/5 data-[state=active]:border-r-4 data-[state=active]:border-r-primary data-[state=active]:shadow-none font-medium"
+              <div className="space-y-2">
+                <Label>Sector</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {SECTORS.map((s) => (
+                    <button key={s.id} type="button"
+                      className={`text-left p-3 rounded-lg border text-sm transition-colors ${newProjectSector === s.id ? 'border-primary bg-primary/5 text-primary font-medium' : 'border-border hover:border-primary/40'}`}
+                      onClick={() => setNewProjectSector(s.id)}
                     >
-                      {sector}
-                    </TabsTrigger>
+                      <div className="font-medium">{s.name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5 leading-tight">{s.description}</div>
+                    </button>
                   ))}
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNewProjectOpen(false)}>Cancel</Button>
+              <Button onClick={createProject} disabled={!newProjectName.trim()}>Create Project</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full" onClick={() => window.print()}>
-                <Printer className="w-4 h-4 mr-2" /> Generate Printable Form
-              </Button>
-              <Button variant="secondary" className="w-full" onClick={handleSave} disabled={createMutation.isPending}>
-                <Save className="w-4 h-4 mr-2" /> Save to System
-              </Button>
-            </CardContent>
-          </Card>
+  // ── RENDER: Builder ────────────────────────────────────────────────────────
+  return (
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Left sidebar: client info + sector */}
+      <div className="w-64 border-r bg-muted/10 flex-shrink-0 flex flex-col">
+        <div className="p-4 border-b flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => { setView('list'); loadProjects(); }}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <h2 className="text-sm font-semibold truncate">Questionnaire Builder</h2>
         </div>
 
-        {/* Right Side: Preview / Print View */}
-        <div className="md:col-span-8">
-          <Card className="print:shadow-none print:border-none print:w-full">
-            <CardHeader className="bg-primary text-primary-foreground rounded-t-xl print:bg-transparent print:text-black print:border-b-2 print:border-primary print:rounded-none">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-2xl print:text-3xl">Technical Requirements Gathering</CardTitle>
-                  <CardDescription className="text-primary-foreground/80 print:text-gray-600 mt-2 text-base">
-                    {clientName ? `Client: ${clientName}` : "Client: ___________________________"}
-                  </CardDescription>
-                </div>
-                <Badge className="bg-white text-primary border-none print:border-2 print:border-primary print:text-primary text-sm px-3 py-1">
-                  {activeSector}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="space-y-8">
-                {currentQuestions.map((q, index) => (
-                  <div key={index} className="space-y-3 border-b border-dashed pb-6 print:border-gray-300">
-                    <p className="font-medium text-foreground flex gap-3">
-                      <span className="text-primary font-bold">{index + 1}.</span> {q}
-                    </p>
-                    {/* The blank lines for filling out on paper */}
-                    <div className="h-6 border-b border-gray-200 print:border-gray-400"></div>
-                    <div className="h-6 border-b border-gray-200 print:border-gray-400 hidden print:block"></div>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-5">
+            {/* Client Info */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Info</h3>
+              <div className="space-y-2">
+                {[
+                  { field: 'companyName' as keyof ClientInfo, label: 'Company', placeholder: 'Company name...' },
+                  { field: 'contactPerson' as keyof ClientInfo, label: 'Contact', placeholder: 'Contact person...' },
+                  { field: 'location' as keyof ClientInfo, label: 'Location', placeholder: 'City, State...' },
+                  { field: 'date' as keyof ClientInfo, label: 'Date', placeholder: 'e.g. July 2025' },
+                ].map(({ field, label, placeholder }) => (
+                  <div key={field} className="space-y-1">
+                    <Label className="text-xs">{label}</Label>
+                    <Input className="h-8 text-xs" placeholder={placeholder} value={sectorState.clientInfo[field]} onChange={(e) => updateClientInfo(field, e.target.value)} />
                   </div>
                 ))}
               </div>
+            </div>
 
-              {/* Add Custom Question (Hidden on Print) */}
-              <div className="pt-6 print-hide">
-                <div className="flex gap-3">
-                  <Input 
-                    placeholder="Type a custom question to add..." 
-                    value={customQuestion}
-                    onChange={(e) => setCustomQuestion(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddQuestion()}
-                  />
-                  <Button variant="outline" onClick={handleAddQuestion}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Sector */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sector</h3>
+              {SECTORS.map((s) => (
+                <button key={s.id} type="button"
+                  className={`w-full text-left px-3 py-2 rounded text-xs transition-colors ${activeSectorId === s.id ? 'bg-primary text-primary-foreground font-semibold' : 'hover:bg-muted text-foreground'}`}
+                  onClick={() => { if (activeSectorId !== s.id) { setActiveSectorId(s.id); setSectorState(initState(s.id)); } }}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Bottom actions */}
+        <div className="p-4 border-t space-y-2">
+          <Button size="sm" className="w-full" onClick={() => setPreviewOpen(true)}>
+            <Eye className="w-4 h-4 mr-2" /> Preview / Export
+          </Button>
+          <Button size="sm" variant="secondary" className="w-full" onClick={saveProject} disabled={isSaving}>
+            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            Save Project
+          </Button>
+          <Button size="sm" variant="outline" className="w-full" onClick={addSection}>
+            <Plus className="w-4 h-4 mr-2" /> Add Section
+          </Button>
         </div>
       </div>
 
-      {/* Saved Questionnaires */}
-      <div className="pt-12 print-hide border-t mt-12">
-        <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2">
-          <ClipboardList className="h-6 w-6 text-primary" />
-          Saved Questionnaires
-        </h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {savedQuestionnaires && savedQuestionnaires.length > 0 ? (
-            savedQuestionnaires.map((q) => (
-              <Card key={q.id} className="hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{q.clientName}</CardTitle>
-                    <Badge variant="secondary">{q.sector}</Badge>
-                  </div>
-                  <CardDescription>
-                    Created {format(new Date(q.createdAt), "MMM d, yyyy")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <FileText className="h-4 w-4 mr-2" />
-                    {q.questions.length} questions
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-12 bg-muted/20 rounded-xl border border-dashed">
-              <ClipboardList className="h-8 w-8 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No saved questionnaires yet.</p>
+      {/* Main builder area */}
+      <ScrollArea className="flex-1 bg-background">
+        <div className="p-6 max-w-3xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-xl font-bold">{activeSector?.name ?? activeSectorId}</h1>
+              <p className="text-sm text-muted-foreground">{sectorState.questions.length} questions across {sectorState.sections.length} sections</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => addQuestion(undefined)}>
+              <Plus className="w-4 h-4 mr-2" /> Add Question
+            </Button>
+          </div>
+
+          {sectorState.sections.length === 0 && sectorState.questions.length === 0 && (
+            <div className="text-center py-16 border border-dashed rounded-xl">
+              <p className="text-muted-foreground">No sections yet. Click "Add Section" to start.</p>
+            </div>
+          )}
+
+          {sectorState.sections.map((section) => {
+            const sectionQuestions = sectorState.questions
+              .filter((q) => q.sectionId === section.id)
+              .sort((a, b) => a.number - b.number);
+            const allQs = sectorState.questions;
+            return (
+              <SectionBlock
+                key={section.id}
+                section={section}
+                questions={sectionQuestions}
+                onUpdateSection={updateSection}
+                onDeleteSection={deleteSection}
+                onAddQuestion={addQuestion}
+                onUpdateQuestion={updateQuestion}
+                onDeleteQuestion={deleteQuestion}
+                onMoveQuestionUp={(id) => { const idx = allQs.findIndex((q) => q.id === id); if (idx > 0) moveQuestion(id, 'up'); }}
+                onMoveQuestionDown={(id) => { const idx = allQs.findIndex((q) => q.id === id); if (idx < allQs.length - 1) moveQuestion(id, 'down'); }}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              />
+            );
+          })}
+
+          {/* Unsectioned questions */}
+          {sectorState.questions.filter((q) => !q.sectionId).length > 0 && (
+            <div className="mt-4 space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Unsectioned Questions</h3>
+              {sectorState.questions.filter((q) => !q.sectionId).sort((a, b) => a.number - b.number).map((q, idx, arr) => (
+                <QuestionRowWrapper
+                  key={q.id} question={q} index={idx} totalQuestions={arr.length}
+                  onUpdate={updateQuestion} onDelete={deleteQuestion}
+                  onMoveUp={(id) => moveQuestion(id, 'up')}
+                  onMoveDown={(id) => moveQuestion(id, 'down')}
+                  onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop}
+                />
+              ))}
             </div>
           )}
         </div>
-      </div>
+      </ScrollArea>
+
+      {/* Preview Modal */}
+      <PreviewModal
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        sectorName={activeSector?.name ?? activeSectorId}
+        clientInfo={sectorState.clientInfo}
+        questions={sectorState.questions}
+        sections={sectorState.sections}
+      />
     </div>
   );
 }
+
+// Lazy import wrapper for QuestionRow to avoid circular dep warning
+import { QuestionRow as QuestionRowWrapper } from '@/components/questionnaire/QuestionRow';
