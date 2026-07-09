@@ -14,6 +14,8 @@ interface Props {
   editableMode: boolean;
   onToggleEditable: () => void;
   projectName: string;
+  onPublishToLibrary?: () => void;
+  isPublishing?: boolean;
 }
 
 type Tab = "client" | "content" | "data" | "images" | "style";
@@ -36,7 +38,7 @@ const POS_OPTS = [
   { value: "bottom right", label: "Bottom-right" },
 ];
 
-export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onBack, saved, onSaveNow, editableMode, onToggleEditable, projectName }: Props) {
+export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onBack, saved, onSaveNow, editableMode, onToggleEditable, projectName, onPublishToLibrary, isPublishing }: Props) {
   const [tab, setTab] = useState<Tab>("client");
   const plantRef = useRef<HTMLInputElement>(null);
   const handshakeRef = useRef<HTMLInputElement>(null);
@@ -330,10 +332,10 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-3 border-t border-gray-200 flex flex-col gap-2">
+      <div className="flex-shrink-0 p-3 border-t border-gray-200 flex flex-col gap-2 bg-gray-50">
         <button
           onClick={onPrint}
-          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2.5 px-4 rounded-md transition-colors hover:opacity-90"
+          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2 px-4 rounded-md transition-colors hover:opacity-90"
           style={{ background: "#003466" }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -341,6 +343,32 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
           </svg>
           Print / Save as PDF
         </button>
+
+        {onPublishToLibrary && (
+          <button
+            onClick={onPublishToLibrary}
+            disabled={isPublishing}
+            className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-semibold py-2 px-4 rounded-md transition-colors hover:opacity-90 bg-emerald-600 disabled:bg-emerald-600/40"
+          >
+            {isPublishing ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Publishing...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+                Publish to Library
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

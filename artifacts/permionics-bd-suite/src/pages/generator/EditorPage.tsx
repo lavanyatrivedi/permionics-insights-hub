@@ -5,6 +5,7 @@ import { CaseStudyData, getPalette } from "./creator_types";
 import { Sidebar } from "./creator_components/Sidebar";
 import { CaseStudyPreview } from "./creator_components/CaseStudyPreview";
 import { printCaseStudy } from "./creator_utils/print";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   projectId: number;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function EditorPage({ projectId }: Props) {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [project, setProject] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<CaseStudyData | null>(null);
@@ -19,6 +21,7 @@ export default function EditorPage({ projectId }: Props) {
   const [editableMode, setEditableMode] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDataRef = useRef<{ data: CaseStudyData; palette: string } | null>(null);
 
@@ -76,6 +79,45 @@ export default function EditorPage({ projectId }: Props) {
     if (data) doSave(data, palette);
   };
 
+  const handlePublishToLibrary = async () => {
+    if (!data) return;
+    setIsPublishing(true);
+    try {
+      const payload = {
+        clientName: data.clientName || project?.name || "Unnamed Client",
+        sector: data.sector || "General",
+        location: data.location || "",
+        challenge: data.challengeProblem || "",
+        solution: data.solDesign || "",
+        technologyStack: data.techList ? data.techList.split("\n").join(", ") : "",
+        capacity: data.capacity || "",
+        results: data.cards ? data.cards.map(c => `${c.number}: ${c.label}`).join(" | ") : "",
+        testimonial: data.handshakeCap || null,
+        tags: data.techList ? data.techList.split("\n").map(t => t.trim()).filter(Boolean) : [],
+        fullText: `${data.intro || ""}\n\n${data.challengeProblem || ""}\n\n${data.solDesign || ""}\n\n${data.conclusions || ""}`.trim(),
+      };
+
+      await customFetch("/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      toast({
+        title: "Published to Library",
+        description: "This case study has been added to the Case Library for future search reference.",
+      });
+    } catch (err: any) {
+      console.error("Publish failed:", err);
+      toast({
+        title: "Publish Failed",
+        description: err.message || "Failed to add this case study to the library.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   if (isLoading || !data) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f4f8", fontFamily: "'Inter', sans-serif" }}>
@@ -113,6 +155,8 @@ export default function EditorPage({ projectId }: Props) {
             editableMode={editableMode}
             onToggleEditable={() => setEditableMode((v) => !v)}
             projectName={project?.name ?? ""}
+            onPublishToLibrary={handlePublishToLibrary}
+            isPublishing={isPublishing}
           />
         )}
       </div>
