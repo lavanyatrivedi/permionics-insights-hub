@@ -23,11 +23,17 @@ export default function ProjectsPage() {
     setIsLoading(true);
     customFetch("/api/case-studies")
       .then((res: any) => {
-        setProjects(res);
+        if (Array.isArray(res)) {
+          setProjects(res);
+        } else {
+          setProjects([]);
+          console.error("Invalid response format, expected array:", res);
+        }
         setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
+        setProjects([]);
         setIsLoading(false);
       });
   };
@@ -65,7 +71,7 @@ export default function ProjectsPage() {
     setIsDeleting(true);
     try {
       await customFetch(`/api/case-studies/${deleteId}`, { method: "DELETE" });
-      fetchProjects();
+      await fetchProjects();
       setDeleteId(null);
       setIsDeleting(false);
       toast({ title: "Deleted", description: "Case study removed." });
