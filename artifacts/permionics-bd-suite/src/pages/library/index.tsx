@@ -22,6 +22,19 @@ export default function LibraryPage() {
     technology: technology !== "all" ? technology : undefined,
   });
 
+  const formatDate = (dateStr?: string) => {
+    try {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "-";
+      return format(d, 'MMM d, yyyy');
+    } catch {
+      return "-";
+    }
+  };
+
+  const safeCaseStudies = Array.isArray(caseStudies) ? caseStudies : [];
+
   return (
     <div className="p-8 pt-6 space-y-6 max-w-[1400px] mx-auto">
       <div className="flex items-center justify-between">
@@ -89,8 +102,8 @@ export default function LibraryPage() {
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground mx-auto" />
                   </TableCell>
                 </TableRow>
-              ) : caseStudies && caseStudies.length > 0 ? (
-                caseStudies.map((cs) => (
+              ) : safeCaseStudies.length > 0 ? (
+                safeCaseStudies.map((cs) => (
                   <TableRow 
                     key={cs.id} 
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
@@ -101,22 +114,22 @@ export default function LibraryPage() {
                         <div className="bg-primary/10 p-2 rounded-md">
                           <FileText className="h-4 w-4 text-primary" />
                         </div>
-                        {cs.clientName}
+                        {cs.clientName || "-"}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`${getSectorColor(cs.sector)} whitespace-nowrap`}>
-                        {cs.sector}
+                      <Badge variant="outline" className={`${getSectorColor(cs.sector || "")} whitespace-nowrap`}>
+                        {cs.sector || "-"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent shadow-none">
-                        {cs.technologyStack}
+                        {cs.technologyStack || "-"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{cs.capacity}</TableCell>
+                    <TableCell className="text-muted-foreground">{cs.capacity || "-"}</TableCell>
                     <TableCell className="text-right text-muted-foreground text-sm pr-6">
-                      {format(new Date(cs.createdAt), 'MMM d, yyyy')}
+                      {formatDate(cs.createdAt)}
                     </TableCell>
                   </TableRow>
                 ))
