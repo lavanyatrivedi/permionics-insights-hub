@@ -104,7 +104,9 @@ export default function EditorPage({ projectId }: Props) {
 
       <div style={{ flex: 1, overflowY: "auto", background: "#dde3ea", display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 14px", gap: "10px" }}>
         <div style={{ width: "100%", maxWidth: "794px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#666", fontWeight: 600 }}>OSMOS</div>
+            <div style={{ width: "1px", height: "18px", background: "#ccc" }} />
             <span style={{ fontSize: "12px", color: "#666", fontWeight: 500 }}>Live Preview — updates as you type</span>
             {editableMode && (
               <span style={{ fontSize: "11px", background: "#fef3c7", color: "#92400e", padding: "2px 8px", borderRadius: "20px", fontWeight: 600, border: "1px solid #fcd34d" }}>

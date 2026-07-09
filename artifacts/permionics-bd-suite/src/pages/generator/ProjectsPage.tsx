@@ -78,7 +78,7 @@ export default function ProjectsPage() {
       {/* Top bar */}
       <div style={{ background: "#003466", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#7ec8e3", fontWeight: 600 }}>Permionics</div>
+          <div style={{ fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#7ec8e3", fontWeight: 600 }}>OSMOS</div>
           <div style={{ width: "1px", height: "18px", background: "rgba(255,255,255,0.2)" }} />
           <div style={{ fontSize: "14px", fontWeight: 600, color: "white" }}>Case Study Creator</div>
         </div>

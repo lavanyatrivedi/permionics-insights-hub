@@ -40,7 +40,11 @@ export function setSessionCookie(res: Response, token: string, remember: boolean
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(COOKIE_NAME);
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
 }
 
 export function getTokenFromRequest(req: Request): string | null {

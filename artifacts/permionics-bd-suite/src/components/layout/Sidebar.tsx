@@ -41,10 +41,12 @@ export function Sidebar() {
   return (
     <div className="flex h-screen w-64 flex-col border-r border-border bg-sidebar text-sidebar-foreground print-hide">
       <div className="flex h-16 items-center border-b border-border px-6">
-        <div className="flex items-center gap-3">
-          <img src={logoMark} alt="Permionics" className="h-8 w-8" />
-          <span className="font-bold tracking-tight text-sidebar-foreground">BD Suite</span>
-        </div>
+        <Link href="/">
+          <div className="flex items-center gap-3 cursor-pointer">
+            <img src={logoMark} alt="OSMOS" className="h-8 w-8" />
+            <span className="font-bold tracking-tight text-sidebar-foreground">OSMOS</span>
+          </div>
+        </Link>
       </div>
       
       <div className="flex-1 overflow-auto py-6">
