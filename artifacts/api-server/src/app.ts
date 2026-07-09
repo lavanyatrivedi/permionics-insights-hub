@@ -27,26 +27,25 @@ app.use(
   }),
 );
 
-const allowedOrigins = process.env["REPLIT_DOMAINS"]
-  ? process.env["REPLIT_DOMAINS"].split(",").map((d) => `https://${d.trim()}`)
-  : [];
+// CORS_ORIGIN: comma-separated list of allowed frontend origins.
+// In dev, the Vite dev server proxies /api so CORS is not needed.
+// In production, set CORS_ORIGIN to your frontend URL, e.g. https://permionics-bd.vercel.app
+const rawCorsOrigins = process.env["CORS_ORIGIN"] ?? "";
+const allowedOrigins = rawCorsOrigins
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (same-origin, curl, mobile apps)
+      // Same-origin requests (no Origin header) always allowed
       if (!origin) return callback(null, true);
-      // Allow localhost for development
+      // Localhost always allowed (dev)
       if (origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1")) {
         return callback(null, true);
       }
-      // Allow explicitly listed Replit domains
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      // Allow any *.replit.app or *.repl.co subdomain (preview domains)
-      if (/^https:\/\/[a-zA-Z0-9-]+\.replit\.app$/.test(origin) ||
-          /^https:\/\/[a-zA-Z0-9-]+\.repl\.co$/.test(origin)) {
-        return callback(null, true);
-      }
       callback(new Error("CORS not allowed"));
     },
     credentials: true,
