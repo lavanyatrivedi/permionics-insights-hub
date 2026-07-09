@@ -44,7 +44,7 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
 
     const completion = await groq.chat.completions.create({
       messages: messages as any,
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
       stream: false,
     });
 

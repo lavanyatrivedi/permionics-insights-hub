@@ -61,7 +61,7 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
     res.json({ success: true, document: data });
   } catch (err: any) {
     req.log.error({ err }, "Error processing document upload");
-    res.status(500).json({ error: "Failed to process document", details: err, message: err?.message });
+    res.status(500).json({ error: `Failed: ${err?.message || err}` });
   } finally {
     // Clean up temp file
     if (fs.existsSync(tempPath)) {
