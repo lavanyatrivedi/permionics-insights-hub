@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User } from "lucide-react";
+import { Send, User, Upload, FileText, Trash2, Loader2 } from "lucide-react";
 import { useSendChatMessage, ChatSource } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import botAvatar from "@assets/__(4)_1783575225786.jpeg";
 
 interface Message {
@@ -12,11 +14,22 @@ interface Message {
   sources?: ChatSource[];
 }
 
+interface Document {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
 export default function AssistantPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const sendChat = useSendChatMessage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,6 +38,21 @@ export default function AssistantPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await fetch("/api/assistant/documents");
+      if (res.ok) {
+        setDocuments(await res.json());
+      }
+    } catch (e) {
+      console.error("Failed to fetch documents", e);
+    }
+  };
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
@@ -43,11 +71,56 @@ export default function AssistantPage() {
     });
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid File", description: "Only PDF files are supported.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/assistant/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        toast({ title: "Success", description: "Document uploaded and OCR processed successfully." });
+        fetchDocuments();
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      toast({ title: "Upload Error", description: "Failed to process the document.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteDocument = async (id: string) => {
+    try {
+      const res = await fetch(`/api/assistant/documents/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast({ title: "Deleted", description: "Document removed from library." });
+        fetchDocuments();
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete document.", variant: "destructive" });
+    }
+  };
+
   const examplePrompts = [
     "Have we done a CETP project above 500 KLD?",
     "What results did we get for Waaree Energies?",
     "Pitch angle for textile ZLD client",
-    "Standard approach for pharma effluent"
+    "Summarize the latest uploaded case study"
   ];
 
   return (
@@ -73,7 +146,7 @@ export default function AssistantPage() {
               </div>
               <div className="max-w-md">
                 <h3 className="text-2xl font-bold mb-3 tracking-tight">How can I assist you?</h3>
-                <p className="text-muted-foreground mb-8 text-base">Ask me anything about past case studies, technical specifications, or previous client solutions.</p>
+                <p className="text-muted-foreground mb-8 text-base">Ask me anything about past case studies, technical specifications, or uploaded PDF documents.</p>
                 <div className="flex flex-col gap-3">
                   {examplePrompts.map((p, i) => (
                     <Button 
@@ -140,39 +213,103 @@ export default function AssistantPage() {
         </div>
       </div>
 
-      {/* Right: Input Area */}
+      {/* Right: Input Area & Library */}
       <div className="w-full lg:w-[400px] flex flex-col gap-4">
-        <Card className="flex-1 flex flex-col shadow-sm border-border">
-          <CardHeader className="pb-4 bg-muted/20 border-b">
-            <CardTitle className="text-lg">Query Input</CardTitle>
-            <CardDescription>Formulate your query for the BD knowledge base.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col p-6">
-            <Textarea 
-              className="flex-1 min-h-[200px] lg:min-h-0 resize-none border-0 focus-visible:ring-0 px-0 text-base leading-relaxed bg-transparent" 
-              placeholder="E.g. What is the standard recovery rate for textile ZLD plants using MBR and RO technologies?"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(input);
-                }
-              }}
-            />
-            <div className="pt-6 mt-auto border-t">
-              <Button 
-                size="lg"
-                className="w-full font-bold text-base h-12" 
-                disabled={!input.trim() || sendChat.isPending}
-                onClick={() => handleSend(input)}
-              >
-                <Send className="w-5 h-5 mr-2" />
-                Analyze Query
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="chat">Chat Input</TabsTrigger>
+            <TabsTrigger value="library">Document Library</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="chat" className="flex-1 flex flex-col mt-0 h-full">
+            <Card className="flex-1 flex flex-col shadow-sm border-border">
+              <CardHeader className="pb-4 bg-muted/20 border-b">
+                <CardTitle className="text-lg">Query Input</CardTitle>
+                <CardDescription>Formulate your query for the BD knowledge base.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col p-6">
+                <Textarea 
+                  className="flex-1 min-h-[200px] lg:min-h-0 resize-none border-0 focus-visible:ring-0 px-0 text-base leading-relaxed bg-transparent" 
+                  placeholder="E.g. What is the standard recovery rate for textile ZLD plants using MBR and RO technologies?"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend(input);
+                    }
+                  }}
+                />
+                <div className="pt-6 mt-auto border-t">
+                  <Button 
+                    size="lg"
+                    className="w-full font-bold text-base h-12" 
+                    disabled={!input.trim() || sendChat.isPending}
+                    onClick={() => handleSend(input)}
+                  >
+                    <Send className="w-5 h-5 mr-2" />
+                    Analyze Query
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="library" className="flex-1 flex flex-col mt-0 h-full">
+            <Card className="flex-1 flex flex-col shadow-sm border-border">
+              <CardHeader className="pb-4 bg-muted/20 border-b">
+                <CardTitle className="text-lg">Reference Library</CardTitle>
+                <CardDescription>Upload PDFs for Gemini OCR processing.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col p-6 space-y-4">
+                <input 
+                  type="file" 
+                  accept="application/pdf"
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+                />
+                <Button 
+                  className="w-full border-dashed border-2 py-8 bg-muted/20 text-muted-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/50" 
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <><Loader2 className="w-6 h-6 mr-3 animate-spin" /> Extracting Text via OCR...</>
+                  ) : (
+                    <><Upload className="w-6 h-6 mr-3" /> Upload PDF Document</>
+                  )}
+                </Button>
+
+                <div className="flex-1 overflow-y-auto mt-4 pr-2 space-y-3">
+                  {documents.length === 0 ? (
+                    <div className="text-center text-sm text-muted-foreground py-8">
+                      No documents uploaded yet.
+                    </div>
+                  ) : (
+                    documents.map(doc => (
+                      <div key={doc.id} className="flex items-center justify-between bg-white border p-3 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                          <div className="truncate text-sm font-medium">{doc.title}</div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
+                          onClick={() => handleDeleteDocument(doc.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

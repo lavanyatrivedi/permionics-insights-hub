@@ -160,5 +160,7 @@ overrides:
   esbuild: "0.27.3"
 
 allowBuilds:
+  '@google/genai': true
   core-js: true
   esbuild: true
+  protobufjs: true

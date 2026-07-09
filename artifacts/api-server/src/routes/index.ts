@@ -7,6 +7,7 @@ import questionnairesRouter from "./questionnaires";
 import projectsRouter from "./projects";
 import chatRouter from "./chat";
 import settingsRouter from "./settings";
+import assistantRouter from "./assistant";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(questionnairesRouter);
 router.use(projectsRouter);
 router.use(chatRouter);
 router.use(settingsRouter);
+router.use(assistantRouter);
 
 export default router;

@@ -63,10 +63,16 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
 
     const { message, history = [] } = body;
 
-    // Retrieve all case studies for RAG
+    // Retrieve case studies
     const { data: allCaseStudies, error: dbError } = await supabase
       .from("case_studies")
       .select("id, client_name, sector, technology_stack, capacity, results, full_text, tags")
+      .order("created_at", { ascending: false });
+
+    // Retrieve uploaded assistant documents
+    const { data: uploadedDocs } = await supabase
+      .from("assistant_documents")
+      .select("title, content")
       .order("created_at", { ascending: false });
 
     if (dbError) {
@@ -95,17 +101,23 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
 
     let context = "";
     if (relevant.length > 0) {
-      context =
+      context +=
         "RELEVANT CASE STUDIES FROM PERMIONICS DATABASE:\n\n" +
         relevant
           .map((s) => {
             const cs = s.cs;
             return `--- Case Study: ${cs.client_name} (${cs.sector}) ---\nTechnology: ${cs.technology_stack}\nCapacity: ${cs.capacity}\nResults: ${cs.results}\nFull Details: ${cs.full_text}\n`;
           })
-          .join("\n");
-    } else {
-      context =
-        "No directly relevant case studies were found in the Permionics database for this specific query.";
+          .join("\n\n");
+    }
+
+    if (uploadedDocs && uploadedDocs.length > 0) {
+      context += "\n\nADDITIONAL UPLOADED DOCUMENTS (OCR extracted):\n\n" + 
+        uploadedDocs.map(doc => `--- Document: ${doc.title} ---\n${doc.content}\n`).join("\n\n");
+    }
+
+    if (!context) {
+      context = "No directly relevant case studies or uploaded documents were found.";
     }
 
     const systemInstruction = `You are the Permionics BD Assistant, an expert internal tool for the business development team at Permionics Membranes Pvt. Ltd. - a leading manufacturer of customised membrane filtration solutions in India.

@@ -52,6 +52,15 @@ ALTER TABLE case_studies DISABLE ROW LEVEL SECURITY;
 ALTER TABLE questionnaires DISABLE ROW LEVEL SECURITY;
 ALTER TABLE questionnaire_projects DISABLE ROW LEVEL SECURITY;
 
+-- ─── Assistant Documents table (for PDF library/OCR context) ──────────────────
+CREATE TABLE IF NOT EXISTS assistant_documents (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE assistant_documents DISABLE ROW LEVEL SECURITY;
+
 -- ─── Add rich_data column if migration was already run without it ─────────────
 DO $$
 BEGIN
