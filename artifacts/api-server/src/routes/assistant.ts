@@ -12,7 +12,8 @@ const upload = multer({ dest: os.tmpdir() });
 
 const extractPdfText = (filePath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const pdfParser = new (PDFParser as any)(null, 1);
+    const ParserClass = (PDFParser as any).default || PDFParser;
+    const pdfParser = new ParserClass(null, 1);
     pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
     pdfParser.on("pdfParser_dataReady", () => resolve(pdfParser.getRawTextContent()));
     pdfParser.loadPDF(filePath);
@@ -50,7 +51,7 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
     res.json({ success: true, document: data });
   } catch (err: any) {
     req.log.error({ err }, "Error processing document upload");
-    res.status(500).json({ error: err?.message || "Failed to process document" });
+    res.status(500).json({ error: "Failed to process document", details: err, message: err?.message });
   } finally {
     // Clean up temp file
     if (fs.existsSync(tempPath)) {
