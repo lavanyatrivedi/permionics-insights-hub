@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, Upload, FileText, Trash2, Loader2 } from "lucide-react";
+import { Send, User, Upload, FileText, Trash2, Loader2, Database } from "lucide-react";
 import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,12 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: ChatSource[];
+  contextSummary?: {
+    uploadedDocs: number;
+    caseStudies: number;
+    creatorProjects: number;
+    total: number;
+  };
 }
 
 interface Document {
@@ -63,8 +69,20 @@ export default function AssistantPage() {
     const historyPayload = messages.map(m => ({ role: m.role, content: m.content }));
 
     sendChat.mutate({ data: { message: text, history: historyPayload } }, {
-      onSuccess: (res) => {
-        setMessages([...newHistory, { role: 'assistant', content: res.answer, sources: res.sources }]);
+      onSuccess: (res: any) => {
+        setMessages([...newHistory, { 
+          role: 'assistant', 
+          content: res.answer, 
+          sources: res.sources,
+          contextSummary: res.contextSummary
+        }]);
+      },
+      onError: (err: any) => {
+        toast({
+          title: "Error",
+          description: err?.message || "Failed to get response from BD Assistant.",
+          variant: "destructive"
+        });
       }
     });
   };
@@ -109,10 +127,10 @@ export default function AssistantPage() {
   };
 
   const examplePrompts = [
-    "Have we done a CETP project above 500 KLD?",
+    "Summarize our technical capabilities for CETP projects",
     "What results did we get for Waaree Energies?",
     "Pitch angle for textile ZLD client",
-    "Summarize the latest uploaded case study"
+    "List the major chemical processing case studies"
   ];
 
   return (
@@ -127,7 +145,9 @@ export default function AssistantPage() {
             </div>
             BD Assistant
           </h2>
-          <span className="text-primary-foreground/70 text-sm font-medium">Knowledge Base AI</span>
+          <span className="text-primary-foreground/70 text-sm font-medium flex items-center gap-1.5">
+            <Database className="w-4 h-4" /> Connected to Knowledge Base
+          </span>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50 dark:bg-background">
@@ -138,7 +158,7 @@ export default function AssistantPage() {
               </div>
               <div className="max-w-md">
                 <h3 className="text-2xl font-bold mb-3 tracking-tight">How can I assist you?</h3>
-                <p className="text-muted-foreground mb-8 text-base">Ask me anything about past case studies, technical specifications, or uploaded PDF documents.</p>
+                <p className="text-muted-foreground mb-8 text-base">Ask me anything. I automatically search and refer to all Library Case Studies, Case Study Creator projects, and uploaded reference PDFs.</p>
                 <div className="flex flex-col gap-3">
                   {examplePrompts.map((p, i) => (
                     <Button 
@@ -171,6 +191,27 @@ export default function AssistantPage() {
                   <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-medium">
                     {m.content}
                   </p>
+                  
+                  {m.contextSummary && m.contextSummary.total > 0 && (
+                    <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center text-xs text-muted-foreground">
+                      <span className="font-semibold mr-1">Context sources:</span>
+                      {m.contextSummary.uploadedDocs > 0 && (
+                        <span className="bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full">
+                          {m.contextSummary.uploadedDocs} Uploaded PDF{m.contextSummary.uploadedDocs !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {m.contextSummary.caseStudies > 0 && (
+                        <span className="bg-violet-50 text-violet-700 border border-violet-100 px-2 py-0.5 rounded-full">
+                          {m.contextSummary.caseStudies} Library Case{m.contextSummary.caseStudies !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {m.contextSummary.creatorProjects > 0 && (
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full">
+                          {m.contextSummary.creatorProjects} Creator Project{m.contextSummary.creatorProjects !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   
                   {m.sources && m.sources.length > 0 && (
                     <div className="mt-5 pt-4 border-t border-border flex flex-wrap gap-2 items-center">
