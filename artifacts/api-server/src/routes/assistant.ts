@@ -1,18 +1,13 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
-import path from "path";
 import os from "os";
+// @ts-ignore
+import pdf from "pdf-parse";
 
 const router: IRouter = Router();
-
-const apiKey = process.env["GEMINI_API_KEY"] ?? "";
-const genAI = new GoogleGenerativeAI(apiKey);
-const fileManager = new GoogleAIFileManager(apiKey);
 
 const upload = multer({ dest: os.tmpdir() });
 
@@ -22,30 +17,15 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
     return;
   }
 
-  const { path: tempPath, originalname, mimetype } = req.file;
+  const { path: tempPath, originalname } = req.file;
 
   try {
-    // 1. Upload to Gemini File API for OCR
-    const uploadResult = await fileManager.uploadFile(tempPath, {
-      mimeType: mimetype,
-      displayName: originalname,
-    });
+    // 1. Read PDF file and extract text locally
+    const dataBuffer = fs.readFileSync(tempPath);
+    const pdfData = await pdf(dataBuffer);
+    const extractedText = pdfData.text;
 
-    // 2. Ask Gemini to extract text
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent([
-      {
-        fileData: {
-          mimeType: uploadResult.file.mimeType,
-          fileUri: uploadResult.file.uri
-        }
-      },
-      { text: "Extract and return the full text content of this document exactly as it is. Do not summarize. Include all data from tables and paragraphs." },
-    ]);
-
-    const extractedText = result.response.text();
-
-    // 3. Save to database
+    // 2. Save to database
     const { data, error } = await supabase
       .from("assistant_documents")
       .insert({
@@ -62,9 +42,9 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
     }
 
     res.json({ success: true, document: data });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Error processing document upload");
-    res.status(500).json({ error: "Failed to process document" });
+    res.status(500).json({ error: err?.message || "Failed to process document" });
   } finally {
     // Clean up temp file
     if (fs.existsSync(tempPath)) {
