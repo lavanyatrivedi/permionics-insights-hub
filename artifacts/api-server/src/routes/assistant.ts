@@ -4,8 +4,8 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
 import os from "os";
-import * as pdfParseModule from "pdf-parse";
-const pdf = (pdfParseModule as any).default || pdfParseModule;
+// @ts-ignore
+import pdf from "pdf-parse";
 
 const router: IRouter = Router();
 
