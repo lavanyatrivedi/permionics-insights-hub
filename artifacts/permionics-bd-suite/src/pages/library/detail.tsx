@@ -1,12 +1,28 @@
-import { useParams, Link } from "wouter";
-import { useGetCaseStudy, getGetCaseStudyQueryKey } from "@workspace/api-client-react";
+import { useParams, Link, useLocation } from "wouter";
+import { useGetCaseStudy, getGetCaseStudyQueryKey, useDeleteCaseStudy } from "@workspace/api-client-react";
 import { CaseStudyPreview } from "@/components/case-study/CaseStudyPreview";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, Download, Loader2, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function CaseStudyDetail() {
   const { id } = useParams();
   const numId = id ? parseInt(id, 10) : 0;
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { data, isLoading } = useGetCaseStudy(numId, {
     query: {
@@ -14,6 +30,25 @@ export default function CaseStudyDetail() {
       queryKey: getGetCaseStudyQueryKey(numId)
     }
   });
+
+  const deleteMutation = useDeleteCaseStudy();
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteMutation.mutateAsync({ id: numId });
+      toast({ title: "Deleted", description: "Case study deleted from library." });
+      setLocation("/library");
+    } catch (err: any) {
+      toast({ 
+        title: "Error", 
+        description: err?.message || "Failed to delete case study.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -40,13 +75,36 @@ export default function CaseStudyDetail() {
         <Link href="/library" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
         </Link>
-        <div className="space-x-3">
+        <div className="flex items-center gap-3">
           <Button variant="outline" onClick={() => window.print()} className="bg-background">
             <Download className="w-4 h-4 mr-2" /> Export PDF
           </Button>
           <Button variant="secondary" className="bg-secondary text-secondary-foreground" disabled>
             <Edit className="w-4 h-4 mr-2" /> Edit Case Study
           </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isDeleting} className="bg-destructive hover:bg-destructive/90 text-white">
+                {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Case Study?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to permanently delete "{data.clientName}" from the library? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 text-white">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       

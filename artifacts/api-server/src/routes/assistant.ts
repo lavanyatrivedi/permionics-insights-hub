@@ -4,30 +4,19 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
 import os from "os";
-// Polyfill DOMMatrix for Node.js to prevent pdfjs-dist crash
-if (!(globalThis as any).DOMMatrix) {
-  (globalThis as any).DOMMatrix = class DOMMatrix { constructor() { return {}; } };
-}
-// @ts-ignore
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const { PDFParse } = require("pdf-parse");
 
 const router: IRouter = Router();
-
 const upload = multer({ dest: os.tmpdir() });
 
 const extractPdfText = async (filePath: string): Promise<string> => {
-  const data = new Uint8Array(fs.readFileSync(filePath));
-  const loadingTask = pdfjsLib.getDocument({ data, useSystemFonts: true });
-  const pdf = await loadingTask.promise;
-  
-  let fullText = "";
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items.map((item: any) => item.str).join(" ");
-    fullText += pageText + "\n";
-  }
-  return fullText;
+  const dataBuffer = fs.readFileSync(filePath);
+  const parser = new PDFParse({ data: dataBuffer });
+  const textResult = await parser.getText();
+  return textResult.text || "";
 };
 
 router.post("/assistant/upload", requireAuth, upload.single("file"), async (req, res): Promise<void> => {
@@ -39,8 +28,12 @@ router.post("/assistant/upload", requireAuth, upload.single("file"), async (req,
   const { path: tempPath, originalname } = req.file;
 
   try {
-    // 1. Read PDF file and extract text locally using pdf2json
+    // 1. Read PDF file and extract text using robust PDFParse
     const extractedText = await extractPdfText(tempPath);
+
+    if (!extractedText.trim()) {
+      throw new Error("No readable text found in the PDF file.");
+    }
 
     // 2. Save to database
     const { data, error } = await supabase
