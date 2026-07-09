@@ -4,20 +4,30 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
 import os from "os";
-import PDFParser from "pdf2json";
+// Polyfill DOMMatrix for Node.js to prevent pdfjs-dist crash
+if (!(globalThis as any).DOMMatrix) {
+  (globalThis as any).DOMMatrix = class DOMMatrix { constructor() { return {}; } };
+}
+// @ts-ignore
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const router: IRouter = Router();
 
 const upload = multer({ dest: os.tmpdir() });
 
-const extractPdfText = (filePath: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const ParserClass = (PDFParser as any).default || PDFParser;
-    const pdfParser = new ParserClass(null, 1);
-    pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
-    pdfParser.on("pdfParser_dataReady", () => resolve(pdfParser.getRawTextContent()));
-    pdfParser.loadPDF(filePath);
-  });
+const extractPdfText = async (filePath: string): Promise<string> => {
+  const data = new Uint8Array(fs.readFileSync(filePath));
+  const loadingTask = pdfjsLib.getDocument({ data, useSystemFonts: true });
+  const pdf = await loadingTask.promise;
+  
+  let fullText = "";
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item: any) => item.str).join(" ");
+    fullText += pageText + "\n";
+  }
+  return fullText;
 };
 
 router.post("/assistant/upload", requireAuth, upload.single("file"), async (req, res): Promise<void> => {
