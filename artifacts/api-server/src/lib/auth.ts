@@ -33,8 +33,8 @@ export function verifyToken(token: string): SessionPayload | null {
 export function setSessionCookie(res: Response, token: string, remember: boolean): void {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env["NODE_ENV"] === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
     maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : undefined,
   });
 }
