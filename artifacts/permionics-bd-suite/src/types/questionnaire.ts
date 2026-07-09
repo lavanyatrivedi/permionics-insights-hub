@@ -28,15 +28,19 @@ export interface SectorState {
   clientInfo: ClientInfo;
 }
 
+export interface AppState {
+  [sectorId: string]: SectorState;
+}
+
 export interface SavedProject {
   id: number;
   name: string;
   companyName: string;
-  contactPerson?: string;
-  location?: string;
-  date?: string;
+  contactPerson: string;
+  location: string;
+  date: string;
   sector: string;
-  data?: Record<string, any>;
+  data: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

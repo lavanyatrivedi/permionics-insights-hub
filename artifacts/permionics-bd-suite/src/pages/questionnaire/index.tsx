@@ -1,15 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { SECTORS, Question, Section, SectorState, SavedProject, ClientInfo } from '@/types/questionnaire';
 import { DEFAULT_SECTOR_STATES } from '@/data/defaultQuestions';
 import { SectionBlock } from '@/components/questionnaire/SectionBlock';
+import { QuestionRow } from '@/components/questionnaire/QuestionRow';
 import { PreviewModal } from '@/components/questionnaire/PreviewModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { customFetch } from '@workspace/api-client-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -19,10 +20,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Plus, Eye, Save, Loader2, FolderOpen, Trash2, MoreVertical, ClipboardList, ArrowLeft,
+  Building2, User2, MapPin, Calendar,
 } from 'lucide-react';
 import { format } from 'date-fns';
-
-// Remove apiFetch
 
 function deepCopyState(state: SectorState): SectorState {
   return JSON.parse(JSON.stringify(state));
@@ -34,6 +34,17 @@ function initState(sectorId: string): SectorState {
   return deepCopyState(template);
 }
 
+// ── Sector colour palette ─────────────────────────────────────────────────────
+const SECTOR_COLORS: Record<string, string> = {
+  pharma:   'bg-violet-100 text-violet-800 border-violet-200',
+  dairy:    'bg-blue-100 text-blue-800 border-blue-200',
+  water:    'bg-cyan-100 text-cyan-800 border-cyan-200',
+  food:     'bg-amber-100 text-amber-800 border-amber-200',
+  textile:  'bg-rose-100 text-rose-800 border-rose-200',
+  cetp:     'bg-emerald-100 text-emerald-800 border-emerald-200',
+  chemical: 'bg-orange-100 text-orange-800 border-orange-200',
+};
+
 export default function QuestionnairePage() {
   const { toast } = useToast();
 
@@ -43,6 +54,7 @@ export default function QuestionnairePage() {
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [projectName, setProjectName] = useState('');
 
   // ── New project dialog ─────────────────────────────────────────────────────
   const [newProjectOpen, setNewProjectOpen] = useState(false);
@@ -60,16 +72,17 @@ export default function QuestionnairePage() {
     setLoadingProjects(true);
     try {
       const data = await customFetch<SavedProject[]>('/api/projects');
-      setProjects(data ?? []);
+      setProjects(Array.isArray(data) ? data : []);
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Could not load projects.', variant: 'destructive' });
+      setProjects([]);
     } finally {
       setLoadingProjects(false);
     }
   }, [toast]);
 
   // Load on mount
-  useState(() => { loadProjects(); });
+  useEffect(() => { loadProjects(); }, [loadProjects]);
 
   // ── Open project ───────────────────────────────────────────────────────────
   const openProject = async (id: number) => {
@@ -77,10 +90,11 @@ export default function QuestionnairePage() {
       const proj = await customFetch<SavedProject>(`/api/projects/${id}`);
       setActiveSectorId(proj.sector);
       const savedState = proj.data && Object.keys(proj.data).length > 0
-        ? (proj.data as SectorState)
+        ? (proj.data as unknown as SectorState)
         : initState(proj.sector);
       setSectorState(deepCopyState(savedState));
       setActiveProjectId(id);
+      setProjectName(proj.name);
       setView('builder');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Could not open project.', variant: 'destructive' });
@@ -91,9 +105,14 @@ export default function QuestionnairePage() {
   const createProject = async () => {
     if (!newProjectName.trim()) return;
     try {
+      const initialState = initState(newProjectSector);
       const proj = await customFetch<SavedProject>('/api/projects', {
         method: 'POST',
-        body: JSON.stringify({ name: newProjectName.trim(), sector: newProjectSector, data: initState(newProjectSector) }),
+        body: JSON.stringify({
+          name: newProjectName.trim(),
+          sector: newProjectSector,
+          data: initialState,
+        }),
       });
       setNewProjectOpen(false);
       setNewProjectName('');
@@ -110,10 +129,17 @@ export default function QuestionnairePage() {
     try {
       await customFetch(`/api/projects/${activeProjectId}`, {
         method: 'PUT',
-        body: JSON.stringify({ data: sectorState }),
+        body: JSON.stringify({
+          name: projectName,
+          companyName: sectorState.clientInfo.companyName,
+          contactPerson: sectorState.clientInfo.contactPerson,
+          location: sectorState.clientInfo.location,
+          date: sectorState.clientInfo.date,
+          data: sectorState,
+        }),
       });
       toast({ title: 'Saved', description: 'Project saved successfully.' });
-      loadProjects();
+      await loadProjects();
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Could not save project.', variant: 'destructive' });
     } finally {
@@ -216,9 +242,9 @@ export default function QuestionnairePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-primary">Questionnaire Builder</h1>
-            <p className="text-muted-foreground mt-1">Manage and build sector-specific technical questionnaire projects.</p>
+            <p className="text-muted-foreground mt-1">Build and manage sector-specific technical questionnaires for clients.</p>
           </div>
-          <Button onClick={() => { setNewProjectOpen(true); }} className="bg-primary hover:bg-primary/90">
+          <Button onClick={() => setNewProjectOpen(true)} className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" /> New Project
           </Button>
         </div>
@@ -230,22 +256,32 @@ export default function QuestionnairePage() {
         ) : projects.length === 0 ? (
           <div className="text-center py-20 border border-dashed rounded-xl bg-muted/10">
             <ClipboardList className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" />
-            <p className="font-medium text-muted-foreground mb-2">No projects yet</p>
-            <p className="text-sm text-muted-foreground mb-6">Create your first questionnaire project to get started.</p>
+            <p className="font-medium text-muted-foreground mb-2">No questionnaire projects yet</p>
+            <p className="text-sm text-muted-foreground mb-6">Create your first sector questionnaire to get started.</p>
             <Button onClick={() => setNewProjectOpen(true)}><Plus className="w-4 h-4 mr-2" /> Create Project</Button>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {projects.map((p) => {
               const sector = SECTORS.find((s) => s.id === p.sector);
+              const colorClass = SECTOR_COLORS[p.sector] ?? 'bg-secondary text-secondary-foreground border-border';
               return (
-                <Card key={p.id} className="hover:border-primary/40 transition-colors cursor-pointer group" onClick={() => openProject(p.id)}>
+                <Card
+                  key={p.id}
+                  className="hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group"
+                  onClick={() => openProject(p.id)}
+                >
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-base leading-tight">{p.name}</CardTitle>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-base leading-tight truncate">{p.name}</CardTitle>
+                        <Badge className={`mt-1.5 text-xs font-medium border ${colorClass}`} variant="outline">
+                          {sector?.name ?? p.sector}
+                        </Badge>
+                      </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -259,11 +295,30 @@ export default function QuestionnairePage() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <Badge variant="secondary" className="w-fit text-xs">{sector?.name ?? p.sector}</Badge>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-muted-foreground">{p.companyName || 'No company set'}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Updated {format(new Date(p.updatedAt), 'MMM d, yyyy')}</p>
+                  <CardContent className="space-y-1.5 pt-0">
+                    {p.companyName && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{p.companyName}</span>
+                      </div>
+                    )}
+                    {p.contactPerson && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <User2 className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{p.contactPerson}</span>
+                      </div>
+                    )}
+                    {p.location && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{p.location}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1 border-t border-border/50 mt-2">
+                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Updated {format(new Date(p.updatedAt), 'MMM d, yyyy')}</span>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -273,12 +328,18 @@ export default function QuestionnairePage() {
 
         {/* New Project Dialog */}
         <Dialog open={newProjectOpen} onOpenChange={setNewProjectOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>New Questionnaire Project</DialogTitle></DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label>Project Name</Label>
-                <Input placeholder="e.g. Waaree Energies — Pharma Water" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && createProject()} autoFocus />
+                <Input
+                  placeholder="e.g. Waaree Energies — Pharma Water Treatment"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && createProject()}
+                  autoFocus
+                />
               </div>
               <div className="space-y-2">
                 <Label>Sector</Label>
@@ -309,35 +370,43 @@ export default function QuestionnairePage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Left sidebar: client info + sector */}
-      <div className="w-64 border-r bg-muted/10 flex-shrink-0 flex flex-col">
+      <div className="w-72 border-r bg-muted/10 flex-shrink-0 flex flex-col">
         <div className="p-4 border-b flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => { setView('list'); loadProjects(); }}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h2 className="text-sm font-semibold truncate">Questionnaire Builder</h2>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold truncate">{projectName || 'Questionnaire Builder'}</h2>
+            <p className="text-xs text-muted-foreground">{activeSector?.name}</p>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-5">
             {/* Client Info */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Info</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Information</h3>
               <div className="space-y-2">
-                {[
-                  { field: 'companyName' as keyof ClientInfo, label: 'Company', placeholder: 'Company name...' },
-                  { field: 'contactPerson' as keyof ClientInfo, label: 'Contact', placeholder: 'Contact person...' },
-                  { field: 'location' as keyof ClientInfo, label: 'Location', placeholder: 'City, State...' },
-                  { field: 'date' as keyof ClientInfo, label: 'Date', placeholder: 'e.g. July 2025' },
-                ].map(({ field, label, placeholder }) => (
-                  <div key={field} className="space-y-1">
-                    <Label className="text-xs">{label}</Label>
-                    <Input className="h-8 text-xs" placeholder={placeholder} value={sectorState.clientInfo[field]} onChange={(e) => updateClientInfo(field, e.target.value)} />
-                  </div>
-                ))}
+                <div className="space-y-1">
+                  <Label className="text-xs">Company Name</Label>
+                  <Input className="h-8 text-xs" placeholder="Company name..." value={sectorState.clientInfo.companyName} onChange={(e) => updateClientInfo('companyName', e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Contact Person</Label>
+                  <Input className="h-8 text-xs" placeholder="Name & designation..." value={sectorState.clientInfo.contactPerson} onChange={(e) => updateClientInfo('contactPerson', e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Location</Label>
+                  <Input className="h-8 text-xs" placeholder="City, State..." value={sectorState.clientInfo.location} onChange={(e) => updateClientInfo('location', e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Date</Label>
+                  <Input className="h-8 text-xs" type="date" value={sectorState.clientInfo.date} onChange={(e) => updateClientInfo('date', e.target.value)} />
+                </div>
               </div>
             </div>
 
-            {/* Sector */}
+            {/* Sector switcher */}
             <div className="space-y-2">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sector</h3>
               {SECTORS.map((s) => (
@@ -354,25 +423,25 @@ export default function QuestionnairePage() {
 
         {/* Bottom actions */}
         <div className="p-4 border-t space-y-2">
-          <Button size="sm" className="w-full" onClick={() => setPreviewOpen(true)}>
-            <Eye className="w-4 h-4 mr-2" /> Preview / Export
+          <Button size="sm" className="w-full bg-primary hover:bg-primary/90" onClick={() => setPreviewOpen(true)}>
+            <Eye className="w-4 h-4 mr-2" /> Preview & Export PDF
           </Button>
           <Button size="sm" variant="secondary" className="w-full" onClick={saveProject} disabled={isSaving}>
             {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Save Project
           </Button>
-          <Button size="sm" variant="outline" className="w-full" onClick={addSection}>
+          <Button size="sm" variant="outline" className="w-full border-dashed" onClick={addSection}>
             <Plus className="w-4 h-4 mr-2" /> Add Section
           </Button>
         </div>
       </div>
 
       {/* Main builder area */}
-      <ScrollArea className="flex-1 bg-background">
-        <div className="p-6 max-w-3xl">
+      <ScrollArea className="flex-1 bg-muted/20">
+        <div className="p-6 max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-xl font-bold">{activeSector?.name ?? activeSectorId}</h1>
+              <h1 className="text-xl font-bold">{activeSector?.name ?? activeSectorId} Questionnaire</h1>
               <p className="text-sm text-muted-foreground">{sectorState.questions.length} questions across {sectorState.sections.length} sections</p>
             </div>
             <Button size="sm" variant="outline" onClick={() => addQuestion(undefined)}>
@@ -381,8 +450,9 @@ export default function QuestionnairePage() {
           </div>
 
           {sectorState.sections.length === 0 && sectorState.questions.length === 0 && (
-            <div className="text-center py-16 border border-dashed rounded-xl">
-              <p className="text-muted-foreground">No sections yet. Click "Add Section" to start.</p>
+            <div className="text-center py-16 border border-dashed rounded-xl bg-white">
+              <ClipboardList className="w-8 h-8 mx-auto text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground">No sections yet. Click "Add Section" to start building.</p>
             </div>
           )}
 
@@ -412,17 +482,27 @@ export default function QuestionnairePage() {
 
           {/* Unsectioned questions */}
           {sectorState.questions.filter((q) => !q.sectionId).length > 0 && (
-            <div className="mt-4 space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Unsectioned Questions</h3>
-              {sectorState.questions.filter((q) => !q.sectionId).sort((a, b) => a.number - b.number).map((q, idx, arr) => (
-                <QuestionRowWrapper
-                  key={q.id} question={q} index={idx} totalQuestions={arr.length}
-                  onUpdate={updateQuestion} onDelete={deleteQuestion}
-                  onMoveUp={(id) => moveQuestion(id, 'up')}
-                  onMoveDown={(id) => moveQuestion(id, 'down')}
-                  onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop}
-                />
-              ))}
+            <div className="mt-4 bg-white border border-border rounded-lg shadow-sm overflow-hidden mb-6">
+              <div className="bg-secondary/30 p-3 border-b border-border">
+                <h3 className="text-sm font-semibold text-primary">Other Questions</h3>
+              </div>
+              <div className="p-4 space-y-3 bg-muted/5">
+                {sectorState.questions.filter((q) => !q.sectionId).sort((a, b) => a.number - b.number).map((q, idx, arr) => (
+                  <QuestionRow
+                    key={q.id}
+                    question={q}
+                    index={idx}
+                    totalQuestions={arr.length}
+                    onUpdate={updateQuestion}
+                    onDelete={deleteQuestion}
+                    onMoveUp={(id) => moveQuestion(id, 'up')}
+                    onMoveDown={(id) => moveQuestion(id, 'down')}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -440,6 +520,3 @@ export default function QuestionnairePage() {
     </div>
   );
 }
-
-// Lazy import wrapper for QuestionRow to avoid circular dep warning
-import { QuestionRow as QuestionRowWrapper } from '@/components/questionnaire/QuestionRow';

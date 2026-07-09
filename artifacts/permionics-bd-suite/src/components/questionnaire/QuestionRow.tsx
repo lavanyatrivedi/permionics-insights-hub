@@ -31,8 +31,16 @@ interface QuestionRowProps {
 }
 
 export function QuestionRow({
-  question, index, totalQuestions, onUpdate, onDelete,
-  onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop
+  question,
+  index,
+  totalQuestions,
+  onUpdate,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDrop
 }: QuestionRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -47,9 +55,22 @@ export function QuestionRow({
     }, 0);
   };
 
+  const handleEditEnd = () => {
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleEditEnd();
+    }
+    if (e.key === 'Escape') {
+      handleEditEnd();
+    }
+  };
+
   return (
     <div
-      id={`q-${question.id}`}
       className="flex items-start gap-3 p-3 bg-white border border-border rounded-md hover:border-primary/40 transition-colors group relative"
       draggable
       onDragStart={(e) => onDragStart(e, question.id)}
@@ -59,10 +80,20 @@ export function QuestionRow({
       <div className="flex flex-col items-center gap-1 mt-1 text-muted-foreground/50 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing">
         <GripVertical className="w-4 h-4" />
         <div className="flex flex-col gap-0.5">
-          <button type="button" onClick={() => onMoveUp(question.id)} disabled={index === 0} className="disabled:opacity-20 hover:text-primary transition-colors">
+          <button
+            type="button"
+            onClick={() => onMoveUp(question.id)}
+            disabled={index === 0}
+            className="disabled:opacity-20 hover:text-primary transition-colors"
+          >
             <ArrowUp className="w-3 h-3" />
           </button>
-          <button type="button" onClick={() => onMoveDown(question.id)} disabled={index === totalQuestions - 1} className="disabled:opacity-20 hover:text-primary transition-colors">
+          <button
+            type="button"
+            onClick={() => onMoveDown(question.id)}
+            disabled={index === totalQuestions - 1}
+            className="disabled:opacity-20 hover:text-primary transition-colors"
+          >
             <ArrowDown className="w-3 h-3" />
           </button>
         </div>
@@ -70,21 +101,30 @@ export function QuestionRow({
 
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <div className="flex items-start gap-2">
-          <span className="text-sm font-medium text-muted-foreground mt-0.5 whitespace-nowrap">Q{question.number}.</span>
+          <span className="text-sm font-medium text-muted-foreground mt-0.5 whitespace-nowrap">
+            Q{question.number}.
+          </span>
           <div className="flex-1">
             {isEditing ? (
               <textarea
                 ref={inputRef}
                 value={question.text}
                 onChange={(e) => onUpdate(question.id, { text: e.target.value })}
-                onBlur={() => setIsEditing(false)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setIsEditing(false); } if (e.key === 'Escape') setIsEditing(false); }}
+                onBlur={handleEditEnd}
+                onKeyDown={handleKeyDown}
                 className="w-full text-sm min-h-[40px] p-1.5 border border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary rounded resize-none overflow-hidden"
                 style={{ height: 'auto', maxHeight: '120px' }}
-                onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = `${t.scrollHeight}px`; }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = `${target.scrollHeight}px`;
+                }}
               />
             ) : (
-              <p className="text-sm text-foreground cursor-text hover:bg-secondary/30 p-1.5 -ml-1.5 rounded transition-colors" onClick={handleEditStart}>
+              <p
+                className="text-sm text-foreground cursor-text hover:bg-secondary/30 p-1.5 -ml-1.5 rounded transition-colors"
+                onClick={handleEditStart}
+              >
                 {question.text}
                 {question.required && <span className="text-destructive ml-1">*</span>}
               </p>
@@ -95,8 +135,13 @@ export function QuestionRow({
         <div className="flex items-center gap-4 flex-wrap mt-1">
           <div className="flex items-center gap-2">
             <Label className="text-xs text-muted-foreground font-normal">Type:</Label>
-            <Select value={question.type} onValueChange={(value: QuestionType) => onUpdate(question.id, { type: value })}>
-              <SelectTrigger className="h-7 text-xs w-[120px] bg-secondary/20"><SelectValue /></SelectTrigger>
+            <Select
+              value={question.type}
+              onValueChange={(value: QuestionType) => onUpdate(question.id, { type: value })}
+            >
+              <SelectTrigger className="h-7 text-xs w-[120px] bg-secondary/20">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Text">Text</SelectItem>
                 <SelectItem value="Number">Number</SelectItem>
@@ -105,9 +150,17 @@ export function QuestionRow({
               </SelectContent>
             </Select>
           </div>
+
           <div className="flex items-center gap-2">
-            <Switch id={`req-${question.id}`} checked={question.required} onCheckedChange={(checked) => onUpdate(question.id, { required: checked })} className="scale-75 data-[state=checked]:bg-primary" />
-            <Label htmlFor={`req-${question.id}`} className="text-xs font-normal text-muted-foreground cursor-pointer">Required</Label>
+            <Switch
+              id={`req-${question.id}`}
+              checked={question.required}
+              onCheckedChange={(checked) => onUpdate(question.id, { required: checked })}
+              className="scale-75 data-[state=checked]:bg-primary"
+            />
+            <Label htmlFor={`req-${question.id}`} className="text-xs font-normal text-muted-foreground cursor-pointer">
+              Required
+            </Label>
           </div>
         </div>
       </div>
@@ -122,11 +175,15 @@ export function QuestionRow({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Question?</AlertDialogTitle>
-              <AlertDialogDescription>Are you sure you want to delete this question? This cannot be undone.</AlertDialogDescription>
+              <AlertDialogDescription>
+                Are you sure you want to delete this question? This action cannot be undone.
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onDelete(question.id)} className="bg-destructive hover:bg-destructive/90 text-white">Delete</AlertDialogAction>
+              <AlertDialogAction onClick={() => onDelete(question.id)} className="bg-destructive hover:bg-destructive/90 text-white">
+                Delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
