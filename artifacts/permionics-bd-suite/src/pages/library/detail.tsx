@@ -1,6 +1,8 @@
 import { useParams, Link, useLocation } from "wouter";
 import { useGetCaseStudy, getGetCaseStudyQueryKey, useDeleteCaseStudy } from "@workspace/api-client-react";
-import { CaseStudyPreview } from "@/components/case-study/CaseStudyPreview";
+import { CaseStudyPreview } from "../generator/creator_components/CaseStudyPreview";
+import { getPalette } from "../generator/creator_types";
+import { printCaseStudy } from "../generator/creator_utils/print";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Download, Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -69,14 +71,34 @@ export default function CaseStudyDetail() {
     );
   }
 
+  const mappedData = {
+    clientName: data.clientName || "",
+    sector: data.sector || "",
+    location: data.location || "",
+    intro: data.fullText ? data.fullText.split("\n\n")[0] || "" : "",
+    challengeProblem: data.challenge || "",
+    solDesign: data.solution || "",
+    techList: data.technologyStack || "",
+    capacity: data.capacity || "",
+    cards: data.results ? data.results.split(" | ").map((cardStr) => {
+      const idx = cardStr.indexOf(":");
+      if (idx !== -1) {
+        return { number: cardStr.slice(0, idx).trim(), label: cardStr.slice(idx + 1).trim() };
+      }
+      return { number: "", label: cardStr.trim() };
+    }) : [],
+    handshakeCap: data.testimonial || "",
+    conclusions: data.fullText ? data.fullText.split("\n\n").slice(-1)[0] || "" : "",
+  };
+
   return (
-    <div className="max-w-[1000px] mx-auto p-8 space-y-6 print-full print:p-0">
+    <div className="max-w-[1000px] mx-auto p-8 space-y-6 print-full print:p-0 animate-fade-in">
       <div className="flex items-center justify-between print-hide mb-8">
         <Link href="/library" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
         </Link>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => window.print()} className="bg-background">
+          <Button variant="outline" onClick={() => printCaseStudy()} className="bg-background">
             <Download className="w-4 h-4 mr-2" /> Export PDF
           </Button>
           <Button variant="secondary" className="bg-secondary text-secondary-foreground" disabled>
@@ -108,8 +130,10 @@ export default function CaseStudyDetail() {
         </div>
       </div>
       
-      <div className="print-full pb-16">
-        <CaseStudyPreview data={data} />
+      <div className="print-full pb-16 flex justify-center bg-slate-50 border rounded-2xl p-6 md:p-12 overflow-x-auto">
+        <div style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.12)", width: "794px", flexShrink: 0, background: "#ffffff" }}>
+          <CaseStudyPreview data={mappedData} palette={getPalette("ocean-blue")} />
+        </div>
       </div>
     </div>
   );
