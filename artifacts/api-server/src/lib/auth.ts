@@ -58,7 +58,13 @@ export function checkPassword(plain: string, adminPassword: string): boolean {
   return plain === adminPassword;
 }
 
+let cachedAdminPassword: string | null = null;
+
 export async function getAdminPassword(): Promise<string> {
+  if (cachedAdminPassword !== null) {
+    return cachedAdminPassword;
+  }
+
   const { supabase } = await import("./supabase");
   try {
     const { data, error } = await supabase
@@ -71,14 +77,17 @@ export async function getAdminPassword(): Promise<string> {
     if (error) {
       console.error("Error fetching admin password from Supabase:", error);
     } else if (data && data.notes) {
-      return data.notes;
+      cachedAdminPassword = data.notes;
+      return cachedAdminPassword;
     }
   } catch (err) {
     console.error("Failed to query system config from database:", err);
   }
 
   // Fallback to environment variable or default
-  return process.env["ADMIN_PASSWORD"] || "Perma@digi1976";
+  const fallback = process.env["ADMIN_PASSWORD"] || "Perma@digi1976";
+  cachedAdminPassword = fallback;
+  return fallback;
 }
 
 export async function setAdminPassword(newPassword: string): Promise<boolean> {
@@ -125,7 +134,8 @@ export async function setAdminPassword(newPassword: string): Promise<boolean> {
       }
     }
 
-    // Also update the local in-process env var
+    // Update in-memory cache and environment variable
+    cachedAdminPassword = newPassword;
     process.env["ADMIN_PASSWORD"] = newPassword;
     return true;
   } catch (err) {

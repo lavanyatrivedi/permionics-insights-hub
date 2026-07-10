@@ -54,6 +54,10 @@ export default function LoginPage() {
       {
         onSuccess: async (res) => {
           if (res.authenticated) {
+            // Force light mode by default on login
+            localStorage.setItem("theme", "light");
+            document.documentElement.classList.remove("dark");
+            
             await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
             setLocation("/");
           } else {
