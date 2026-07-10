@@ -80,9 +80,9 @@ export default function LoginPage() {
       {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
-      {/* Moving Blobs */}
+      {/* Moving Blobs (Slightly Brighter/Higher Opacity for better contrast) */}
       <div
-        className="absolute w-[500px] h-[500px] rounded-full opacity-35 z-0"
+        className="absolute w-[500px] h-[500px] rounded-full opacity-45 z-0"
         style={{
           background: "radial-gradient(circle at 40% 50%, hsl(217 91% 60%), hsl(260 80% 50%) 60%, transparent 80%)",
           top: "-10%", left: "10%",
@@ -91,7 +91,7 @@ export default function LoginPage() {
         }}
       />
       <div
-        className="absolute w-[400px] h-[400px] rounded-full opacity-30 z-0"
+        className="absolute w-[400px] h-[400px] rounded-full opacity-40 z-0"
         style={{
           background: "radial-gradient(circle, hsl(199 89% 55%), hsl(217 91% 60%) 50%, transparent 80%)",
           bottom: "-10%", right: "15%",
@@ -199,19 +199,19 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right Side: Layered Navy Branding Card ── */}
+      {/* ── Right Side: Layered Navy Branding Card (Brighter Gradient for screens with low brightness) ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[40vh] lg:h-[calc(100vh-128px)] max-h-[580px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-400/20 min-h-[40vh] lg:h-[calc(100vh-128px)] max-h-[580px] overflow-hidden bg-gradient-to-br from-[#0c2340] via-[#102a43] to-[#0f172a]"
       >
-        {/* Subtle Tech-Grid Background Layer */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:16px_28px] pointer-events-none z-0" />
+        {/* Subtle Tech-Grid Background Layer (Brightened for high visibility) */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:16px_28px] pointer-events-none z-0" />
         
-        {/* Subtle glow blob */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-500/10 blur-[80px] pointer-events-none z-0" />
+        {/* Glow blob (Brightened) */}
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-blue-400/25 blur-[60px] pointer-events-none z-0" />
 
         {/* Top: Small badge label */}
-        <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/5 border border-white/10 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+        <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/10 border border-white/20 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-300 animate-pulse" />
           BD Suite Platform
         </div>
 
@@ -220,7 +220,7 @@ export default function LoginPage() {
           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
             Search Smarter.<br />Extract Faster.<br />Create Anywhere.
           </h1>
-          <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
+          <p className="text-sm lg:text-base text-white/70 max-w-md leading-relaxed">
             BD Intelligence Platform for Permionics Membranes - powering smarter business development with AI.
           </p>
 
@@ -229,7 +229,7 @@ export default function LoginPage() {
             {["Case Study Library", "AI BD Assistant", "Smart Generator", "Questionnaire Engine"].map(f => (
               <span
                 key={f}
-                className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 backdrop-blur-sm shadow-sm hover:bg-white/10 hover:text-white transition-all duration-200 cursor-default"
+                className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-white shadow-sm hover:bg-white/20 hover:text-white transition-all duration-200 cursor-default"
               >
                 {f}
               </span>
@@ -238,7 +238,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom footer text for desktop */}
-        <p className="hidden lg:block text-xs text-white/30 z-10">
+        <p className="hidden lg:block text-xs text-white/45 z-10">
           © 2026 Permionics Membranes Pvt. Ltd. All rights reserved.
         </p>
       </div>
