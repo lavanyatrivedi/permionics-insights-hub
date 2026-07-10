@@ -191,7 +191,7 @@ export function Sidebar() {
                 <p className="text-xs font-semibold text-white/80 truncate">
                   {(user as any)?.email ?? "Admin"}
                 </p>
-                <p className="text-[10px] text-white/40">Permionics BD Suite</p>
+                <p className="text-[10px] text-white/40">Permionics Insights Portal</p>
               </div>
             )}
             <button

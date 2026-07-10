@@ -396,7 +396,7 @@ export default function AssistantPage() {
             <Card className="flex-1 flex flex-col shadow-sm border-border">
               <CardHeader className="pb-4 bg-muted/20 border-b">
                 <CardTitle className="text-lg">Query Input</CardTitle>
-                <CardDescription>Formulate your query for the BD knowledge base.</CardDescription>
+                <CardDescription>Formulate your query for the knowledge base.</CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col p-6">
                 <Textarea 

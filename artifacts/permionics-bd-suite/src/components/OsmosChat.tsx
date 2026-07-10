@@ -141,7 +141,7 @@ export function OsmosChat() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-white">OSMOS</p>
-              <p className="text-[11px] text-white/50">BD Intelligence Assistant</p>
+              <p className="text-[11px] text-white/50">Intelligence Assistant</p>
             </div>
             <div className="flex items-center gap-1">
               {messages.length > 0 && (
@@ -184,7 +184,7 @@ export function OsmosChat() {
                 <img src={botAvatar} alt="OSMOS" className="w-16 h-16 object-contain osmos-blob" />
                 <div>
                   <p className="text-white/80 font-semibold text-sm">Hi, I'm OSMOS</p>
-                  <p className="text-white/40 text-xs mt-1">Ask me anything about Permionics' case studies, technical capabilities, or BD intelligence.</p>
+                  <p className="text-white/40 text-xs mt-1">Ask me anything about Permionics' case studies, technical capabilities, or project insights.</p>
                 </div>
                 <div className="grid gap-2 w-full">
                   {[
@@ -281,7 +281,7 @@ export function OsmosChat() {
                 <Send className="w-3.5 h-3.5 text-white" />
               </button>
             </div>
-            <p className="text-center text-[10px] text-white/20 mt-2">Powered by OSMOS · Permionics BD Intelligence</p>
+            <p className="text-center text-[10px] text-white/20 mt-2">Powered by OSMOS · Permionics Insights</p>
           </div>
         </div>
       )}

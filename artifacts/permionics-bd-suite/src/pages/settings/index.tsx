@@ -88,7 +88,7 @@ export default function SettingsPage() {
                 Change Password
               </CardTitle>
               <CardDescription>
-                Update the master access password for the BD Suite.
+                Update the master access password for the portal.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
             </CardContent>
             <CardFooter className="bg-muted/50 border-t py-3">
               <p className="text-xs text-muted-foreground w-full text-center">
-                Permionics BD Suite v1.0.0
+                Permionics Insights Portal v1.0.0
               </p>
             </CardFooter>
           </Card>

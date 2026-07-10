@@ -183,7 +183,7 @@ export default function DashboardPage() {
             Overview
           </h1>
           <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-            Permionics BD Intelligence Dashboard
+            Permionics Intelligence Dashboard
           </p>
         </div>
         {/* Quick actions */}
@@ -202,7 +202,7 @@ export default function DashboardPage() {
             value={stats.totalCaseStudies}
             icon={Briefcase}
             accent="hsl(var(--primary))"
-            sublabel="In BD Library"
+            sublabel="In Case Library"
           />
           <StatCard
             label="Questionnaires"
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Recent Activity</p>
-                  <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Latest BD library additions</p>
+                  <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Latest library additions</p>
                 </div>
               </div>
               <Link href="~/library">
@@ -416,7 +416,7 @@ export default function DashboardPage() {
               href: "~/assistant",
               icon: Activity,
               title: "Osmos AI",
-              desc: "Ask OSMOS for BD intelligence from all your documents",
+              desc: "Ask OSMOS for project intelligence from all your documents",
               accent: "#10b981",
               accentBg: "rgba(16,185,129,0.08)",
             },

@@ -192,7 +192,7 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
     }
 
     // ── 4. Build system prompt ──────────────────────────────────────────────
-    const systemContext = `You are OSMOS BD Assistant — an expert Business Development AI for Permionics Membranes Pvt. Ltd., a leading membrane technology company specialising in Reverse Osmosis (RO), Ultrafiltration (UF), Nanofiltration (NF), MBR, and Zero Liquid Discharge (ZLD) systems.
+    const systemContext = `You are OSMOS Assistant — an expert project intelligence AI for Permionics Membranes Pvt. Ltd., a leading membrane technology company specialising in Reverse Osmosis (RO), Ultrafiltration (UF), Nanofiltration (NF), MBR, and Zero Liquid Discharge (ZLD) systems.
 
 Your role:
 - Answer questions about past projects, technical capabilities, and client outcomes using the provided reference documents.
