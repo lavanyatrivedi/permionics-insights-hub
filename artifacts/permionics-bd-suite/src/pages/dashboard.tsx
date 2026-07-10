@@ -1,4 +1,4 @@
-import { useGetDashboardStats } from "@workspace/api-client-react";
+import { useGetDashboardStats, useListCaseStudies } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import {
@@ -105,7 +105,10 @@ function ActionBtn({ href, icon: Icon, label, accent }: { href: string; icon: an
 }
 
 export default function DashboardPage() {
-  const { data: stats, isLoading, isError } = useGetDashboardStats();
+  const { data: stats, isLoading: statsLoading, isError } = useGetDashboardStats();
+  const { data: caseStudiesRes, isLoading: csLoading } = useListCaseStudies();
+
+  const isLoading = statsLoading || csLoading;
 
   if (isLoading) {
     return (
@@ -136,8 +139,24 @@ export default function DashboardPage() {
     );
   }
 
-  const sectorData = ((stats as any).sectorBreakdown && (stats as any).sectorBreakdown.length > 0
-    ? (stats as any).sectorBreakdown
+  // Compute sector breakdown percentages on the client side dynamically
+  const caseStudies = caseStudiesRes ?? [];
+  const sectorCounts: Record<string, number> = {};
+  let totalSectors = 0;
+  caseStudies.forEach((cs: any) => {
+    if (cs.sector) {
+      sectorCounts[cs.sector] = (sectorCounts[cs.sector] || 0) + 1;
+      totalSectors++;
+    }
+  });
+
+  const computedBreakdown = Object.entries(sectorCounts).map(([name, count]) => ({
+    name,
+    value: totalSectors > 0 ? Math.round((count / totalSectors) * 100) : 0,
+  })).sort((a, b) => b.value - a.value);
+
+  const sectorData = (computedBreakdown.length > 0
+    ? computedBreakdown
     : [
         { name: "Pharma/Herbal", value: 35 },
         { name: "Textile", value: 25 },
