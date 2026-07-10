@@ -79,35 +79,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-6 select-none justify-center items-center gap-6 lg:gap-8">
-      {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
+      {/* ── Background: Deep navy gradient ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
-      {/* Moving Blobs (Slightly Brighter/Higher Opacity for better contrast) */}
-      <div
-        className="absolute w-[500px] h-[500px] rounded-full opacity-45 z-0"
-        style={{
-          background: "radial-gradient(circle at 40% 50%, hsl(217 91% 60%), hsl(260 80% 50%) 60%, transparent 80%)",
-          top: "-10%", left: "10%",
-          filter: "blur(80px)",
-          animation: "blob-random-move-1 25s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute w-[400px] h-[400px] rounded-full opacity-40 z-0"
-        style={{
-          background: "radial-gradient(circle, hsl(199 89% 55%), hsl(217 91% 60%) 50%, transparent 80%)",
-          bottom: "-10%", right: "15%",
-          filter: "blur(70px)",
-          animation: "blob-random-move-2 20s ease-in-out infinite reverse",
-        }}
-      />
-
-      {/* ── Left Side: Embedded Login Card ── */}
+      {/* ── Left Side: Embedded Login Card (Off-white, squarish/rounded-xl, reduced height) ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-48px)] max-h-[720px]"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-[#fafafb] p-6 lg:p-10 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[480px] lg:h-[calc(100vh-80px)] max-h-[660px]"
       >
         {/* High-fidelity Vertical Circuit Trace Background Watermark */}
-        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-[28px] opacity-[0.26]">
+        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-xl opacity-[0.26]">
           <svg
             width="100%"
             height="100%"
@@ -282,9 +262,9 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right Side: Layered Navy Branding Card ── */}
+      {/* ── Right Side: Layered Navy Branding Card (Squarish/rounded-xl, reduced height) ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[56%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[40vh] lg:h-[calc(100vh-48px)] max-h-[720px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[56%] p-8 lg:p-12 text-white rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[38vh] lg:h-[calc(100vh-80px)] max-h-[660px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
       >
         {/* Subtle Tech-Grid Background Layer (Brightened for high visibility on dark background) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:16px_28px] pointer-events-none z-0" />
@@ -294,7 +274,7 @@ export default function LoginPage() {
 
         {/* Top: Small badge label */}
         <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/5 border border-white/10 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
           OSMOS INTELLIGENCE
         </div>
 
