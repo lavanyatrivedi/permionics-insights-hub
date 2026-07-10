@@ -5,10 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.tsx';
 import './index.css';
 
-// For production builds (like on Vercel), point API calls to the remote backend
-if (import.meta.env.VITE_API_URL) {
-  setBaseUrl(import.meta.env.VITE_API_URL);
-}
+// For production builds (like on Vercel) and local dev, we use relative paths (/api) 
+// to let the respective proxies (Vercel rewrite / Vite config) handle routing.
+// This resolves CORS and third-party cookie restrictions.
 
 const queryClient = new QueryClient();
 
