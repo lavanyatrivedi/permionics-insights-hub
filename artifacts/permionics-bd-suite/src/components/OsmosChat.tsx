@@ -89,16 +89,24 @@ export function OsmosChat() {
       <button
         id="osmos-chat-trigger"
         onClick={() => setOpen(v => !v)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 print-hide border border-slate-200/55"
+        className="fixed bottom-6 right-6 z-50 w-20 h-20 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 print-hide"
         style={{
-          background: open ? "hsl(222 71% 17%)" : "white",
+          background: "transparent",
         }}
         title="OSMOS AI Assistant"
       >
         {open ? (
-          <X className="w-6 h-6 text-white" />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center bg-slate-900 text-white shadow-2xl border border-slate-800">
+            <X className="w-6 h-6" />
+          </div>
         ) : (
-          <img src={botAvatar} alt="OSMOS" className="w-10 h-10 object-contain" />
+          <div className="w-20 h-20 overflow-hidden flex items-center justify-center rounded-full">
+            <img 
+              src={botAvatar} 
+              alt="OSMOS" 
+              className="w-[350%] h-[350%] max-w-none object-contain drop-shadow-xl mix-blend-multiply" 
+            />
+          </div>
         )}
       </button>
 
