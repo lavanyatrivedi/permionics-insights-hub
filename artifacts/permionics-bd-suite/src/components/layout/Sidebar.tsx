@@ -13,7 +13,7 @@ import {
 import { useLogout, useGetMe } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import logoMark from "@assets/permionics_P_exact_1783575144366.png";
+import osmosLogo from "@assets/osmos_logo_blue_transparent.png";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -52,10 +52,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center justify-between px-4 border-b" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
         <Link href="~/">
           <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="relative flex-shrink-0 w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, hsl(217 91% 60% / 0.2), hsl(217 91% 60% / 0.05))", border: "1px solid hsl(217 91% 60% / 0.3)" }}>
-              <img src={logoMark} alt="OSMOS" className="h-6 w-6 object-contain" />
-            </div>
+            <img src={osmosLogo} alt="OSMOS" className="h-8.5 w-8.5 object-contain flex-shrink-0" />
             <span
               className={`font-extrabold tracking-tight text-xl text-white transition-all duration-200 overflow-hidden whitespace-nowrap ${
                 expanded ? "opacity-100 w-auto" : "opacity-0 w-0"
