@@ -81,11 +81,14 @@ export default function CaseStudyDetail() {
   }, [data, isEditingModalOpen]);
 
   const isStaticStudy = (clientName: string) => {
-    const name = clientName.toLowerCase();
-    return name.includes("gropello") || name.includes("european pharmaceutical") ||
-           name.includes("jeedimetla") || name.includes("jetl") ||
-           name.includes("stevia") || name.includes("nandesari") || name.includes("nia") ||
-           name.includes("serratiopeptidase");
+    const staticNames = [
+      "European Pharmaceutical Major (Gropello, Italy)",
+      "Jeedimetla Effluent Treatment Limited (JETL)",
+      "World's Largest Stevia Plant",
+      "Nandesari Industries Association (NIA)",
+      "Serratiopeptidase Production Facility"
+    ];
+    return staticNames.includes(clientName);
   };
 
   const isStatic = data ? isStaticStudy(data.clientName || "") : false;

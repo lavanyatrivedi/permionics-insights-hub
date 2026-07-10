@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 import os from "os";
+import { GoogleGenAI } from "@google/genai";
 
 const upload = multer({ dest: os.tmpdir() });
 
@@ -401,6 +402,51 @@ router.post("/case-studies/upload", requireAuth, upload.single("file"), async (r
       req.log.warn({ err }, "pdf-parse failed to parse uploaded case study text");
     }
 
+    // Fallback to Gemini OCR if text is empty or too short (scanned PDF)
+    const geminiKey = process.env["GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"] ?? "";
+    if ((!fullText || fullText.length < 50) && geminiKey) {
+      try {
+        req.log.info("Text is empty or short; falling back to Gemini Vision OCR for scanned PDF...");
+        const ai = new GoogleGenAI({ apiKey: geminiKey });
+        const pdfBytes = fs.readFileSync(tempPath);
+        const base64Pdf = pdfBytes.toString("base64");
+        
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: "application/pdf",
+                    data: base64Pdf,
+                  },
+                },
+                {
+                  text: `Please extract ALL the text from this PDF document completely and accurately. 
+Include all headings, paragraphs, tables, numbers, and data.
+Do NOT summarize — extract the full verbatim text.`,
+                },
+              ],
+            },
+          ],
+        });
+
+        const extracted = response.candidates?.[0]?.content?.parts
+          ?.map((p: any) => p.text || "")
+          .join("\n")
+          .trim();
+
+        if (extracted && extracted.length > 10) {
+          fullText = extracted;
+          req.log.info("Successfully extracted text via Gemini Vision OCR");
+        }
+      } catch (ocrErr) {
+        req.log.error({ err: ocrErr }, "Gemini OCR fallback failed");
+      }
+    }
+
     // 3. Determine sector and technology from content
     const textLower = fullText.toLowerCase();
     let sector = "Pharma/Herbal";
@@ -423,10 +469,12 @@ router.post("/case-studies/upload", requireAuth, upload.single("file"), async (r
       technologyStack = "MBR";
     } else if (textLower.includes("zld")) {
       technologyStack = "ZLD";
-    } else if (textLower.includes("nf")) {
-      technologyStack = "NF";
-    } else if (textLower.includes("uf")) {
+    } else if (/\buf\b/i.test(textLower) || textLower.includes("ultrafiltration")) {
       technologyStack = "UF";
+    } else if (/\bnf\b/i.test(textLower) || textLower.includes("nanofiltration")) {
+      technologyStack = "NF";
+    } else if (/\bro\b/i.test(textLower) || textLower.includes("reverse osmosis")) {
+      technologyStack = "RO";
     }
 
     // 4. Save file to pdfs/ folder
