@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Lock, ArrowRight } from "lucide-react";
-import logoMark from "@assets/osmos_logo_blue_transparent.png";
+import osmosLogo from "@assets/osmos_logo_blue_transparent.png";
+import permionicsP from "@assets/permionics_P_exact_1783575144366.png";
 
 const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
@@ -100,7 +101,7 @@ export default function LoginPage() {
       />
 
       {/* ── Left Side: Bold Branding Panel ── */}
-      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-6 lg:p-12 text-white min-h-[35vh] lg:min-h-0">
+      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[60%] p-6 lg:p-12 text-white min-h-[35vh] lg:min-h-0">
         {/* Top spacer */}
         <div className="h-6" />
 
@@ -134,12 +135,21 @@ export default function LoginPage() {
 
       {/* ── Right Side: Embedded Full-Height Login Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border border-slate-100/10 min-h-[50vh] lg:min-h-0"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[38%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border border-slate-100/10 min-h-[50vh] lg:min-h-0"
       >
-        {/* Top: OSMOS Logo inside the white panel with clean vertical stack */}
-        <div className="flex flex-col items-center lg:items-start gap-1">
-          <img src={logoMark} alt="OSMOS" className="h-10 w-10 object-contain" />
-          <span className="text-sm font-extrabold tracking-widest uppercase text-slate-800">OSMOS</span>
+        {/* Top: Dope Co-branded Header Layout */}
+        <div className="flex items-center gap-3.5 justify-center lg:justify-start select-none">
+          {/* Left: Permionics P Logo */}
+          <img src={permionicsP} alt="Permionics" className="h-7 w-7 object-contain opacity-90" />
+          
+          {/* Subtle Vertical Divider */}
+          <div className="h-5 w-px bg-slate-200" />
+          
+          {/* Right: OSMOS Brand */}
+          <div className="flex items-center gap-2">
+            <img src={osmosLogo} alt="OSMOS" className="h-8 w-8 object-contain" />
+            <span className="text-base font-extrabold tracking-wider uppercase text-slate-800">OSMOS</span>
+          </div>
         </div>
 
         {/* Center: Login Form */}
