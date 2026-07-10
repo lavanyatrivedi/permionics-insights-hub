@@ -126,6 +126,80 @@ export default function LoginPage() {
 
         {/* Center: Login Form */}
         <div className="my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
+          {/* Custom vector illustration to fill white space */}
+          <div className="mb-6 w-full flex justify-center lg:justify-start">
+            <svg
+              width="100%"
+              height="80"
+              viewBox="0 0 300 80"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="opacity-95"
+            >
+              <rect
+                x="5"
+                y="5"
+                width="290"
+                height="70"
+                rx="12"
+                fill="url(#left-grid-grad)"
+                stroke="#e2e8f0"
+                strokeWidth="1"
+              />
+              <path
+                d="M5 22.5 H295 M5 40 H295 M5 57.5 H295 M77.5 5 V75 M150 5 V75 M222.5 5 V75"
+                stroke="#e2e8f0"
+                strokeWidth="0.5"
+                strokeDasharray="2 3"
+              />
+
+              {/* Data Connections / Waves */}
+              <path
+                d="M15 50 Q 80 15, 150 50 T 285 50"
+                stroke="url(#left-wave-grad-1)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M15 35 Q 90 60, 160 30 T 285 40"
+                stroke="url(#left-wave-grad-2)"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                className="opacity-60"
+              />
+
+              {/* Network Node Circles */}
+              <circle cx="50" cy="30" r="4.5" fill="#1e3a8a" />
+              <circle cx="50" cy="30" r="2.5" fill="#3b82f6" />
+              
+              <circle cx="115" cy="55" r="5.5" fill="#0369a1" />
+              <circle cx="115" cy="55" r="3" fill="#0ea5e9" />
+
+              <circle cx="190" cy="25" r="4" fill="#1d4ed8" />
+              <circle cx="190" cy="25" r="2" fill="#60a5fa" />
+
+              <circle cx="250" cy="45" r="5" fill="#0f172a" />
+              <circle cx="250" cy="45" r="2.5" fill="#64748b" />
+
+              {/* Gradients */}
+              <defs>
+                <linearGradient id="left-grid-grad" x1="0" y1="0" x2="300" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#f8fafc" />
+                  <stop offset="100%" stopColor="#f1f5f9" />
+                </linearGradient>
+                <linearGradient id="left-wave-grad-1" x1="15" y1="50" x2="285" y2="50" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#1e3a8a" />
+                  <stop offset="50%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#0ea5e9" />
+                </linearGradient>
+                <linearGradient id="left-wave-grad-2" x1="15" y1="35" x2="285" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#3b82f6" opacity="0.5" />
+                  <stop offset="100%" stopColor="#64748b" opacity="0.5" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
@@ -212,7 +286,7 @@ export default function LoginPage() {
         {/* Top: Small badge label */}
         <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/5 border border-white/10 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-300">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-          Osmos Platform
+          OSMOS INTELLIGENCE
         </div>
 
         {/* Center: Bolder Heading */}
