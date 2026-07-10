@@ -118,8 +118,9 @@ export function CaseStudyPreview({ data, palette, editable = false, onChange }: 
 
   const headingStyle: React.CSSProperties = {
     fontSize: "10pt", fontWeight: 700, color: accent, marginTop: 0, marginBottom: "5px",
-    paddingBottom: "3px", borderBottom: `2px solid ${accent}`, textTransform: "uppercase", letterSpacing: "0.5px",
-   return (
+  };
+
+  return (
     <div id="cs-root" style={{ fontFamily: "'Open Sans', Arial, sans-serif", fontSize: "9pt", color: "#1a1a1a", background: "#fff", width: "794px", margin: "0 auto" }}>
       
       {/* ─── PAGE 1 ──────────────────────────────────────────────────────── */}
