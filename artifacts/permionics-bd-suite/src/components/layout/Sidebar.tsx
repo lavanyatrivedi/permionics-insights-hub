@@ -72,7 +72,7 @@ export function Sidebar() {
       style={{ background: "hsl(var(--sidebar))" }}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center px-4 border-b relative" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
+      <div className="flex h-16 items-center justify-center px-4 border-b" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
         <Link href="~/">
           <div className="flex items-center gap-3 cursor-pointer group">
             <img src={osmosLogo} alt="OSMOS" className="h-8.5 w-8.5 object-contain flex-shrink-0" />
@@ -85,18 +85,6 @@ export function Sidebar() {
             </span>
           </div>
         </Link>
-
-        {/* Toggle button - positioned absolutely on the right border */}
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="absolute -right-3 top-5 w-6 h-6 rounded-full flex items-center justify-center transition-all shadow-md border-0 cursor-pointer bg-[#182235] text-white hover:bg-[#202d44] hover:scale-105"
-          style={{ zIndex: 50 }}
-          title={expanded ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          <ChevronRight
-            className={`w-3.5 h-3.5 transition-transform duration-250 ${expanded ? "rotate-180" : ""}`}
-          />
-        </button>
       </div>
 
       {/* Nav items */}
@@ -241,6 +229,30 @@ export function Sidebar() {
               <TooltipContent side="right">Logout</TooltipContent>
             </Tooltip>
           </>
+        )}\n
+        {/* Collapse toggle */}
+        {expanded ? (
+          <button
+            onClick={() => setExpanded(false)}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
+            title="Collapse sidebar"
+          >
+            <ChevronRight className="h-[18px] w-[18px] flex-shrink-0 rotate-180" />
+            <span>Collapse</span>
+          </button>
+        ) : (
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setExpanded(true)}
+                className="flex items-center justify-center w-full h-10 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
+                title="Expand sidebar"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Expand sidebar</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </div>

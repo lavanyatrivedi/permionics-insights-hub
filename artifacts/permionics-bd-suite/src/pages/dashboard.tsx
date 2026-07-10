@@ -31,7 +31,6 @@ function getSectorColor(sector: string) {
   return "bg-blue-100 text-blue-700 border-blue-200";
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({
   label,
   value,
@@ -50,7 +49,7 @@ function StatCard({
       className="relative rounded-2xl p-6 overflow-hidden"
       style={{
         background: "var(--card)",
-        boxShadow: "0 1px 3px var(--border), 0 1px 2px var(--border)",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
         border: "1px solid var(--border)",
       }}
     >
@@ -62,14 +61,14 @@ function StatCard({
 
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "hsl(220 10% 55%)" }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-muted-foreground">
             {label}
           </p>
-          <p className="text-3xl font-extrabold tracking-tight" style={{ color: "hsl(222 47% 11%)" }}>
+          <p className="text-3xl font-extrabold tracking-tight text-foreground">
             {value}
           </p>
           {sublabel && (
-            <p className="text-xs mt-1.5" style={{ color: "hsl(220 10% 60%)" }}>
+            <p className="text-xs mt-1.5 text-muted-foreground">
               {sublabel}
             </p>
           )}
@@ -402,44 +401,44 @@ export default function DashboardPage() {
               icon: Briefcase,
               title: "Case Study Library",
               desc: "Browse all client case studies and outcomes",
-              accent: "hsl(var(--primary))",
-              bg: "hsl(var(--primary) / 0.06)",
+              accent: "#60a5fa",
+              bg: "hsl(222 47% 11%)",
             },
             {
               href: "~/generator",
               icon: FileText,
               title: "Case Study Generator",
               desc: "Create structured case studies with AI assistance",
-              accent: "hsl(var(--secondary))",
-              bg: "hsl(var(--secondary) / 0.06)",
+              accent: "#60a5fa",
+              bg: "hsl(222 47% 11%)",
             },
             {
               href: "~/assistant",
               icon: Activity,
               title: "Osmos AI",
               desc: "Ask OSMOS for BD intelligence from all your documents",
-              accent: "hsl(175 70% 45%)",
-              bg: "hsl(175 70% 45% / 0.08)",
+              accent: "#34d399",
+              bg: "hsl(222 47% 11%)",
             },
           ].map((item) => (
             <Link key={item.href} href={item.href}>
               <div
-                className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-md"
+                className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-lg"
                 style={{
                   background: item.bg,
-                  border: `1px solid var(--border)`,
+                  border: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: item.bg }}
+                  style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   <item.icon className="w-5 h-5" style={{ color: item.accent }} />
                 </div>
-                <p className="text-sm font-bold mb-1" style={{ color: "var(--foreground)" }}>
+                <p className="text-sm font-bold mb-1" style={{ color: "#f1f5f9" }}>
                   {item.title}
                 </p>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>
                   {item.desc}
                 </p>
                 <div className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: item.accent }}>
