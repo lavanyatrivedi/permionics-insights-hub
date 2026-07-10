@@ -49,9 +49,9 @@ function StatCard({
     <div
       className="relative rounded-2xl p-6 overflow-hidden"
       style={{
-        background: "white",
-        boxShadow: "0 1px 3px hsl(222 47% 11% / 0.06), 0 1px 2px hsl(222 47% 11% / 0.04)",
-        border: "1px solid hsl(220 15% 90%)",
+        background: "var(--card)",
+        boxShadow: "0 1px 3px var(--border), 0 1px 2px var(--border)",
+        border: "1px solid var(--border)",
       }}
     >
       {/* Accent bar */}

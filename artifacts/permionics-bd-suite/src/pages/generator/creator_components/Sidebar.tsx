@@ -97,32 +97,32 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
     const cfg = data[cfgField];
     const img = data[imgField];
     return (
-      <div className="border border-gray-200 rounded-lg p-2.5 flex flex-col gap-2 bg-white">
-        <div className="text-[10px] font-semibold text-[#003466]">{label}</div>
+      <div className="border border-border rounded-lg p-2.5 flex flex-col gap-2 bg-card">
+        <div className="text-[10px] font-semibold text-foreground">{label}</div>
         <div
-          className="relative border-2 border-dashed border-gray-200 rounded-lg p-2 text-center cursor-pointer hover:border-[#1A5FA8] transition-colors"
+          className="relative border-2 border-dashed border-border rounded-lg p-2 text-center cursor-pointer hover:border-primary transition-colors"
           onClick={() => inputRef.current?.click()}
         >
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImg(e, imgField)} />
           {img ? (
             <div>
               <img src={img} alt="preview" className="mx-auto object-cover rounded mb-1" style={{ height: "56px", width: "100%", objectFit: "cover" }} />
-              <span className="text-[10px] text-[#1A5FA8] font-medium">Click to change</span>
+              <span className="text-[10px] text-primary font-medium">Click to change</span>
             </div>
           ) : (
             <div className="py-1">
-              <div className="text-gray-400 text-[10px] mb-0.5">No photo yet</div>
-              <span className="text-[10px] text-[#1A5FA8] font-medium">Click to upload</span>
+              <div className="text-muted-foreground text-[10px] mb-0.5">No photo yet</div>
+              <span className="text-[10px] text-primary font-medium">Click to upload</span>
             </div>
           )}
         </div>
         <div>
           <div className="flex justify-between items-center mb-1">
             <span className={lbl + " mb-0"}>Height</span>
-            <span className="text-[10px] font-semibold text-[#1A5FA8]">{cfg.height}px</span>
+            <span className="text-[10px] font-semibold text-primary">{cfg.height}px</span>
           </div>
-          <input type="range" min={60} max={360} step={10} value={cfg.height} onChange={(e) => setCfg(cfgField, { height: Number(e.target.value) })} className="w-full accent-[#1A5FA8]" />
-          <div className="flex justify-between text-[9px] text-gray-400 -mt-0.5"><span>60px</span><span>360px</span></div>
+          <input type="range" min={60} max={360} step={10} value={cfg.height} onChange={(e) => setCfg(cfgField, { height: Number(e.target.value) })} className="w-full accent-primary cursor-pointer" />
+          <div className="flex justify-between text-[9px] text-muted-foreground -mt-0.5"><span>60px</span><span>360px</span></div>
         </div>
         <div>
           <label className={lbl}>Fit mode</label>

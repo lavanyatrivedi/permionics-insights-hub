@@ -115,12 +115,7 @@ export default function ProjectsPage() {
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                   placeholder="e.g. Nandesari Industries — RO Plant"
-                  style={{
-                    width: "100%", padding: "10px 14px", border: "1.5px solid var(--border)",
-                    borderRadius: "8px", fontSize: "13px", outline: "none",
-                    boxSizing: "border-box", transition: "border-color 0.15s",
-                    background: "var(--background)", color: "var(--foreground)",
-                  }}
+                  className="w-full px-3.5 py-2.5 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm"
                 />
               </div>
               <div>
@@ -135,9 +130,9 @@ export default function ProjectsPage() {
                       style={{
                         padding: "8px 16px", fontSize: "12px", fontWeight: 600,
                         borderRadius: "8px", border: "1px solid", cursor: "pointer",
-                        borderColor: newPalette === p.id ? p.primary : "var(--border)",
-                        background: newPalette === p.id ? `${p.primary}12` : "var(--card)",
-                        color: newPalette === p.id ? p.primary : "var(--muted-foreground)",
+                        borderColor: newPalette === p.id ? p.primary : "hsl(var(--border))",
+                        background: newPalette === p.id ? `${p.primary}1c` : "hsl(var(--card))",
+                        color: newPalette === p.id ? p.primary : "hsl(var(--muted-foreground))",
                         transition: "all 0.15s",
                       }}
                     >
