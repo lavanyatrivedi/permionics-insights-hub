@@ -160,7 +160,7 @@ export default function AssistantPage() {
       onError: (err: any) => {
         toast({
           title: "Error",
-          description: err?.message || "Failed to get response from BD Assistant.",
+          description: err?.message || "Failed to get response from Osmos AI.",
           variant: "destructive"
         });
       }
@@ -255,8 +255,8 @@ export default function AssistantPage() {
       <div className="flex-1 flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm h-full">
         <div className="bg-primary px-6 py-4 border-b flex items-center justify-between shadow-sm">
           <h2 className="text-lg font-bold flex items-center gap-3 text-primary-foreground tracking-wide">
-            <img src={botAvatar} alt="BD Assistant" className="w-8 h-8 object-contain" />
-            BD Assistant
+            <img src={botAvatar} alt="Osmos AI" className="w-8 h-8 object-contain" />
+            Osmos AI
           </h2>
           <span className="text-primary-foreground/70 text-sm font-medium flex items-center gap-1.5">
             <Activity className="w-4 h-4" /> Connected to Knowledge Base
@@ -266,7 +266,7 @@ export default function AssistantPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50 dark:bg-background">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-              <img src={botAvatar} alt="BD Assistant" className="w-20 h-20 object-contain drop-shadow-md" />
+              <img src={botAvatar} alt="Osmos AI" className="w-20 h-20 object-contain drop-shadow-md" />
               <div className="max-w-md">
                 <h3 className="text-2xl font-bold mb-3 tracking-tight">How can I assist you?</h3>
                 <p className="text-muted-foreground mb-8 text-base">Ask me anything. I automatically search and refer to all Library Case Studies, Case Study Creator projects, and uploaded reference PDFs.</p>

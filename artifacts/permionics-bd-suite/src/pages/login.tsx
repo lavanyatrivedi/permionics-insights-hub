@@ -226,7 +226,7 @@ export default function LoginPage() {
 
           {/* Feature Pills */}
           <div className="flex flex-wrap gap-2 pt-4">
-            {["Case Study Library", "AI BD Assistant", "Smart Generator", "Questionnaire Engine"].map(f => (
+            {["Case Study Library", "Osmos AI", "Smart Generator", "Questionnaire Engine"].map(f => (
               <span
                 key={f}
                 className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 backdrop-blur-sm shadow-sm hover:bg-white/10 hover:text-white transition-all duration-200 cursor-default"

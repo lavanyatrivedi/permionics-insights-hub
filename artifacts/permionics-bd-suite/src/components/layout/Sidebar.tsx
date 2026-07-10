@@ -20,7 +20,7 @@ const navItems = [
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/generator", label: "Generator", icon: FileText },
   { href: "/questionnaire", label: "Questionnaire", icon: ClipboardList },
-  { href: "/assistant", label: "BD Assistant", icon: MessageSquare },
+  { href: "/assistant", label: "Osmos AI", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

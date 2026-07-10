@@ -393,7 +393,7 @@ export default function DashboardPage() {
             {
               href: "~/assistant",
               icon: Activity,
-              title: "BD Assistant",
+              title: "Osmos AI",
               desc: "Ask OSMOS for BD intelligence from all your documents",
               accent: "hsl(175 70% 38%)",
               bg: "hsl(175 70% 38% / 0.05)",
