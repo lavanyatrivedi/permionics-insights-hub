@@ -34,43 +34,65 @@ async function extractTextWithPdfParse(filePath: string): Promise<string> {
 
 async function extractTextWithGeminiOCR(filePath: string, filename: string): Promise<string> {
   // Send the raw PDF bytes directly to Gemini as an inline blob — works for multi-page PDFs
-  // Gemini Flash 2.0 natively understands PDFs and can extract text from scanned/image pages
+  // gemini-1.5-flash has higher free-tier rate limits (15 RPM → gemini-2.0-flash has lower limits)
   const pdfBytes = fs.readFileSync(filePath);
   const base64Pdf = pdfBytes.toString("base64");
 
-  const model = ai.models;
+  const models = ["gemini-1.5-flash", "gemini-2.0-flash"];
 
-  const response = await model.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            inlineData: {
-              mimeType: "application/pdf",
-              data: base64Pdf,
-            },
-          },
-          {
-            text: `Please extract ALL the text from this PDF document completely and accurately. 
+  for (const modelName of models) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: "application/pdf",
+                    data: base64Pdf,
+                  },
+                },
+                {
+                  text: `Please extract ALL the text from this PDF document completely and accurately. 
 Include all headings, paragraphs, tables, bullet points, numbers, and data.
 Do NOT summarize — extract the full verbatim text. 
 Format clearly with line breaks between sections.
 This is the file: ${filename}`,
-          },
-        ],
-      },
-    ],
-  });
+                },
+              ],
+            },
+          ],
+        });
 
-  const text = response.candidates?.[0]?.content?.parts
-    ?.map((p: any) => p.text || "")
-    .join("\n")
-    .trim();
+        const text = response.candidates?.[0]?.content?.parts
+          ?.map((p: any) => p.text || "")
+          .join("\n")
+          .trim();
 
-  return text || "";
+        if (text && text.length > 10) return text;
+        break; // empty result — try next model
+      } catch (err: any) {
+        const isRateLimit = err?.status === 429 || err?.message?.includes("429") || err?.message?.includes("RESOURCE_EXHAUSTED");
+        if (isRateLimit && attempt < 2) {
+          // Exponential backoff: 5s, 15s
+          const waitMs = (attempt + 1) * 5000;
+          console.warn(`[assistant] ${modelName} rate-limited (attempt ${attempt + 1}), retrying in ${waitMs / 1000}s...`);
+          await new Promise(r => setTimeout(r, waitMs));
+          continue;
+        }
+        // Not a rate limit error or exhausted retries — try next model
+        console.warn(`[assistant] ${modelName} failed (attempt ${attempt + 1}): ${err?.message}`);
+        break;
+      }
+    }
+  }
+
+  return "";
 }
+
 
 async function extractDocumentText(filePath: string, filename: string): Promise<{ text: string; method: "pdf-parse" | "gemini-ocr" }> {
   // 1. Try text extraction first (fast, free)
