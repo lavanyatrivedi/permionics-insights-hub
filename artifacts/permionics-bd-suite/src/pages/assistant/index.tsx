@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, Upload, FileText, Trash2, Loader2, Database } from "lucide-react";
+import { Send, User, Upload, FileText, Trash2, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
 import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +25,7 @@ interface Document {
   id: string;
   title: string;
   created_at: string;
+  hasContent: boolean;
 }
 
 export default function AssistantPage() {
@@ -32,7 +33,10 @@ export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [reprocessingId, setReprocessingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const reprocessFileInputRef = useRef<HTMLInputElement>(null);
+  const reprocessTargetId = useRef<string | null>(null);
   
   const sendChat = useSendChatMessage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -124,6 +128,41 @@ export default function AssistantPage() {
       fetchDocuments();
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete document.", variant: "destructive" });
+    }
+  };
+
+  const handleReprocessClick = (id: string) => {
+    reprocessTargetId.current = id;
+    reprocessFileInputRef.current?.click();
+  };
+
+  const handleReprocessUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const id = reprocessTargetId.current;
+    if (!file || !id) return;
+
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid File", description: "Only PDF files are supported.", variant: "destructive" });
+      return;
+    }
+
+    setReprocessingId(id);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await customFetch(`/api/assistant/documents/${id}/reprocess`, {
+        method: "POST",
+        body: formData,
+      });
+      toast({ title: "Re-OCR Complete", description: `"${file.name}" has been re-processed and text extracted via Gemini OCR.` });
+      fetchDocuments();
+    } catch (error: any) {
+      toast({ title: "Re-OCR Failed", description: error?.message || "Failed to re-process document.", variant: "destructive" });
+    } finally {
+      setReprocessingId(null);
+      reprocessTargetId.current = null;
+      if (reprocessFileInputRef.current) reprocessFileInputRef.current.value = "";
     }
   };
 
@@ -319,26 +358,62 @@ export default function AssistantPage() {
                   )}
                 </Button>
 
-                <div className="flex-1 overflow-y-auto mt-4 pr-2 space-y-3">
+                {/* Hidden file input for re-OCR reprocessing */}
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  ref={reprocessFileInputRef}
+                  onChange={handleReprocessUpload}
+                />
+
+                <div className="flex-1 overflow-y-auto mt-4 pr-2 space-y-2">
                   {documents.length === 0 ? (
                     <div className="text-center text-sm text-muted-foreground py-8">
                       No documents uploaded yet.
                     </div>
                   ) : (
                     documents.map(doc => (
-                      <div key={doc.id} className="flex items-center justify-between bg-white border p-3 rounded-lg shadow-sm">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                      <div key={doc.id} className={`flex items-center justify-between border p-3 rounded-lg shadow-sm ${
+                        doc.hasContent ? 'bg-white' : 'bg-amber-50 border-amber-200'
+                      }`}>
+                        <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+                          {doc.hasContent ? (
+                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                          )}
                           <div className="truncate text-sm font-medium">{doc.title}</div>
+                          {!doc.hasContent && (
+                            <span className="text-[10px] bg-amber-100 text-amber-700 border border-amber-200 rounded px-1.5 py-0.5 flex-shrink-0">No text</span>
+                          )}
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-                          onClick={() => handleDeleteDocument(doc.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {!doc.hasContent && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs text-amber-700 hover:text-amber-900 hover:bg-amber-100 px-2"
+                              disabled={reprocessingId === doc.id}
+                              onClick={() => handleReprocessClick(doc.id)}
+                              title="Re-upload and OCR this document with Gemini Vision"
+                            >
+                              {reprocessingId === doc.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <><RefreshCw className="w-3 h-3 mr-1" />Re-OCR</>
+                              )}
+                            </Button>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteDocument(doc.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   )}
