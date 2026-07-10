@@ -10,6 +10,8 @@ import {
   LogOut,
   ChevronRight,
   Monitor,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useLogout, useGetMe } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +34,25 @@ export function Sidebar() {
   const logout = useLogout();
   const { toast } = useToast();
   const { data: user } = useGetMe();
+
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    return "light";
+  });
+
+  const toggleTheme = () => {
+    if (theme === "dark") {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      setTheme("light");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setTheme("dark");
+    }
+  };
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -172,25 +193,54 @@ export function Sidebar() {
               </div>
             )}
             <button
+              onClick={toggleTheme}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="h-[18px] w-[18px] flex-shrink-0" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-[18px] w-[18px] flex-shrink-0" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
+            <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-all"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
             >
               <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
               <span>Logout</span>
             </button>
           </>
         ) : (
-          <Tooltip delayDuration={200}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center w-full h-10 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Logout</TooltipContent>
-          </Tooltip>
+          <>
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center justify-center w-full h-10 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
+                >
+                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">{theme === "dark" ? "Light Mode" : "Dark Mode"}</TooltipContent>
+            </Tooltip>
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center w-full h-10 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Logout</TooltipContent>
+            </Tooltip>
+          </>
         )}
       </div>
     </div>
