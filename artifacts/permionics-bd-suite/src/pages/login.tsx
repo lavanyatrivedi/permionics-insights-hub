@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user?.authenticated) {
-      setLocation("/dashboard");
+      setLocation("/");
     }
   }, [user, setLocation]);
 
@@ -53,7 +53,7 @@ export default function LoginPage() {
         onSuccess: async (res) => {
           if (res.authenticated) {
             await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-            setLocation("/dashboard");
+            setLocation("/");
           } else {
             toast({
               title: "Access Denied",
