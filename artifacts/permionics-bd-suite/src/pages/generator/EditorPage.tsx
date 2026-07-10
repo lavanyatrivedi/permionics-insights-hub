@@ -120,7 +120,7 @@ export default function EditorPage({ projectId }: Props) {
 
   if (isLoading || !data) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--background)" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--background))" }}>
         <div style={{ color: "var(--muted-foreground)", fontSize: "13px" }}>Loading project...</div>
       </div>
     );
@@ -131,17 +131,17 @@ export default function EditorPage({ projectId }: Props) {
   const saveColor = saveStatus === "saving" ? "#f59e0b" : saveStatus === "saved" ? "#22c55e" : "#ef4444";
 
   return (
-    <div className="text-foreground" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--background)" }}>
+    <div className="text-foreground" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "hsl(var(--background))" }}>
       {/* Collapsible sidebar */}
       <div style={{
         flexShrink: 0,
         width: sidebarCollapsed ? "0px" : "320px",
         overflow: "hidden",
         transition: "width 0.25s ease",
-        borderRight: sidebarCollapsed ? "none" : "1px solid var(--border)",
+        borderRight: sidebarCollapsed ? "none" : "1px solid hsl(var(--border))",
         display: "flex",
         flexDirection: "column",
-        background: "var(--card)",
+        background: "hsl(var(--card))",
       }}>
         {!sidebarCollapsed && (
           <Sidebar
@@ -163,7 +163,7 @@ export default function EditorPage({ projectId }: Props) {
       </div>
 
       {/* Preview area */}
-      <div style={{ flex: 1, overflowY: "auto", background: "var(--background)", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 16px", gap: "10px", minWidth: 0 }}>
+      <div style={{ flex: 1, overflowY: "auto", background: "hsl(var(--background))", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 16px", gap: "10px", minWidth: 0 }}>
         {/* Top bar */}
         <div style={{ width: "100%", maxWidth: "860px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -173,7 +173,7 @@ export default function EditorPage({ projectId }: Props) {
               title={sidebarCollapsed ? "Show panel" : "Collapse panel"}
               style={{
                 width: "32px", height: "32px", borderRadius: "6px",
-                background: "var(--card)", border: "1px solid var(--border)",
+                background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0, color: "var(--muted-foreground)",
               }}
@@ -189,7 +189,7 @@ export default function EditorPage({ projectId }: Props) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "1px", height: "16px", background: "var(--border)" }} />
+            <div style={{ width: "1px", height: "16px", background: "hsl(var(--border))" }} />
             <span style={{ fontSize: "12px", color: "#666", fontWeight: 500 }}>Live Preview</span>
             {editableMode && (
               <span style={{ fontSize: "11px", background: "#fef3c7", color: "#92400e", padding: "2px 8px", borderRadius: "20px", fontWeight: 600, border: "1px solid #fcd34d" }}>

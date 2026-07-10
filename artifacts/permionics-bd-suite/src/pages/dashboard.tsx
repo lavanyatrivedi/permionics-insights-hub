@@ -48,9 +48,9 @@ function StatCard({
     <div
       className="relative rounded-2xl p-6 overflow-hidden"
       style={{
-        background: "var(--card)",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-        border: "1px solid var(--border)",
+        background: "hsl(var(--card))",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02)",
+        border: "1px solid hsl(var(--border))",
       }}
     >
       {/* Accent bar */}
@@ -168,14 +168,14 @@ export default function DashboardPage() {
     : "N/A";
 
   return (
-    <div className="min-h-full text-foreground" style={{ background: "var(--background)" }}>
+    <div className="min-h-full text-foreground" style={{ background: "hsl(var(--background))" }}>
       {/* ── Top header bar ── */}
       <div
         className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 print-hide"
         style={{
-          background: "var(--card)",
-          borderBottom: "1px solid var(--border)",
-          boxShadow: "0 1px 0 var(--border)",
+          background: "hsl(var(--card))",
+          borderBottom: "1px solid hsl(var(--border))",
+          boxShadow: "0 1px 0 hsl(var(--border))",
         }}
       >
         <div>
@@ -233,15 +233,15 @@ export default function DashboardPage() {
           <div
             className="lg:col-span-4 rounded-2xl overflow-hidden"
             style={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-              boxShadow: "0 1px 3px var(--border)",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02)",
             }}
           >
             {/* Card header */}
             <div
               className="flex items-center justify-between px-6 py-4"
-              style={{ borderBottom: "1px solid var(--border)" }}
+              style={{ borderBottom: "1px solid hsl(var(--border))" }}
             >
               <div className="flex items-center gap-2.5">
                 <div
@@ -263,7 +263,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Activity list */}
-            <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+            <div className="divide-y font-normal" style={{ borderColor: "hsl(var(--border))" }}>
               {stats.recentActivity.length > 0 ? (
                 stats.recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors">
@@ -319,14 +319,14 @@ export default function DashboardPage() {
           <div
             className="lg:col-span-3 rounded-2xl overflow-hidden"
             style={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-              boxShadow: "0 1px 3px var(--border)",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02)",
             }}
           >
             <div
               className="flex items-center gap-2.5 px-6 py-4"
-              style={{ borderBottom: "1px solid var(--border)" }}
+              style={{ borderBottom: "1px solid hsl(var(--border))" }}
             >
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -345,14 +345,14 @@ export default function DashboardPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={sectorData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      dataKey="value"
-                      strokeWidth={0}
+                       data={sectorData}
+                       cx="50%"
+                       cy="50%"
+                       innerRadius={55}
+                       outerRadius={80}
+                       paddingAngle={3}
+                       dataKey="value"
+                       strokeWidth={0}
                     >
                       {sectorData.map((_, index) => (
                         <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -362,11 +362,11 @@ export default function DashboardPage() {
                       formatter={(value: number) => [`${value}%`, "Share"]}
                       contentStyle={{
                         borderRadius: 12,
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
                         fontSize: 12,
                         fontFamily: "Plus Jakarta Sans, sans-serif",
-                        boxShadow: "0 4px 16px var(--border)",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
                         color: "var(--foreground)",
                       }}
                     />

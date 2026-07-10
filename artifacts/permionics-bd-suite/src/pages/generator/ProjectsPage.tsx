@@ -70,7 +70,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="text-foreground" style={{ minHeight: "100vh", background: "var(--background)" }}>
+    <div className="text-foreground" style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
 
       {/* Content */}
       <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px" }}>
@@ -98,8 +98,8 @@ export default function ProjectsPage() {
         {/* Create panel modal */}
         {isCreating && (
           <div style={{
-            background: "var(--card)", borderRadius: "16px", padding: "28px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)", border: "1px solid var(--border)",
+            background: "hsl(var(--card))", borderRadius: "16px", padding: "28px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)", border: "1px solid hsl(var(--border))",
             marginBottom: "32px", animation: "slideDown 0.2s ease-out",
           }}>
             <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--foreground)", margin: "0 0 18px 0" }}>Create New Project</h3>
@@ -197,8 +197,8 @@ export default function ProjectsPage() {
                   role="button"
                   tabIndex={0}
                   style={{
-                    background: "var(--card)", borderRadius: "14px", overflow: "hidden",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)", border: "1px solid var(--border)",
+                    background: "hsl(var(--card))", borderRadius: "14px", overflow: "hidden",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)", border: "1px solid hsl(var(--border))",
                     transition: "all 0.18s", cursor: "pointer", userSelect: "none",
                   }}
                   onClick={() => openProject(project.id)}
@@ -211,7 +211,7 @@ export default function ProjectsPage() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.borderColor = "hsl(var(--border))";
                   }}
                 >
                   {/* Color bar */}
@@ -266,11 +266,11 @@ export default function ProjectsPage() {
       {/* Delete confirm modal */}
       {deleteId !== null && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "14px", padding: "32px", width: "380px", boxShadow: "0 24px 64px rgba(0,0,0,0.28)" }}>
+          <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "14px", padding: "32px", width: "380px", boxShadow: "0 24px 64px rgba(0,0,0,0.28)" }}>
             <h3 style={{ fontSize: "17px", fontWeight: 800, color: "var(--foreground)", marginBottom: "12px", marginTop: 0 }}>Delete project?</h3>
             <p style={{ fontSize: "13px", color: "var(--muted-foreground)", marginBottom: "24px" }}>This action cannot be undone. The project and all its data will be permanently deleted.</p>
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-              <button onClick={() => setDeleteId(null)} style={{ padding: "9px 18px", border: "1.5px solid var(--border)", borderRadius: "8px", background: "var(--card)", fontSize: "13px", cursor: "pointer", color: "var(--muted-foreground)", fontWeight: 500 }}>
+              <button onClick={() => setDeleteId(null)} style={{ padding: "9px 18px", border: "1.5px solid hsl(var(--border))", borderRadius: "8px", background: "hsl(var(--card))", fontSize: "13px", cursor: "pointer", color: "var(--muted-foreground)", fontWeight: 500 }}>
                 Cancel
               </button>
               <button
