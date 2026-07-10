@@ -72,8 +72,18 @@ export function Sidebar() {
     });
   };
 
-  const isActive = (href: string) =>
-    href === "/" ? location === "/" : location === href || location.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (typeof window === "undefined") return href === "/";
+    const path = window.location.pathname;
+    const base = import.meta.env.BASE_URL || "/";
+    const absoluteLocation = (base !== "/" && path.startsWith(base))
+      ? (path.slice(base.length - 1) || "/")
+      : path;
+    
+    return href === "/" 
+      ? absoluteLocation === "/" 
+      : absoluteLocation === href || absoluteLocation.startsWith(`${href}/`);
+  };
 
   return (
     <div
