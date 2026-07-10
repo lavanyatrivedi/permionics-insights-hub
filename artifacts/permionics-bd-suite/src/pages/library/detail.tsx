@@ -4,9 +4,9 @@ import { CaseStudyPreview } from "../generator/creator_components/CaseStudyPrevi
 import { getPalette } from "../generator/creator_types";
 import { printCaseStudy } from "../generator/creator_utils/print";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Download, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Download, Loader2, Trash2, FileText, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,41 @@ export default function CaseStudyDetail() {
   });
 
   const deleteMutation = useDeleteCaseStudy();
+
+  const isStaticStudy = (clientName: string) => {
+    const name = clientName.toLowerCase();
+    return name.includes("gropello") || name.includes("european pharmaceutical") ||
+           name.includes("jeedimetla") || name.includes("jetl") ||
+           name.includes("stevia") || name.includes("nandesari") || name.includes("nia") ||
+           name.includes("serratiopeptidase");
+  };
+
+  const isStatic = data ? isStaticStudy(data.clientName || "") : false;
+
+  const handleDownload = () => {
+    if (isStatic) {
+      window.open(`/api/case-studies/${numId}/download`, '_blank');
+    } else {
+      printCaseStudy();
+    }
+  };
+
+  useEffect(() => {
+    if (data && window.location.search.includes("download=true")) {
+      // Clean up URL query parameters so it only runs once
+      window.history.replaceState(null, "", window.location.pathname);
+      
+      toast({
+        title: "Downloading File",
+        description: "Preparing your professional case study download...",
+      });
+      
+      // Trigger download
+      setTimeout(() => {
+        handleDownload();
+      }, 500);
+    }
+  }, [data]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -133,7 +168,7 @@ export default function CaseStudyDetail() {
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
         </Link>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => printCaseStudy()} className="bg-background">
+          <Button variant="outline" onClick={handleDownload} className="bg-background">
             <Download className="w-4 h-4 mr-2" /> Export PDF
           </Button>
           <Button variant="secondary" className="bg-secondary text-secondary-foreground" disabled>
@@ -165,11 +200,39 @@ export default function CaseStudyDetail() {
         </div>
       </div>
       
-      <div className="print-full pb-16 flex justify-center bg-slate-50 border rounded-2xl p-6 md:p-12 overflow-x-auto">
-        <div style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.12)", width: "794px", flexShrink: 0, background: "#ffffff" }}>
-          <CaseStudyPreview data={mappedData} palette={getPalette("ocean-blue")} />
+      {isStatic ? (
+        <div className="flex flex-col items-center justify-center border border-slate-200 rounded-2xl p-16 bg-white max-w-xl mx-auto shadow-md">
+          <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-6">
+            <FileText className="h-8 w-8 text-blue-600 animate-pulse" />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-800 text-center mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            {data.clientName}
+          </h3>
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">{data.sector}</span>
+            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">{data.technologyStack}</span>
+          </div>
+          <p className="text-sm text-slate-500 text-center mb-8 max-w-md leading-relaxed">
+            This document has been archived directly in the library as a high-quality PDF report. Click below to view and download the official file.
+          </p>
+          <Button 
+            onClick={() => window.open(`/api/case-studies/${numId}/download`, '_blank')} 
+            className="w-full h-12 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+            style={{
+              background: "linear-gradient(135deg, hsl(222 71% 18%), hsl(217 91% 28%))",
+              color: "white"
+            }}
+          >
+            <Download className="w-4 h-4" /> Download Original PDF
+          </Button>
         </div>
-      </div>
+      ) : (
+        <div className="print-full pb-16 flex justify-center bg-slate-50 border rounded-2xl p-6 md:p-12 overflow-x-auto">
+          <div style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.12)", width: "794px", flexShrink: 0, background: "#ffffff" }}>
+            <CaseStudyPreview data={mappedData} palette={getPalette("ocean-blue")} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
+import fs from "fs";
+import path from "path";
 
 const router: IRouter = Router();
 
@@ -122,6 +124,52 @@ router.get("/case-studies/:id", requireAuth, async (req, res): Promise<void> => 
     res.json(mapCaseStudyRow(data));
   } catch (err) {
     req.log.error({ err }, "GET /case-studies/:id error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Download static PDF or get indicator for case study
+router.get("/case-studies/:id/download", requireAuth, async (req, res): Promise<void> => {
+  try {
+    const { data, error } = await supabase
+      .from("case_studies")
+      .select("*")
+      .eq("id", req.params.id)
+      .single();
+
+    if (error || !data) {
+      res.status(404).json({ error: "Case study not found" });
+      return;
+    }
+
+    const clientName = (data.client_name || "").toLowerCase();
+    let pdfFile = "";
+
+    if (clientName.includes("gropello") || clientName.includes("european pharmaceutical")) {
+      pdfFile = "gropello.pdf";
+    } else if (clientName.includes("jeedimetla") || clientName.includes("jetl")) {
+      pdfFile = "jeedimetla.pdf";
+    } else if (clientName.includes("stevia")) {
+      pdfFile = "stevia.pdf";
+    } else if (clientName.includes("nandesari") || clientName.includes("nia")) {
+      pdfFile = "nandesari.pdf";
+    } else if (clientName.includes("serratiopeptidase")) {
+      pdfFile = "serratiopeptidase.pdf";
+    }
+
+    if (pdfFile) {
+      const filePath = path.resolve(process.cwd(), "pdfs", pdfFile);
+      if (fs.existsSync(filePath)) {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${data.client_name.replace(/[^a-zA-Z0-9]/g, "_")}.pdf"`);
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      }
+    }
+
+    res.json({ isStatic: false });
+  } catch (err) {
+    req.log.error({ err }, "GET /case-studies/:id/download error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

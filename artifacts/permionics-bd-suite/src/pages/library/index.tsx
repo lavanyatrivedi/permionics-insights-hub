@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useListCaseStudies } from "@workspace/api-client-react";
+import { useListCaseStudies, useDeleteCaseStudy } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { getSectorColor } from "@/components/case-study/CaseStudyPreview";
-import { Search, Plus, FileText, Loader2 } from "lucide-react";
+import { Search, Plus, FileText, Loader2, MoreVertical, Download, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 
 export default function LibraryPage() {
@@ -15,12 +23,49 @@ export default function LibraryPage() {
   const [sector, setSector] = useState("all");
   const [technology, setTechnology] = useState("all");
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const deleteMutation = useDeleteCaseStudy();
 
-  const { data: caseStudies, isLoading } = useListCaseStudies({
+  const caseStudiesQuery = useListCaseStudies({
     search: search || undefined,
     sector: sector !== "all" ? sector : undefined,
     technology: technology !== "all" ? technology : undefined,
   });
+
+  const { data: caseStudies, isLoading } = caseStudiesQuery;
+
+  const isStaticStudy = (clientName: string) => {
+    const name = clientName.toLowerCase();
+    return name.includes("gropello") || name.includes("european pharmaceutical") ||
+           name.includes("jeedimetla") || name.includes("jetl") ||
+           name.includes("stevia") || name.includes("nandesari") || name.includes("nia") ||
+           name.includes("serratiopeptidase");
+  };
+
+  const triggerDownload = (cs: any) => {
+    if (isStaticStudy(cs.clientName || "")) {
+      window.open(`/api/case-studies/${cs.id}/download`, '_blank');
+    } else {
+      setLocation(`/library/${cs.id}?download=true`);
+    }
+  };
+
+  const handleDelete = async (cs: any) => {
+    if (confirm(`Are you sure you want to permanently delete "${cs.clientName}"?`)) {
+      try {
+        await deleteMutation.mutateAsync({ id: cs.id });
+        toast({ title: "Deleted", description: "Case study deleted from library." });
+        queryClient.invalidateQueries({ queryKey: caseStudiesQuery.queryKey });
+      } catch (err: any) {
+        toast({ 
+          title: "Error", 
+          description: err?.message || "Failed to delete case study.", 
+          variant: "destructive" 
+        });
+      }
+    }
+  };
 
   const formatDate = (dateStr?: string) => {
     try {
@@ -36,10 +81,10 @@ export default function LibraryPage() {
   const safeCaseStudies = Array.isArray(caseStudies) ? caseStudies : [];
 
   return (
-    <div className="max-w-5xl mx-auto p-8 space-y-8 text-foreground">
+    <div className="max-w-5xl mx-auto p-8 space-y-8 text-foreground animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Case Study Library</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>Case Study Library</h1>
           <p className="text-muted-foreground mt-1 font-normal text-sm">Browse, filter, and access all client case studies and outcomes.</p>
         </div>
         <Button onClick={() => setLocation("/generator")}>
@@ -91,17 +136,18 @@ export default function LibraryPage() {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead className="w-[300px] py-4">Client Name</TableHead>
+                <TableHead className="w-[280px] py-4">Client Name</TableHead>
                 <TableHead>Sector</TableHead>
                 <TableHead>Technology</TableHead>
                 <TableHead>Capacity</TableHead>
-                <TableHead className="text-right pr-6">Date Added</TableHead>
+                <TableHead className="text-right">Date Added</TableHead>
+                <TableHead className="text-right pr-6 w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-64 text-center">
+                  <TableCell colSpan={6} className="h-64 text-center">
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground mx-auto" />
                   </TableCell>
                 </TableRow>
@@ -131,14 +177,42 @@ export default function LibraryPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{cs.capacity || "-"}</TableCell>
-                    <TableCell className="text-right text-muted-foreground text-sm pr-6">
+                    <TableCell className="text-right text-muted-foreground text-sm">
                       {formatDate(cs.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[160px]">
+                            <DropdownMenuItem 
+                              className="cursor-pointer"
+                              onClick={() => triggerDownload(cs)}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-600 focus:text-red-700 cursor-pointer"
+                              onClick={() => handleDelete(cs)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-64 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-64 text-center text-muted-foreground">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <FileText className="w-8 h-8 text-muted-foreground/50" />
                       <p>No case studies found matching your criteria.</p>
