@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, Upload, FileText, Trash2, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
+import { Send, User, Upload, FileText, Trash2, Loader2, RefreshCw, AlertTriangle, Activity } from "lucide-react";
 import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -261,7 +261,7 @@ export default function AssistantPage() {
             BD Assistant
           </h2>
           <span className="text-primary-foreground/70 text-sm font-medium flex items-center gap-1.5">
-            <Database className="w-4 h-4" /> Connected to Knowledge Base
+            <Activity className="w-4 h-4" /> Connected to Knowledge Base
           </span>
         </div>
         
