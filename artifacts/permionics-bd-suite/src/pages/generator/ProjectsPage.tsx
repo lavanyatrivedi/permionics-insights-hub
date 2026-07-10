@@ -69,7 +69,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
       {/* Content */}
       <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px" }}>
@@ -123,7 +123,7 @@ export default function ProjectsPage() {
                     width: "100%", padding: "10px 14px", border: "1.5px solid #e2e8f0",
                     borderRadius: "8px", fontSize: "13px", outline: "none",
                     boxSizing: "border-box", transition: "border-color 0.15s",
-                    fontFamily: "Inter, sans-serif",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
                 />
               </div>
