@@ -6,6 +6,7 @@ import {
   getTokenFromRequest,
   verifyToken,
   checkPassword,
+  getAdminPassword,
 } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -18,7 +19,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const adminPassword = process.env["ADMIN_PASSWORD"];
+  const adminPassword = await getAdminPassword();
   if (!adminPassword) {
     res.status(500).json({ error: "Server configuration error" });
     return;

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { requireAuth } from "../middlewares/requireAuth";
-import { checkPassword } from "../lib/auth";
+import { checkPassword, getAdminPassword, setAdminPassword } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -20,7 +20,7 @@ router.post("/settings/change-password", requireAuth, async (req, res): Promise<
     return;
   }
 
-  const adminPassword = process.env["ADMIN_PASSWORD"];
+  const adminPassword = await getAdminPassword();
   if (!adminPassword) {
     res.status(500).json({ error: "Server configuration error" });
     return;
@@ -31,16 +31,16 @@ router.post("/settings/change-password", requireAuth, async (req, res): Promise<
     return;
   }
 
-  // In this architecture, ADMIN_PASSWORD is an env var / secret.
-  // Changing it at runtime only affects the current process.
-  // The new password should be updated in Replit Secrets for persistence.
-  // We update the in-process env var so the change works for the session.
-  process.env["ADMIN_PASSWORD"] = newPassword;
+  const success = await setAdminPassword(newPassword);
+  if (!success) {
+    res.status(500).json({ error: "Failed to persist new password to database" });
+    return;
+  }
 
   req.log.info("Admin password changed");
   res.json({
     authenticated: true,
-    message: "Password updated for this session. Update ADMIN_PASSWORD in Replit Secrets to persist across restarts.",
+    message: "Password updated successfully in database.",
   });
 });
 
