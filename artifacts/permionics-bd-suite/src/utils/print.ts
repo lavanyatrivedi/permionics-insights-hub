@@ -32,19 +32,14 @@ export async function printCaseStudy() {
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    // Create PDF (A4 Portrait)
+    // Create PDF with dynamic page size to fit content edge-to-edge
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: [imgWidth, imgHeight]
     });
 
-    // Page 1
-    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 594);
-
-    // Page 2
-    pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, -297, 210, 594);
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     
     // Save the PDF
     pdf.save(`Permionics_Case_Study_${new Date().toISOString().split('T')[0]}.pdf`);
