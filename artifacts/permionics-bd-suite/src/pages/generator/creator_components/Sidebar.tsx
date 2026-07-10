@@ -239,36 +239,36 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
               + Add Field
             </button>
           </div>
-          <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto border border-border/60 p-2 rounded bg-muted/20">
+          <div className="flex flex-col gap-3.5 border border-border/80 p-3 rounded-lg bg-muted/10">
             {(data.siteInfoFields || []).map((field, idx) => (
-              <div key={field.id} className="flex flex-col gap-1 border-b border-border/40 pb-2.5 last:border-b-0 last:pb-0">
-                <div className="flex items-center justify-between gap-1.5">
-                  <div className="flex items-center gap-1">
+              <div key={field.id} className="flex flex-col gap-1.5 border-b border-border/40 pb-3 last:border-b-0 last:pb-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
                     <input 
                       type="checkbox" 
                       id={`vis-${field.id}`}
                       checked={field.visible} 
                       onChange={(e) => updateSiteInfoField(idx, { visible: e.target.checked })} 
-                      className="cursor-pointer"
+                      className="cursor-pointer h-3.5 w-3.5"
                     />
-                    <label htmlFor={`vis-${field.id}`} className="text-[9px] font-semibold text-muted-foreground uppercase cursor-pointer select-none">Show</label>
+                    <label htmlFor={`vis-${field.id}`} className="text-[10px] font-semibold text-muted-foreground uppercase cursor-pointer select-none">Show on study</label>
                   </div>
                   <button 
                     type="button" 
                     onClick={() => deleteSiteInfoField(idx)}
-                    className="text-[9px] text-destructive hover:text-destructive/80 font-bold bg-transparent border-0 cursor-pointer"
+                    className="text-[10px] text-destructive hover:text-destructive/80 font-bold bg-transparent border-0 cursor-pointer"
                   >
-                    Delete
+                    Remove
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   <div className="flex flex-col gap-0.5">
-                    <label className={lbl} style={{ fontSize: "8px" }}>Label</label>
-                    <input className={inp} style={{ padding: "3px 6px" }} value={field.label} onChange={(e) => updateSiteInfoField(idx, { label: e.target.value })} />
+                    <label className={lbl}>Field Name</label>
+                    <input className={inp} value={field.label} onChange={(e) => updateSiteInfoField(idx, { label: e.target.value })} />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className={lbl} style={{ fontSize: "8px" }}>Value</label>
-                    <input className={inp} style={{ padding: "3px 6px" }} value={field.value} onChange={(e) => updateSiteInfoField(idx, { value: e.target.value })} />
+                    <label className={lbl}>Value</label>
+                    <input className={inp} value={field.value} onChange={(e) => updateSiteInfoField(idx, { value: e.target.value })} />
                   </div>
                 </div>
               </div>
