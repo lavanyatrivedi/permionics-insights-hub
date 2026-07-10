@@ -425,8 +425,8 @@ export default function DashboardPage() {
               <div
                 className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-lg dark:hover:shadow-xl"
                 style={{
-                  background: "var(--card)",
-                  border: "1px solid var(--border)",
+                  background: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
                 }}
               >
                 <div
