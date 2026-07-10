@@ -212,7 +212,8 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
-
+        {/* CLIENT TAB */}
+        {tab === "client" && <>
           <div className={sec}>Client &amp; Project</div>
           <div className="flex flex-col gap-1"><label className={lbl}>Client / Project Name *</label><input className={inp} value={data.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="Nandesari Industries Association (NIA)" /></div>
           <div className="grid grid-cols-2 gap-1.5">
