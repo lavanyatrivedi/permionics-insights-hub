@@ -255,8 +255,8 @@ export default function AssistantPage() {
       <div className="flex-1 flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm h-full">
         <div className="bg-primary px-6 py-4 border-b flex items-center justify-between shadow-sm">
           <h2 className="text-lg font-bold flex items-center gap-3 text-primary-foreground tracking-wide">
-            <div className="bg-white p-0.5 rounded-full shadow-sm">
-              <img src={botAvatar} alt="BD Assistant" className="w-8 h-8 rounded-full object-cover" />
+            <div className="bg-white p-0.5 rounded-full shadow-sm overflow-hidden flex items-center justify-center w-9 h-9">
+              <img src={botAvatar} alt="BD Assistant" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
             </div>
             BD Assistant
           </h2>
@@ -268,8 +268,8 @@ export default function AssistantPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50 dark:bg-background">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-              <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center border-4 border-primary/10">
-                <img src={botAvatar} alt="BD Assistant" className="w-20 h-20 rounded-full object-cover" />
+              <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center border-4 border-primary/10 overflow-hidden">
+                <img src={botAvatar} alt="BD Assistant" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
               </div>
               <div className="max-w-md">
                 <h3 className="text-2xl font-bold mb-3 tracking-tight">How can I assist you?</h3>
@@ -297,8 +297,8 @@ export default function AssistantPage() {
                       <User className="w-5 h-5" />
                     </div>
                   ) : (
-                    <div className="bg-white p-0.5 rounded-full shadow-md border-2 border-primary/20">
-                      <img src={botAvatar} alt="Assistant" className="w-9 h-9 rounded-full object-cover" />
+                    <div className="bg-white p-0.5 rounded-full shadow-md border-2 border-primary/20 overflow-hidden flex items-center justify-center w-10 h-10">
+                      <img src={botAvatar} alt="Assistant" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
                     </div>
                   )}
                 </div>
@@ -350,8 +350,8 @@ export default function AssistantPage() {
           )}
           {sendChat.isPending && (
             <div className="flex gap-4">
-               <div className="bg-white p-0.5 rounded-full shadow-md border-2 border-primary/20 h-max">
-                <img src={botAvatar} alt="Assistant" className="w-9 h-9 rounded-full object-cover opacity-60" />
+               <div className="bg-white p-0.5 rounded-full shadow-md border-2 border-primary/20 h-10 w-10 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <img src={botAvatar} alt="Assistant" className="w-[350%] h-[350%] max-w-none object-contain opacity-60 mix-blend-multiply" />
               </div>
               <div className="bg-white dark:bg-card rounded-2xl p-5 shadow-sm border flex items-center h-[52px]">
                 <div className="flex gap-1.5">
