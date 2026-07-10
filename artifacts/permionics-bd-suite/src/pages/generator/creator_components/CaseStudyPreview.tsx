@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useRef } from "react";
-import { CaseStudyData, PhotoConfig, Palette } from "../creator_types";
+import { CaseStudyData, PhotoConfig, Palette, formatSectorDefault } from "../creator_types";
 import logoUrl from "@assets/logo-01_(1)_1783575156427.png";
 
 interface Props {
@@ -162,31 +162,53 @@ export function CaseStudyPreview({ data, palette, editable = false, onChange }: 
             <div style={{ fontSize: "8.5pt", fontWeight: 700, color: primary, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px", borderBottom: `1px solid ${lightBorder}`, paddingBottom: "4px" }}>
               Site Information
             </div>
-            {[
-              ["Location:", data.location],
-              ["Industry:", data.sector + " Manufacturing"],
-              ["Application:", data.application],
-              ["Capacity:", data.capacity],
-              ["Client:", data.clientName],
-            ].map(([label, val]) => (
-              <div key={label} style={{ display: "block", marginBottom: "7px", fontSize: "7.5pt", lineHeight: 1.35 }}>
-                <span style={{ display: "block", fontWeight: 700, color: primary, textTransform: "uppercase", fontSize: "6.5pt", letterSpacing: "0.5px", marginBottom: "1px" }}>{label}</span>
-                <span style={{ display: "block", color: "#333", fontSize: "7.5pt" }}>{val}</span>
-              </div>
-            ))}
+            {(data.siteInfoFields || [
+              { id: "location", label: "Location:", value: data.location || "", visible: true },
+              { id: "sector", label: "Industry:", value: formatSectorDefault(data.sector), visible: true },
+              { id: "application", label: "Application:", value: data.application || "", visible: true },
+              { id: "capacity", label: "Capacity:", value: data.capacity || "", visible: true },
+              { id: "clientName", label: "Client:", value: data.clientName || "", visible: true },
+            ])
+              .filter(f => f.visible !== false)
+              .map((field) => (
+                <div key={field.id} style={{ display: "block", marginBottom: "7px", fontSize: "7.5pt", lineHeight: 1.35 }}>
+                  <span style={{ display: "block", fontWeight: 700, color: primary, textTransform: "uppercase", fontSize: "6.5pt", letterSpacing: "0.5px", marginBottom: "1px" }}>{field.label}</span>
+                  <span style={{ display: "block", color: "#333", fontSize: "7.5pt" }}>{field.value}</span>
+                </div>
+              ))
+            }
             <ul style={{ marginTop: "10px", paddingLeft: 0 }}>{sidebarBulletLines.map(renderSiteBullet)}</ul>
           </div>
 
-          {[
-            ["Technologies Used", techLines.map(renderSidebarBullet)],
-            ["Delivery Model", <span style={{ fontSize: "7.5pt", color: "#333", lineHeight: 1.45 }}>{data.delivery}</span>],
-            ["Operations", <span style={{ fontSize: "7.5pt", color: "#333", lineHeight: 1.45 }}>{data.operations}</span>],
-          ].map(([heading, content]) => (
-            <div key={String(heading)} style={{ marginBottom: "16px" }}>
-              <div style={{ fontSize: "7pt", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.8px", borderBottom: `2px solid ${accent}`, paddingBottom: "3px", marginBottom: "7px" }}>{heading}</div>
-              {heading === "Technologies Used" ? <ul style={{ paddingLeft: 0 }}>{content}</ul> : <div>{content}</div>}
+          {/* Technologies Used Section */}
+          {(data.showTech ?? true) && (
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "7pt", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.8px", borderBottom: `2px solid ${accent}`, paddingBottom: "3px", marginBottom: "7px" }}>
+                {data.techLabel || "Technologies Used"}
+              </div>
+              <ul style={{ paddingLeft: 0 }}>{techLines.map(renderSidebarBullet)}</ul>
             </div>
-          ))}
+          )}
+
+          {/* Delivery Model Section */}
+          {(data.showDelivery ?? true) && (
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "7pt", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.8px", borderBottom: `2px solid ${accent}`, paddingBottom: "3px", marginBottom: "7px" }}>
+                {data.deliveryLabel || "Delivery Model"}
+              </div>
+              <div style={{ fontSize: "7.5pt", color: "#333", lineHeight: 1.45 }}>{data.delivery}</div>
+            </div>
+          )}
+
+          {/* Operations Section */}
+          {(data.showOperations ?? true) && (
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "7pt", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.8px", borderBottom: `2px solid ${accent}`, paddingBottom: "3px", marginBottom: "7px" }}>
+                {data.operationsLabel || "Operations"}
+              </div>
+              <div style={{ fontSize: "7.5pt", color: "#333", lineHeight: 1.45 }}>{data.operations}</div>
+            </div>
+          )}
         </div>
 
         {/* MAIN CONTENT */}

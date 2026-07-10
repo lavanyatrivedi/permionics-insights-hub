@@ -44,8 +44,41 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
   const handshakeRef = useRef<HTMLInputElement>(null);
   const beakersRef = useRef<HTMLInputElement>(null);
 
-  const set = <K extends keyof CaseStudyData>(key: K, value: CaseStudyData[K]) =>
-    onChange({ ...data, [key]: value });
+  const set = <K extends keyof CaseStudyData>(key: K, value: CaseStudyData[K]) => {
+    const patch: any = { [key]: value };
+    // Synchronize to dynamic siteInfoFields if the user edits the main fields
+    if (data.siteInfoFields) {
+      const idx = data.siteInfoFields.findIndex(f => f.id === key);
+      if (idx !== -1) {
+        const fields = [...data.siteInfoFields];
+        fields[idx] = { ...fields[idx], value: String(value) };
+        patch.siteInfoFields = fields;
+      }
+    }
+    onChange({ ...data, ...patch });
+  };
+
+  const updateSiteInfoField = (idx: number, patch: Partial<any>) => {
+    const fields = [...(data.siteInfoFields || [])];
+    fields[idx] = { ...fields[idx], ...patch };
+    onChange({ ...data, siteInfoFields: fields });
+  };
+
+  const deleteSiteInfoField = (idx: number) => {
+    const fields = (data.siteInfoFields || []).filter((_, i) => i !== idx);
+    onChange({ ...data, siteInfoFields: fields });
+  };
+
+  const addSiteInfoField = () => {
+    const fields = [...(data.siteInfoFields || [])];
+    fields.push({
+      id: `custom_${Date.now()}`,
+      label: "Custom Field:",
+      value: "Value",
+      visible: true
+    });
+    onChange({ ...data, siteInfoFields: fields });
+  };
 
   const setCfg = (
     field: "plantImgCfg" | "handshakeImgCfg" | "beakersImgCfg",
@@ -180,8 +213,6 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
 
-        {/* CLIENT TAB */}
-        {tab === "client" && <>
           <div className={sec}>Client &amp; Project</div>
           <div className="flex flex-col gap-1"><label className={lbl}>Client / Project Name *</label><input className={inp} value={data.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="Nandesari Industries Association (NIA)" /></div>
           <div className="grid grid-cols-2 gap-1.5">
@@ -195,11 +226,126 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
             <div className="flex flex-col gap-1"><label className={lbl}>Capacity</label><input className={inp} value={data.capacity} onChange={(e) => set("capacity", e.target.value)} /></div>
           </div>
           <div className="flex flex-col gap-1"><label className={lbl}>Stat bar headline</label><input className={inp} value={data.statBar} onChange={(e) => set("statBar", e.target.value)} /></div>
+
+          {/* CUSTOM SITE INFORMATION CONFIGURATION */}
+          <div className={sec} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Site Info Fields</span>
+            <button 
+              type="button" 
+              onClick={addSiteInfoField}
+              className="text-[9px] bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-2 py-0.5 rounded cursor-pointer"
+            >
+              + Add Field
+            </button>
+          </div>
+          <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto border border-border/60 p-2 rounded bg-muted/20">
+            {(data.siteInfoFields || []).map((field, idx) => (
+              <div key={field.id} className="flex flex-col gap-1 border-b border-border/40 pb-2.5 last:border-b-0 last:pb-0">
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1">
+                    <input 
+                      type="checkbox" 
+                      id={`vis-${field.id}`}
+                      checked={field.visible} 
+                      onChange={(e) => updateSiteInfoField(idx, { visible: e.target.checked })} 
+                      className="cursor-pointer"
+                    />
+                    <label htmlFor={`vis-${field.id}`} className="text-[9px] font-semibold text-muted-foreground uppercase cursor-pointer select-none">Show</label>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => deleteSiteInfoField(idx)}
+                    className="text-[9px] text-destructive hover:text-destructive/80 font-bold bg-transparent border-0 cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div className="flex flex-col gap-0.5">
+                    <label className={lbl} style={{ fontSize: "8px" }}>Label</label>
+                    <input className={inp} style={{ padding: "3px 6px" }} value={field.label} onChange={(e) => updateSiteInfoField(idx, { label: e.target.value })} />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <label className={lbl} style={{ fontSize: "8px" }}>Value</label>
+                    <input className={inp} style={{ padding: "3px 6px" }} value={field.value} onChange={(e) => updateSiteInfoField(idx, { value: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <div className={sec}>Sidebar Bullets</div>
           <div className="flex flex-col gap-1"><label className={lbl}>Key outcome bullets (one per line)</label><textarea className={ta} rows={5} value={data.sidebarBullets} onChange={(e) => set("sidebarBullets", e.target.value)} /></div>
-          <div className="flex flex-col gap-1"><label className={lbl}>Technologies Used (one per line)</label><textarea className={ta} rows={5} value={data.techList} onChange={(e) => set("techList", e.target.value)} /></div>
-          <div className="flex flex-col gap-1"><label className={lbl}>Delivery Model</label><textarea className={ta} rows={3} value={data.delivery} onChange={(e) => set("delivery", e.target.value)} /></div>
-          <div className="flex flex-col gap-1"><label className={lbl}>Operations</label><textarea className={ta} rows={3} value={data.operations} onChange={(e) => set("operations", e.target.value)} /></div>
+
+          {/* EDITABLE/TOGGLEABLE SIDEBAR SECTIONS */}
+          <div className={sec}>Custom Sections</div>
+          
+          {/* Technologies Used Section */}
+          <div className="border border-border p-2 rounded mb-1 bg-card flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <input 
+                type="checkbox" 
+                id="sec-tech-show"
+                checked={data.showTech ?? true} 
+                onChange={(e) => set("showTech", e.target.checked)} 
+                className="cursor-pointer"
+              />
+              <label htmlFor="sec-tech-show" className="text-[10px] font-bold text-foreground cursor-pointer select-none">Show Technologies</label>
+            </div>
+            {(data.showTech ?? true) && (
+              <div className="flex flex-col gap-1">
+                <label className={lbl}>Section Title</label>
+                <input className={inp} value={data.techLabel || "Technologies Used"} onChange={(e) => set("techLabel", e.target.value)} />
+                <label className={lbl}>Items (one per line)</label>
+                <textarea className={ta} rows={4} value={data.techList} onChange={(e) => set("techList", e.target.value)} />
+              </div>
+            )}
+          </div>
+
+          {/* Delivery Model Section */}
+          <div className="border border-border p-2 rounded mb-1 bg-card flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <input 
+                type="checkbox" 
+                id="sec-del-show"
+                checked={data.showDelivery ?? true} 
+                onChange={(e) => set("showDelivery", e.target.checked)} 
+                className="cursor-pointer"
+              />
+              <label htmlFor="sec-del-show" className="text-[10px] font-bold text-foreground cursor-pointer select-none">Show Delivery Model</label>
+            </div>
+            {(data.showDelivery ?? true) && (
+              <div className="flex flex-col gap-1">
+                <label className={lbl}>Section Title</label>
+                <input className={inp} value={data.deliveryLabel || "Delivery Model"} onChange={(e) => set("deliveryLabel", e.target.value)} />
+                <label className={lbl}>Description</label>
+                <textarea className={ta} rows={3} value={data.delivery} onChange={(e) => set("delivery", e.target.value)} />
+              </div>
+            )}
+          </div>
+
+          {/* Operations Section */}
+          <div className="border border-border p-2 rounded mb-1 bg-card flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <input 
+                type="checkbox" 
+                id="sec-op-show"
+                checked={data.showOperations ?? true} 
+                onChange={(e) => set("showOperations", e.target.checked)} 
+                className="cursor-pointer"
+              />
+              <label htmlFor="sec-op-show" className="text-[10px] font-bold text-foreground cursor-pointer select-none">Show Operations</label>
+            </div>
+            {(data.showOperations ?? true) && (
+              <div className="flex flex-col gap-1">
+                <label className={lbl}>Section Title</label>
+                <input className={inp} value={data.operationsLabel || "Operations"} onChange={(e) => set("operationsLabel", e.target.value)} />
+                <label className={lbl}>Description</label>
+                <textarea className={ta} rows={3} value={data.operations} onChange={(e) => set("operations", e.target.value)} />
+              </div>
+            )}
+          </div>
+
           <div className={sec}>Header &amp; Footer</div>
           <div className="flex flex-col gap-1"><label className={lbl}>Category label (header banner)</label><input className={inp} value={data.categoryLabel} onChange={(e) => set("categoryLabel", e.target.value)} /></div>
           <div className="flex flex-col gap-1"><label className={lbl}>Company name</label><input className={inp} value={data.companyName} onChange={(e) => set("companyName", e.target.value)} /></div>

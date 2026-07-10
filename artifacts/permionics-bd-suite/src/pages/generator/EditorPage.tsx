@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { customFetch } from "@workspace/api-client-react";
-import { CaseStudyData, getPalette } from "./creator_types";
+import { CaseStudyData, getPalette, migrateCaseStudyData } from "./creator_types";
 import { Sidebar } from "./creator_components/Sidebar";
 import { CaseStudyPreview } from "./creator_components/CaseStudyPreview";
 import { printCaseStudy } from "./creator_utils/print";
@@ -29,7 +29,8 @@ export default function EditorPage({ projectId }: Props) {
     customFetch(`/api/case-creator/${projectId}`)
       .then((res: any) => {
         setProject(res);
-        setData(res.data as unknown as CaseStudyData);
+        const migrated = migrateCaseStudyData(res.data);
+        setData(migrated);
         setPalette(res.palette ?? "ocean-blue");
         setIsLoading(false);
       })

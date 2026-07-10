@@ -1,3 +1,10 @@
+export interface SidebarField {
+  id: string;
+  label: string;
+  value: string;
+  visible: boolean;
+}
+
 export interface ResultCard {
   number: string;
   label: string;
@@ -29,6 +36,15 @@ export interface CaseStudyData {
   techList: string;
   delivery: string;
   operations: string;
+
+  // Dynamic custom fields for left sidebar
+  siteInfoFields?: SidebarField[];
+  showTech?: boolean;
+  techLabel?: string;
+  showDelivery?: boolean;
+  deliveryLabel?: string;
+  showOperations?: boolean;
+  operationsLabel?: string;
 
   companyName: string;
   website: string;
@@ -219,3 +235,31 @@ export const DEFAULT_DATA: CaseStudyData = {
   handshakeImgCfg: { height: 180, fit: "cover", position: "center" },
   beakersImgCfg: { height: 140, fit: "cover", position: "center" },
 };
+
+export function formatSectorDefault(sector?: string): string {
+  if (!sector) return "";
+  const s = sector.trim();
+  if (/manufacturing/i.test(s)) return s;
+  if (/water|waste|municipal|sewage|effluent|reuse/i.test(s)) return s;
+  return s + " Manufacturing";
+}
+
+export function migrateCaseStudyData(raw: any): CaseStudyData {
+  const d = { ...raw };
+  if (!d.siteInfoFields) {
+    d.siteInfoFields = [
+      { id: "location", label: "Location:", value: d.location || "", visible: true },
+      { id: "sector", label: "Industry:", value: formatSectorDefault(d.sector), visible: true },
+      { id: "application", label: "Application:", value: d.application || "", visible: true },
+      { id: "capacity", label: "Capacity:", value: d.capacity || "", visible: true },
+      { id: "clientName", label: "Client:", value: d.clientName || "", visible: true },
+    ];
+  }
+  if (d.showTech === undefined) d.showTech = true;
+  if (d.techLabel === undefined) d.techLabel = "Technologies Used";
+  if (d.showDelivery === undefined) d.showDelivery = true;
+  if (d.deliveryLabel === undefined) d.deliveryLabel = "Delivery Model";
+  if (d.showOperations === undefined) d.showOperations = true;
+  if (d.operationsLabel === undefined) d.operationsLabel = "Operations";
+  return d;
+}
