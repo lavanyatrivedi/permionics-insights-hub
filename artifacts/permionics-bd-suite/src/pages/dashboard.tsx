@@ -136,12 +136,14 @@ export default function DashboardPage() {
     );
   }
 
-  const sectorData = [
-    { name: "Pharma/Herbal", value: 35 },
-    { name: "Textile", value: 25 },
-    { name: "CETP/Municipal", value: 20 },
-    { name: "Food & Beverage", value: 20 },
-  ];
+  const sectorData = ((stats as any).sectorBreakdown && (stats as any).sectorBreakdown.length > 0
+    ? (stats as any).sectorBreakdown
+    : [
+        { name: "Pharma/Herbal", value: 35 },
+        { name: "Textile", value: 25 },
+        { name: "CETP/Municipal", value: 20 },
+        { name: "Food & Beverage", value: 20 },
+      ]) as { name: string; value: number }[];
 
   const lastUpdatedStr = stats.lastUpdated
     ? format(new Date(stats.lastUpdated), "MMM d, yyyy")

@@ -57,12 +57,28 @@ router.get("/dashboard/stats", requireAuth, async (req, res): Promise<void> => {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
 
+    // Compute sector breakdown percentages
+    const sectorCounts: Record<string, number> = {};
+    let totalSectors = 0;
+    caseStudies.forEach((cs) => {
+      if (cs.sector) {
+        sectorCounts[cs.sector] = (sectorCounts[cs.sector] || 0) + 1;
+        totalSectors++;
+      }
+    });
+
+    const sectorBreakdown = Object.entries(sectorCounts).map(([name, count]) => ({
+      name,
+      value: totalSectors > 0 ? Math.round((count / totalSectors) * 100) : 0,
+    })).sort((a, b) => b.value - a.value);
+
     res.json({
       totalCaseStudies: csResult.count ?? caseStudies.length,
       totalQuestionnaires: qResult.count ?? questionnaires.length,
       sectorsCount,
       lastUpdated,
       recentActivity,
+      sectorBreakdown,
     });
   } catch (err) {
     req.log.error({ err }, "Dashboard stats error");
