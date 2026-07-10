@@ -363,6 +363,9 @@ export async function customFetch<T = unknown>(
   const response = await fetch(input, { ...init, method, headers, credentials: "include" });
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined" && !window.location.pathname.endsWith("/login")) {
+      window.location.href = "/login";
+    }
     const errorData = await parseErrorBody(response, method);
     throw new ApiError(response, errorData, requestInfo);
   }

@@ -65,11 +65,14 @@ export function Sidebar() {
     }
   };
 
-  const handleLogout = () => {
-    logout.mutate(undefined, {
-      onSuccess: () => { setLocation("/login"); },
-      onError: () => { toast({ title: "Error logging out", variant: "destructive" }); }
-    });
+  const handleLogout = async () => {
+    try {
+      await logout.mutateAsync(undefined);
+    } catch (err) {
+      console.warn("Backend logout request failed/unauthorized, proceeding with local clear", err);
+    } finally {
+      setLocation("/login");
+    }
   };
 
   const isActive = (href: string) => {
