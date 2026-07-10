@@ -1,5 +1,5 @@
 import { CaseStudyData, PhotoConfig } from "@/types/case-study";
-import logoUrl from "@assets/logo-01_(1)_1783575156427.png";
+import logoUrl from "@assets/logo_white.png";
 
 interface Props {
   data: CaseStudyData;
@@ -85,7 +85,7 @@ export function FullCaseStudyPreview({ data }: Props) {
       {/* HEADER */}
       <div style={{ background: "#003466", color: "white", display: "flex", alignItems: "stretch", minHeight: "96px" }}>
         <div style={{ background: "#003466", width: "200px", minWidth: "200px", display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 16px" }}>
-          <img src={logoUrl} alt="Permionics" style={{ width: "160px", display: "block", filter: "brightness(0) invert(1)" }} />
+          <img src={logoUrl} alt="Permionics" style={{ width: "160px", display: "block" }} />
         </div>
         <div style={{ background: "#1a5fa8", flex: 1, padding: "14px 24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ fontSize: "7px", letterSpacing: "3px", textTransform: "uppercase", color: "#a8d4f0", marginBottom: "5px", fontWeight: 600 }}>CASE HISTORY | WATER & WASTEWATER</div>

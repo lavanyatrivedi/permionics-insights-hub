@@ -43,18 +43,23 @@ export async function printCaseStudy() {
     const canvasW = canvas.width;
     const canvasH = canvas.height;
 
-    // Scale image to fit A4 width exactly (210mm) and calculate height based on aspect ratio
-    const imgW = A4_W;
-    const imgH = (canvasH / canvasW) * A4_W;
-
+    // Since we restructured the template to have exactly two A4 pages stacked,
+    // we draw page 1 on PDF page 1, and page 2 on PDF page 2.
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: [imgW, imgH], // Dynamic format matching the exact content height
+      format: "a4",
       compress: true,
     });
 
-    pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
+    // Page 1
+    // A4 is 210mm wide x 297mm high. Total height of 2 pages at this aspect ratio is 594mm.
+    pdf.addImage(imgData, "JPEG", 0, 0, 210, 594);
+
+    // Page 2
+    pdf.addPage();
+    pdf.addImage(imgData, "JPEG", 0, -297, 210, 594);
+
     pdf.save(`Permionics_CaseStudy_${Date.now()}.pdf`);
   } catch (err) {
     document.body.style.overflow = originalOverflow;

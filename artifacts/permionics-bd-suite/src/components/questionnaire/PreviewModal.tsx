@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Question, Section, ClientInfo } from '@/types/questionnaire';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import logoUrl from '@assets/logo-01_(1)_1783575156427.png';
+import logoUrl from '@assets/logo_white.png';
 import { Download, Loader2 } from 'lucide-react';
 import { generatePdf } from './PdfExport';
 
