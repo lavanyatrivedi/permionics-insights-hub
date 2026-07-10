@@ -317,14 +317,16 @@
     size: auto;
   }
   
-  html, body {
+  html, body, #root, div.flex.h-screen.w-full {
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
+    min-height: 100% !important;
     overflow: visible !important;
     background: white !important;
     zoom: 1 !important;
     font-size: 16px !important;
+    display: block !important;
   }
 
   .print-hide {
@@ -341,6 +343,7 @@
     box-shadow: none !important;
     border-radius: 0 !important;
     overflow: visible !important;
+    display: block !important;
   }
 }
 
