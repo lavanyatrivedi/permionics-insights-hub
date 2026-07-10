@@ -8,7 +8,14 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [location] = useLocation();
+  const absolutePath = typeof window !== "undefined" ? window.location.pathname : "/";
+  const base = import.meta.env.BASE_URL || "/";
+  const absoluteLocation = (base !== "/" && absolutePath.startsWith(base))
+    ? (absolutePath.slice(base.length - 1) || "/")
+    : absolutePath;
+
+  const showFloatingChat = absoluteLocation === "/";
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <Sidebar />
@@ -16,7 +23,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
       {/* OSMOS floating chat — visible only on dashboard */}
-      {location === "/" && <OsmosChat />}
+      {showFloatingChat && <OsmosChat />}
     </div>
   );
 }
