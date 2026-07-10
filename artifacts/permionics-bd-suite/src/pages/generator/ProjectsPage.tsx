@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { customFetch } from "@workspace/api-client-react";
 import { DEFAULT_DATA, PALETTES, getPalette } from "./creator_types";
 import { useToast } from "@/hooks/use-toast";
-import { FileText } from "lucide-react";
+import { Plus, ClipboardList } from "lucide-react";
 
 export default function ProjectsPage() {
   const [, navigate] = useLocation();
@@ -70,7 +70,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f0f4f8" }}>
 
       {/* Content */}
       <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px" }}>
@@ -85,17 +85,12 @@ export default function ProjectsPage() {
           </div>
           <button
             onClick={() => setIsCreating(true)}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 flex items-center gap-2 cursor-pointer border-0"
             style={{
-              background: "#0C4A8C", color: "white", border: "none", borderRadius: "10px",
-              padding: "11px 22px", fontSize: "13px", fontWeight: 700, cursor: "pointer",
-              display: "flex", alignItems: "center", gap: "8px",
-              boxShadow: "0 2px 8px rgba(12,74,140,0.3)",
-              transition: "all 0.15s",
+              boxShadow: "0 2px 8px rgba(12,74,140,0.15)",
             }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+            <Plus className="w-3.5 h-3.5" />
             New Project
           </button>
         </div>
@@ -124,7 +119,6 @@ export default function ProjectsPage() {
                     width: "100%", padding: "10px 14px", border: "1.5px solid #e2e8f0",
                     borderRadius: "8px", fontSize: "13px", outline: "none",
                     boxSizing: "border-box", transition: "border-color 0.15s",
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
                 />
               </div>
@@ -164,11 +158,9 @@ export default function ProjectsPage() {
                 <button
                   onClick={handleCreate}
                   disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 cursor-pointer disabled:opacity-50 border-0"
                   style={{
-                    background: "#0C4A8C", color: "white", border: "none", borderRadius: "10px",
-                    padding: "10px 20px", fontSize: "13px", fontWeight: 700, cursor: "pointer",
-                    boxShadow: "0 2px 8px rgba(12,74,140,0.2)",
-                    opacity: isSubmitting ? 0.6 : 1,
+                    boxShadow: "0 2px 8px rgba(12,74,140,0.15)",
                   }}
                 >
                   {isSubmitting ? "Creating..." : "Create Project"}
@@ -184,22 +176,19 @@ export default function ProjectsPage() {
             Loading projects...
           </div>
         ) : !projects.length && !isCreating ? (
-          <div style={{
-            textAlign: "center", padding: "80px 40px", background: "rgba(241, 245, 249, 0.4)",
-            borderRadius: "12px", border: "1px dashed #cbd5e1",
-          }}>
-            <FileText className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" style={{ margin: "0 auto 16px auto", color: "#94a3b8", opacity: 0.5 }} />
-            <p style={{ fontSize: "15px", fontWeight: 600, color: "#475569", marginBottom: "6px" }}>No projects yet</p>
-            <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "24px" }}>Create your first case study to get started.</p>
-            <button 
-              onClick={() => setIsCreating(true)} 
-              style={{ 
-                background: "#0c4a8c", color: "white", border: "none", borderRadius: "10px", 
-                padding: "11px 22px", fontSize: "13px", fontWeight: 700, cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(12,74,140,0.3)"
+          <div className="text-center py-20 border border-dashed border-border rounded-xl bg-muted/10">
+            <ClipboardList className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" />
+            <p className="font-semibold text-muted-foreground mb-2 text-sm">No projects yet</p>
+            <p className="text-xs text-muted-foreground mb-6">Create your first case study to get started.</p>
+            <button
+              onClick={() => setIsCreating(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 inline-flex items-center gap-1.5 cursor-pointer border-0"
+              style={{
+                boxShadow: "0 2px 8px rgba(12,74,140,0.15)"
               }}
             >
-              + New Project
+              <Plus className="w-3.5 h-3.5" />
+              Create Project
             </button>
           </div>
         ) : (

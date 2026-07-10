@@ -120,7 +120,7 @@ export default function EditorPage({ projectId }: Props) {
 
   if (isLoading || !data) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f4f8", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f4f8" }}>
         <div style={{ color: "#94a3b8", fontSize: "13px" }}>Loading project...</div>
       </div>
     );
@@ -131,7 +131,7 @@ export default function EditorPage({ projectId }: Props) {
   const saveColor = saveStatus === "saving" ? "#f59e0b" : saveStatus === "saved" ? "#22c55e" : "#ef4444";
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Collapsible sidebar */}
       <div style={{
         flexShrink: 0,
