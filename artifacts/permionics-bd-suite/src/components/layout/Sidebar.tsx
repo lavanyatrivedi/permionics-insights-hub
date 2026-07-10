@@ -229,7 +229,8 @@ export function Sidebar() {
               <TooltipContent side="right">Logout</TooltipContent>
             </Tooltip>
           </>
-        )}\n
+        )}
+
         {/* Collapse toggle */}
         {expanded ? (
           <button
