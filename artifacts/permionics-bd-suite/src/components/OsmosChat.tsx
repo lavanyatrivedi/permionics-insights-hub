@@ -3,7 +3,7 @@ import { X, Send, Minimize2, Maximize2, Loader2, ExternalLink } from "lucide-rea
 import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import botAvatar from "@assets/__(4)_1783575225786.jpeg";
+import botAvatar from "@assets/osmos_logo_blue.png";
 
 // ── Minimal inline markdown renderer ──────────────────────────────────────────
 function MiniMarkdown({ text }: { text: string }) {
@@ -89,28 +89,23 @@ export function OsmosChat() {
       <button
         id="osmos-chat-trigger"
         onClick={() => setOpen(v => !v)}
-        className="fixed top-4 right-4 z-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 print-hide"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 print-hide border border-slate-200/55"
         style={{
-          background: open
-            ? "hsl(222 71% 17%)"
-            : "linear-gradient(135deg, hsl(222 71% 14%), hsl(217 91% 25%))",
-          boxShadow: open
-            ? "0 4px 20px hsl(222 71% 17% / 0.4)"
-            : "0 4px 20px hsl(217 91% 40% / 0.35), 0 0 0 1px hsl(217 91% 60% / 0.2)",
+          background: open ? "hsl(222 71% 17%)" : "white",
         }}
         title="OSMOS AI Assistant"
       >
         {open ? (
-          <X className="w-5 h-5 text-white" />
+          <X className="w-6 h-6 text-white" />
         ) : (
-          <img src={botAvatar} alt="OSMOS" className="w-8 h-8 rounded-xl object-cover osmos-blob" />
+          <img src={botAvatar} alt="OSMOS" className="w-10 h-10 object-contain" />
         )}
       </button>
 
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed top-20 right-4 z-40 flex flex-col rounded-2xl overflow-hidden print-hide chat-panel-enter"
+          className="fixed bottom-24 right-6 z-40 flex flex-col rounded-2xl overflow-hidden print-hide chat-panel-enter"
           style={{
             width: 380,
             height: 540,

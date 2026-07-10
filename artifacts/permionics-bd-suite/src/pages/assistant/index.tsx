@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import botAvatar from "@assets/__(4)_1783575225786.jpeg";
+import botAvatar from "@assets/osmos_logo_blue.png";
 
 // Lightweight markdown renderer — no external dependency
 function MarkdownContent({ text, className = "" }: { text: string; className?: string }) {
