@@ -14,7 +14,10 @@ const router: IRouter = Router();
 const upload = multer({ dest: os.tmpdir() });
 
 const geminiKey = process.env["GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"] ?? "";
-const ai = new GoogleGenAI({ apiKey: geminiKey });
+if (!geminiKey) {
+  console.warn("[assistant] WARNING: GEMINI_API_KEY is not set. Gemini OCR fallback will be disabled. Text-based PDFs will still work via pdf-parse.");
+}
+const ai = new GoogleGenAI({ apiKey: geminiKey || "placeholder" });
 
 // ── Text extraction: try pdf-parse first, then fall back to Gemini Vision OCR ─
 
@@ -73,19 +76,32 @@ async function extractDocumentText(filePath: string, filename: string): Promise<
   // 1. Try text extraction first (fast, free)
   const textFromParse = await extractTextWithPdfParse(filePath);
 
-  // If we got meaningful text (>100 chars), use it
-  if (textFromParse.length > 100) {
+  // If we got meaningful text (>50 chars), use it
+  if (textFromParse.length > 50) {
     return { text: textFromParse, method: "pdf-parse" };
   }
 
-  // 2. Fall back to Gemini Vision OCR (for scanned/image PDFs)
+  // 2. Fall back to Gemini Vision OCR only if a key is available
+  if (!geminiKey) {
+    // No Gemini key — save whatever pdf-parse got (even if sparse) with a note
+    const fallbackText = textFromParse.length > 0
+      ? textFromParse
+      : `[This document (${filename}) appears to be a scanned/image PDF. Text extraction requires a GEMINI_API_KEY to be configured on the server. The document has been saved but its content cannot be searched until the key is added.]`;
+    return { text: fallbackText, method: "pdf-parse" };
+  }
+
+  // 3. Gemini Vision OCR (for scanned/image PDFs)
   const textFromOCR = await extractTextWithGeminiOCR(filePath, filename);
 
   if (textFromOCR.length > 10) {
     return { text: textFromOCR, method: "gemini-ocr" };
   }
 
-  throw new Error("Could not extract any text from this PDF. The file may be corrupt or password-protected.");
+  // Last resort: save with whatever we have
+  const lastResortText = textFromParse.length > 0
+    ? textFromParse
+    : `[Could not extract text from ${filename}. The file may be corrupt, password-protected, or a low-quality scan.]`;
+  return { text: lastResortText, method: "pdf-parse" };
 }
 
 // ── Upload route ──────────────────────────────────────────────────────────────
