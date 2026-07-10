@@ -28,41 +28,18 @@ export async function printCaseStudy() {
 
     const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
-    // Create PDF (A4 Portrait)
+    // Set width to standard A4 width (210mm) and calculate height based on element aspect ratio
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // Create PDF with dynamic page size to fit content edge-to-edge
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: [imgWidth, imgHeight]
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // If the image is taller than the A4 page, we can either:
-    // 1. Scale it down to fit on one page
-    // 2. Let it span multiple pages
-    // The user explicitly wanted a 1-page layout, so we'll scale it to fit 
-    // IF it's only slightly taller, otherwise it might become unreadable.
-    // For a highly dense 1-pager, scaling is usually preferred.
-    
-    let finalWidth = imgWidth;
-    let finalHeight = imgHeight;
-    
-    // Scale to fit vertically if needed
-    if (imgHeight > pageHeight) {
-      const ratio = pageHeight / imgHeight;
-      finalWidth = imgWidth * ratio;
-      finalHeight = pageHeight;
-    }
-
-    // Center horizontally if scaled down
-    const marginX = (pageWidth - finalWidth) / 2;
-    const marginY = 0; // Top aligned
-
-    pdf.addImage(imgData, 'JPEG', marginX, marginY, finalWidth, finalHeight);
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     
     // Save the PDF
     pdf.save(`Permionics_Case_Study_${new Date().toISOString().split('T')[0]}.pdf`);

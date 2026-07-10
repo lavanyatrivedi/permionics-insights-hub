@@ -50,19 +50,18 @@ export async function printCaseStudy() {
     const canvasW = canvas.width;
     const canvasH = canvas.height;
 
-    // Scale image to fit A4 with no margins (full bleed)
-    const scaleX = A4_W / (canvasW / 2);  // divide by scale factor
-    const scaleY = A4_H / (canvasH / 2);
-    const scale = Math.min(scaleX, scaleY);
+    // Scale image to fit A4 width exactly (210mm) and calculate height based on aspect ratio
+    const imgW = A4_W;
+    const imgH = (canvasH / canvasW) * A4_W;
 
-    const imgW = (canvasW / 2) * scale;
-    const imgH = (canvasH / 2) * scale;
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: [imgW, imgH], // Dynamic format matching the exact content height
+      compress: true,
+    });
 
-    // Centre on page
-    const offsetX = (A4_W - imgW) / 2;
-    const offsetY = (A4_H - imgH) / 2;
-
-    pdf.addImage(imgData, "JPEG", offsetX, offsetY, imgW, imgH);
+    pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
     pdf.save(`Permionics_CaseStudy_${Date.now()}.pdf`);
   } catch (err) {
     document.body.style.overflow = originalOverflow;
