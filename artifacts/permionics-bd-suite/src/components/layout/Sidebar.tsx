@@ -74,11 +74,11 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center justify-center px-4 border-b" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
         <Link href="~/">
-          <div className="flex items-center gap-3 cursor-pointer group">
+          <div className={`flex items-center cursor-pointer group ${expanded ? "gap-3" : "gap-0"}`}>
             <img src={osmosLogo} alt="OSMOS" className="h-8.5 w-8.5 object-contain flex-shrink-0" />
             <span
               className={`font-extrabold tracking-tight text-xl text-white transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                expanded ? "opacity-100 w-auto" : "opacity-0 w-0"
+                expanded ? "opacity-100 w-auto ml-0" : "opacity-0 w-0"
               }`}
             >
               OSMOS
