@@ -82,92 +82,10 @@ export default function LoginPage() {
       {/* ── Background: Deep navy gradient ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
-      {/* ── Left Side: Embedded Login Card (Off-white, squarish/rounded-xl, reduced height) ── */}
+      {/* ── Left Side: Embedded Login Card (Solid white, squarish/rounded-xl, reduced height) ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-[#fafafb] p-6 lg:p-10 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[480px] lg:h-[calc(100vh-80px)] max-h-[660px]"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-6 lg:p-10 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[480px] lg:h-[calc(100vh-80px)] max-h-[660px]"
       >
-        {/* High-fidelity Vertical Circuit Trace Background Watermark */}
-        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-xl opacity-[0.26]">
-          <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 400 700"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full"
-          >
-            {/* THICK TRACES (OUTER EDGES FOR CONTRAST) */}
-            <path d="M40 0 V150 L15 175 V320 L40 345 V550 L15 575 V700" stroke="url(#circuit-stroke-dark)" strokeWidth="3" strokeLinecap="round" />
-            <path d="M360 0 V180 L385 205 V300 L360 325 V500 L385 525 V700" stroke="url(#circuit-stroke-dark)" strokeWidth="3" strokeLinecap="round" />
-
-            {/* MEDIUM VERTICAL TRACES (INTERMEDIATE FLOW) */}
-            <path d="M80 0 V120 L110 150 V280 L90 300 V520 L110 540 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-            <path d="M110 0 V80 L140 110 V230 L120 250 V480 L140 500 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-            <path d="M140 0 V200 L170 230 V350 L150 370 V550 L170 570 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-            
-            <path d="M320 0 V120 L290 150 V280 L310 300 V520 L290 540 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-            <path d="M290 0 V80 L260 110 V230 L280 250 V480 L260 500 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-            <path d="M260 0 V200 L230 230 V350 L250 370 V550 L230 570 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
-
-            {/* SUBTLE FINE TRACES (GRID DENSITY) */}
-            <path d="M170 0 V220 L195 245 V380 L170 405 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
-            <path d="M200 0 V180 L225 205 V420 L200 445 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
-            <path d="M230 0 V250 L205 275 V350 L230 375 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
-
-            {/* HORIZONTAL CROSSOVER BRIDGES */}
-            <path d="M80 120 L60 120 M110 80 L90 80 M140 200 L120 200" stroke="url(#circuit-stroke-main)" strokeWidth="1.2" />
-            <path d="M320 120 L340 120 M290 80 L310 80 M260 200 L280 200" stroke="url(#circuit-stroke-main)" strokeWidth="1.2" />
-            <path d="M170 220 L150 220 M200 180 L220 180" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
-
-            {/* HOLLOW TERMINAL PADS (CIRCLE INTERSECTIONS) */}
-            <circle cx="15" cy="175" r="4.5" stroke="url(#circuit-stroke-dark)" strokeWidth="2.5" fill="white" />
-            <circle cx="385" cy="205" r="4.5" stroke="url(#circuit-stroke-dark)" strokeWidth="2.5" fill="white" />
-            <circle cx="80" cy="120" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
-            <circle cx="320" cy="120" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
-            <circle cx="140" cy="200" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
-            <circle cx="260" cy="200" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
-            <circle cx="170" cy="220" r="3.5" stroke="url(#circuit-stroke-light)" strokeWidth="1.2" fill="white" />
-            <circle cx="230" cy="250" r="3.5" stroke="url(#circuit-stroke-light)" strokeWidth="1.2" fill="white" />
-
-            {/* SOLID TERMINAL PADS (NODE CONNECTIONS) */}
-            <circle cx="40" cy="150" r="3.5" fill="#003466" />
-            <circle cx="360" cy="180" r="3.5" fill="#003466" />
-            <circle cx="110" cy="150" r="3" fill="#1e3a8a" />
-            <circle cx="290" cy="150" r="3" fill="#1e3a8a" />
-            <circle cx="120" cy="250" r="3" fill="#3b82f6" />
-            <circle cx="280" cy="250" r="3" fill="#3b82f6" />
-            <circle cx="195" cy="245" r="2.5" fill="#60a5fa" />
-            <circle cx="225" cy="205" r="2.5" fill="#60a5fa" />
-            <circle cx="205" cy="275" r="2.5" fill="#60a5fa" />
-
-            {/* MID-LINE NODE PINHEADS */}
-            <circle cx="110" cy="280" r="2.5" fill="#1e3a8a" />
-            <circle cx="140" cy="110" r="2.5" fill="#1e3a8a" />
-            <circle cx="170" cy="230" r="2" fill="#3b82f6" />
-            <circle cx="200" cy="420" r="2" fill="#3b82f6" />
-            <circle cx="260" cy="110" r="2.5" fill="#1e3a8a" />
-            <circle cx="290" cy="280" r="2.5" fill="#1e3a8a" />
-
-            {/* Gradients */}
-            <defs>
-              <linearGradient id="circuit-stroke-dark" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#002244" />
-                <stop offset="50%" stopColor="#003466" />
-                <stop offset="100%" stopColor="#1e3a8a" />
-              </linearGradient>
-              <linearGradient id="circuit-stroke-main" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#003466" />
-                <stop offset="50%" stopColor="#1e3a8a" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-              <linearGradient id="circuit-stroke-light" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#1e3a8a" opacity="0.6" />
-                <stop offset="100%" stopColor="#60a5fa" opacity="0.6" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
         {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
         <div className="relative z-10 flex items-center gap-3.5 justify-center lg:justify-start select-none">
           {/* Left: Permionics P Logo in Navy Square Box */}
@@ -258,7 +176,7 @@ export default function LoginPage() {
 
         {/* Bottom: Footer Info */}
         <p className="text-[10px] text-center text-slate-400 mt-4">
-          Authorized personnel only · Permionics Membranes Pvt. Ltd.
+          Authorized personnel only
         </p>
       </div>
 
