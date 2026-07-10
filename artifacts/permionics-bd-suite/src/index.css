@@ -237,8 +237,8 @@
 
 @layer base {
   html {
-    font-size: 87.5%;
-    zoom: 0.85;
+    font-size: 100%;
+    zoom: 0.75;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }

@@ -32,9 +32,9 @@ export function Sidebar() {
   const [expanded, setExpanded] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("sidebar-expanded");
-      return saved !== null ? saved === "true" : true; // default: expanded
+      return saved !== null ? saved === "true" : false; // default: collapsed
     }
-    return true;
+    return false;
   });
 
   const toggleExpanded = (value: boolean) => {
