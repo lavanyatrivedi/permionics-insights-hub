@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { customFetch } from "@workspace/api-client-react";
 import { DEFAULT_DATA, PALETTES, getPalette } from "./creator_types";
 import { useToast } from "@/hooks/use-toast";
+import { FileText } from "lucide-react";
 
 export default function ProjectsPage() {
   const [, navigate] = useLocation();
@@ -99,17 +100,17 @@ export default function ProjectsPage() {
           </button>
         </div>
 
-        {/* New project form */}
+        {/* Create panel modal */}
         {isCreating && (
           <div style={{
-            background: "white", borderRadius: "14px", padding: "28px",
-            marginBottom: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
-            border: "1px solid #e2e8f0",
+            background: "white", borderRadius: "16px", padding: "28px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0",
+            marginBottom: "32px", animation: "slideDown 0.2s ease-out",
           }}>
-            <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#0f172a", marginBottom: "20px", marginTop: 0 }}>Create New Project</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#0f172a", margin: "0 0 18px 0" }}>Create New Project</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               <div>
-                <label style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.7px" }}>
+                <label style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.7px" }}>
                   Project Name
                 </label>
                 <input
@@ -133,36 +134,41 @@ export default function ProjectsPage() {
                 </label>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   {PALETTES.map((p) => (
-                    <button key={p.id} onClick={() => setNewPalette(p.id)} style={{
-                      display: "flex", alignItems: "center", gap: "8px",
-                      padding: "8px 14px", borderRadius: "8px",
-                      border: newPalette === p.id ? `2px solid ${p.accent}` : "2px solid #e2e8f0",
-                      background: newPalette === p.id ? p.light : "white",
-                      cursor: "pointer", fontSize: "12px", fontWeight: 600,
-                      color: newPalette === p.id ? p.primary : "#64748b",
-                      transition: "all 0.15s",
-                    }}>
-                      <div style={{ display: "flex", gap: "3px" }}>
-                        <div style={{ width: "11px", height: "11px", borderRadius: "50%", background: p.primary }} />
-                        <div style={{ width: "11px", height: "11px", borderRadius: "50%", background: p.accent }} />
-                      </div>
+                    <button
+                      key={p.id}
+                      onClick={() => setNewPalette(p.id)}
+                      style={{
+                        padding: "8px 16px", fontSize: "12px", fontWeight: 600,
+                        borderRadius: "8px", border: "1px solid", cursor: "pointer",
+                        borderColor: newPalette === p.id ? p.primary : "#e2e8f0",
+                        background: newPalette === p.id ? `${p.primary}12` : "white",
+                        color: newPalette === p.id ? p.primary : "#475569",
+                        transition: "all 0.15s",
+                      }}
+                    >
                       {p.name}
                     </button>
                   ))}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "4px" }}>
-                <button onClick={() => { setIsCreating(false); setNewName(""); }} style={{ padding: "9px 18px", border: "1.5px solid #e2e8f0", borderRadius: "8px", background: "white", fontSize: "13px", cursor: "pointer", color: "#64748b", fontWeight: 500 }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
+                <button
+                  onClick={() => { setIsCreating(false); setNewName(""); }}
+                  style={{
+                    background: "none", border: "none", color: "#64748b", fontSize: "13px",
+                    fontWeight: 600, cursor: "pointer", padding: "8px 16px",
+                  }}
+                >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreate}
-                  disabled={!newName.trim() || isSubmitting}
+                  disabled={isSubmitting}
                   style={{
-                    padding: "9px 22px", border: "none", borderRadius: "8px",
-                    background: newName.trim() ? "#0C4A8C" : "#94a3b8",
-                    color: "white", fontSize: "13px", fontWeight: 700,
-                    cursor: newName.trim() ? "pointer" : "not-allowed",
+                    background: "#0C4A8C", color: "white", border: "none", borderRadius: "10px",
+                    padding: "10px 20px", fontSize: "13px", fontWeight: 700, cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(12,74,140,0.2)",
+                    opacity: isSubmitting ? 0.6 : 1,
                   }}
                 >
                   {isSubmitting ? "Creating..." : "Create Project"}
@@ -179,13 +185,20 @@ export default function ProjectsPage() {
           </div>
         ) : !projects.length && !isCreating ? (
           <div style={{
-            textAlign: "center", padding: "80px 40px", background: "white",
-            borderRadius: "16px", border: "2px dashed #cbd5e1",
+            textAlign: "center", padding: "80px 40px", background: "rgba(241, 245, 249, 0.4)",
+            borderRadius: "12px", border: "1px dashed #cbd5e1",
           }}>
-            <div style={{ fontSize: "42px", marginBottom: "14px" }}>📄</div>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#334155", marginBottom: "8px" }}>No projects yet</p>
+            <FileText className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" style={{ margin: "0 auto 16px auto", color: "#94a3b8", opacity: 0.5 }} />
+            <p style={{ fontSize: "15px", fontWeight: 600, color: "#475569", marginBottom: "6px" }}>No projects yet</p>
             <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "24px" }}>Create your first case study to get started.</p>
-            <button onClick={() => setIsCreating(true)} style={{ background: "#0C4A8C", color: "white", border: "none", borderRadius: "10px", padding: "11px 22px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+            <button 
+              onClick={() => setIsCreating(true)} 
+              style={{ 
+                background: "#0c4a8c", color: "white", border: "none", borderRadius: "10px", 
+                padding: "11px 22px", fontSize: "13px", fontWeight: 700, cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(12,74,140,0.3)"
+              }}
+            >
               + New Project
             </button>
           </div>
