@@ -110,7 +110,7 @@ export default function LoginPage() {
         <div className="relative z-10 my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "'Outfit', sans-serif" }}>Welcome Back</h2>
             <p className="text-xs text-slate-400 mt-1 font-medium">Log in to start using the Osmos Portal</p>
           </div>
           {/* Form */}
@@ -198,7 +198,7 @@ export default function LoginPage() {
 
         {/* Center: Bolder Heading */}
         <div className="my-auto space-y-6 z-10">
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
+          <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white drop-shadow-sm" style={{ fontFamily: "'Outfit', sans-serif" }}>
             Search Smarter.<br />Extract Faster.<br />Create Anywhere.
           </h1>
           <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
