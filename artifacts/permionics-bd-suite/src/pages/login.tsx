@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,43 +29,7 @@ export default function LoginPage() {
     defaultValues: { password: "" },
   });
 
-  const plexusData = useMemo(() => {
-    let seed = 42;
-    function random() {
-      let x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x);
-    }
-    const nodesList = [];
-    const width = 400;
-    const height = 700;
-    for (let i = 0; i < 110; i++) {
-      const bias = Math.pow(random(), 1.6);
-      const x = width - bias * 360;
-      const y = random() * height;
-      const r = 0.8 + random() * 2.2;
-      nodesList.push({ x, y, r });
-    }
-    const linesList = [];
-    for (let i = 0; i < nodesList.length; i++) {
-      for (let j = i + 1; j < nodesList.length; j++) {
-        const n1 = nodesList[i];
-        const n2 = nodesList[j];
-        const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
-        if (dist < 42) {
-          const opacity = (1 - dist / 42) * 0.45;
-          linesList.push({
-            id: `${i}-${j}`,
-            x1: n1.x,
-            y1: n1.y,
-            x2: n2.x,
-            y2: n2.y,
-            opacity,
-          });
-        }
-      }
-    }
-    return { nodes: nodesList, lines: linesList };
-  }, []);
+
 
   useEffect(() => {
     if (user?.authenticated) {
@@ -142,8 +106,8 @@ export default function LoginPage() {
       <div 
         className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-48px)] max-h-[720px]"
       >
-        {/* High-fidelity Plexus Connection Network Background Watermark */}
-        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-[28px] opacity-[0.22]">
+        {/* High-fidelity Vertical Circuit Trace Background Watermark */}
+        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-[28px] opacity-[0.26]">
           <svg
             width="100%"
             height="100%"
@@ -152,31 +116,75 @@ export default function LoginPage() {
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
           >
-            {/* Draw Plexus Lines */}
-            {plexusData.lines.map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke="#0f172a"
-                strokeWidth="0.6"
-                strokeOpacity={line.opacity}
-              />
-            ))}
+            {/* THICK TRACES (OUTER EDGES FOR CONTRAST) */}
+            <path d="M40 0 V150 L15 175 V320 L40 345 V550 L15 575 V700" stroke="url(#circuit-stroke-dark)" strokeWidth="3" strokeLinecap="round" />
+            <path d="M360 0 V180 L385 205 V300 L360 325 V500 L385 525 V700" stroke="url(#circuit-stroke-dark)" strokeWidth="3" strokeLinecap="round" />
 
-            {/* Draw Plexus Nodes */}
-            {plexusData.nodes.map((node, idx) => (
-              <circle
-                key={idx}
-                cx={node.x}
-                cy={node.y}
-                r={node.r}
-                fill="#0f172a"
-                fillOpacity={0.45}
-              />
-            ))}
+            {/* MEDIUM VERTICAL TRACES (INTERMEDIATE FLOW) */}
+            <path d="M80 0 V120 L110 150 V280 L90 300 V520 L110 540 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+            <path d="M110 0 V80 L140 110 V230 L120 250 V480 L140 500 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+            <path d="M140 0 V200 L170 230 V350 L150 370 V550 L170 570 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+            
+            <path d="M320 0 V120 L290 150 V280 L310 300 V520 L290 540 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+            <path d="M290 0 V80 L260 110 V230 L280 250 V480 L260 500 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+            <path d="M260 0 V200 L230 230 V350 L250 370 V550 L230 570 V700" stroke="url(#circuit-stroke-main)" strokeWidth="1.5" />
+
+            {/* SUBTLE FINE TRACES (GRID DENSITY) */}
+            <path d="M170 0 V220 L195 245 V380 L170 405 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
+            <path d="M200 0 V180 L225 205 V420 L200 445 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
+            <path d="M230 0 V250 L205 275 V350 L230 375 V700" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
+
+            {/* HORIZONTAL CROSSOVER BRIDGES */}
+            <path d="M80 120 L60 120 M110 80 L90 80 M140 200 L120 200" stroke="url(#circuit-stroke-main)" strokeWidth="1.2" />
+            <path d="M320 120 L340 120 M290 80 L310 80 M260 200 L280 200" stroke="url(#circuit-stroke-main)" strokeWidth="1.2" />
+            <path d="M170 220 L150 220 M200 180 L220 180" stroke="url(#circuit-stroke-light)" strokeWidth="0.8" />
+
+            {/* HOLLOW TERMINAL PADS (CIRCLE INTERSECTIONS) */}
+            <circle cx="15" cy="175" r="4.5" stroke="url(#circuit-stroke-dark)" strokeWidth="2.5" fill="white" />
+            <circle cx="385" cy="205" r="4.5" stroke="url(#circuit-stroke-dark)" strokeWidth="2.5" fill="white" />
+            <circle cx="80" cy="120" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
+            <circle cx="320" cy="120" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
+            <circle cx="140" cy="200" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
+            <circle cx="260" cy="200" r="4" stroke="url(#circuit-stroke-main)" strokeWidth="1.8" fill="white" />
+            <circle cx="170" cy="220" r="3.5" stroke="url(#circuit-stroke-light)" strokeWidth="1.2" fill="white" />
+            <circle cx="230" cy="250" r="3.5" stroke="url(#circuit-stroke-light)" strokeWidth="1.2" fill="white" />
+
+            {/* SOLID TERMINAL PADS (NODE CONNECTIONS) */}
+            <circle cx="40" cy="150" r="3.5" fill="#003466" />
+            <circle cx="360" cy="180" r="3.5" fill="#003466" />
+            <circle cx="110" cy="150" r="3" fill="#1e3a8a" />
+            <circle cx="290" cy="150" r="3" fill="#1e3a8a" />
+            <circle cx="120" cy="250" r="3" fill="#3b82f6" />
+            <circle cx="280" cy="250" r="3" fill="#3b82f6" />
+            <circle cx="195" cy="245" r="2.5" fill="#60a5fa" />
+            <circle cx="225" cy="205" r="2.5" fill="#60a5fa" />
+            <circle cx="205" cy="275" r="2.5" fill="#60a5fa" />
+
+            {/* MID-LINE NODE PINHEADS */}
+            <circle cx="110" cy="280" r="2.5" fill="#1e3a8a" />
+            <circle cx="140" cy="110" r="2.5" fill="#1e3a8a" />
+            <circle cx="170" cy="230" r="2" fill="#3b82f6" />
+            <circle cx="200" cy="420" r="2" fill="#3b82f6" />
+            <circle cx="260" cy="110" r="2.5" fill="#1e3a8a" />
+            <circle cx="290" cy="280" r="2.5" fill="#1e3a8a" />
+
+            {/* Gradients */}
+            <defs>
+              <linearGradient id="circuit-stroke-dark" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#002244" />
+                <stop offset="50%" stopColor="#003466" />
+                <stop offset="100%" stopColor="#1e3a8a" />
+              </linearGradient>
+              <linearGradient id="circuit-stroke-main" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#003466" />
+                <stop offset="50%" stopColor="#1e3a8a" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+              <linearGradient id="circuit-stroke-light" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#1e3a8a" opacity="0.6" />
+                <stop offset="100%" stopColor="#60a5fa" opacity="0.6" />
+              </linearGradient>
+            </defs>
           </svg>
         </div>
 
