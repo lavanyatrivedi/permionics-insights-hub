@@ -104,8 +104,118 @@ export default function LoginPage() {
       <div 
         className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-48px)] max-h-[720px]"
       >
+        {/* Abstract Neural/Brain Circuit Background Watermark */}
+        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden rounded-[28px] opacity-[0.08]">
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 400 700"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full"
+          >
+            {/* Brain Outline / Neural Network Core */}
+            {/* Left Hemisphere Lobe */}
+            <path
+              d="M170 140 C120 140, 90 170, 90 220 C90 250, 110 270, 100 290 C90 310, 80 330, 80 350 C80 390, 110 420, 140 420 C155 420, 165 410, 175 425 C185 440, 195 440, 200 440"
+              stroke="url(#brain-stroke)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeDasharray="4 2"
+            />
+            {/* Right Hemisphere Tech-Grid Lobe */}
+            <path
+              d="M230 140 C280 140, 310 170, 310 220 C310 250, 290 270, 300 290 C310 310, 320 330, 320 350 C320 390, 290 420, 260 420 C245 420, 235 410, 225 425 C215 440, 205 440, 200 440"
+              stroke="url(#brain-stroke)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+
+            {/* Central Processing Core (Microchip) */}
+            <rect x="180" y="250" width="40" height="40" rx="6" fill="#1e3a8a" opacity="0.4" />
+            <rect x="185" y="255" width="30" height="30" rx="4" stroke="url(#brain-stroke)" strokeWidth="1" />
+            <circle cx="200" cy="270" r="6" fill="#3b82f6" opacity="0.6" />
+
+            {/* Internal Circuit Lines Inside Brain */}
+            <path d="M140 220 H180 M130 280 H180 M120 340 H180 M220 220 H260 M220 280 H270 M220 340 H280" stroke="url(#brain-stroke)" strokeWidth="1" />
+            <path d="M200 170 V250 M200 290 V380" stroke="url(#brain-stroke)" strokeWidth="1" />
+
+            {/* Extensively Branching Tentacles (spreading across background) */}
+            {/* Top Left Branch */}
+            <path d="M170 140 L130 90 H80 L50 50 H20" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="20" cy="50" r="3" fill="#1e3a8a" />
+            <circle cx="80" cy="90" r="2" fill="#3b82f6" />
+
+            {/* Top Right Branch */}
+            <path d="M230 140 L270 90 H320 L350 50 H380" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="380" cy="50" r="3" fill="#1e3a8a" />
+            <circle cx="320" cy="90" r="2" fill="#3b82f6" />
+
+            {/* Mid Left Branch 1 */}
+            <path d="M90 220 L50 200 H10" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="10" cy="200" r="3" fill="#1e3a8a" />
+
+            {/* Mid Left Branch 2 */}
+            <path d="M100 290 L60 290 L30 250 H10" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="10" cy="250" r="3" fill="#1e3a8a" />
+
+            {/* Mid Left Branch 3 */}
+            <path d="M80 350 L40 350 L15 390 V440 H10" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="10" cy="440" r="3" fill="#1e3a8a" />
+
+            {/* Bottom Left Branch 1 */}
+            <path d="M110 420 L70 460 V520 L40 560 H15" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="15" cy="560" r="3" fill="#1e3a8a" />
+
+            {/* Bottom Left Branch 2 */}
+            <path d="M140 420 L110 480 H60 L30 520 V650" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="30" cy="650" r="3" fill="#1e3a8a" />
+
+            {/* Bottom Center Branch */}
+            <path d="M200 440 V500 L160 550 V620 L130 660 H90" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="90" cy="660" r="3" fill="#1e3a8a" />
+
+            {/* Bottom Right Branch 1 */}
+            <path d="M260 420 L290 480 H340 L370 520 V650" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="370" cy="650" r="3" fill="#1e3a8a" />
+
+            {/* Bottom Right Branch 2 */}
+            <path d="M290 420 L330 460 V520 L360 560 H385" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="385" cy="560" r="3" fill="#1e3a8a" />
+
+            {/* Mid Right Branch 1 */}
+            <path d="M320 350 L360 350 L385 390 V440 H390" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="390" cy="440" r="3" fill="#1e3a8a" />
+
+            {/* Mid Right Branch 2 */}
+            <path d="M300 290 L340 290 L370 250 H390" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="390" cy="250" r="3" fill="#1e3a8a" />
+
+            {/* Mid Right Branch 3 */}
+            <path d="M310 220 L350 200 H390" stroke="url(#brain-stroke)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="390" cy="200" r="3" fill="#1e3a8a" />
+
+            {/* Micro Dots (Synaptic nodes) */}
+            <circle cx="130" cy="220" r="2.5" fill="#3b82f6" />
+            <circle cx="270" cy="280" r="2.5" fill="#3b82f6" />
+            <circle cx="200" cy="170" r="2.5" fill="#3b82f6" />
+            <circle cx="200" cy="380" r="2.5" fill="#3b82f6" />
+            <circle cx="160" cy="320" r="2" fill="#10b981" />
+            <circle cx="240" cy="320" r="2" fill="#10b981" />
+
+            {/* Gradients */}
+            <defs>
+              <linearGradient id="brain-stroke" x1="0" y1="0" x2="400" y2="700" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#1e3a8a" />
+                <stop offset="50%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#6366f1" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
         {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
-        <div className="flex items-center gap-3.5 justify-center lg:justify-start select-none">
+        <div className="relative z-10 flex items-center gap-3.5 justify-center lg:justify-start select-none">
           {/* Left: Permionics P Logo in Navy Square Box */}
           <div 
             className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-105"
@@ -125,87 +235,12 @@ export default function LoginPage() {
         </div>
 
         {/* Center: Login Form */}
-        <div className="my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
-          {/* Custom vector illustration to fill white space */}
-          <div className="mb-6 w-full flex justify-center lg:justify-start">
-            <svg
-              width="100%"
-              height="80"
-              viewBox="0 0 300 80"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="opacity-95"
-            >
-              <rect
-                x="5"
-                y="5"
-                width="290"
-                height="70"
-                rx="12"
-                fill="url(#left-grid-grad)"
-                stroke="#e2e8f0"
-                strokeWidth="1"
-              />
-              <path
-                d="M5 22.5 H295 M5 40 H295 M5 57.5 H295 M77.5 5 V75 M150 5 V75 M222.5 5 V75"
-                stroke="#e2e8f0"
-                strokeWidth="0.5"
-                strokeDasharray="2 3"
-              />
-
-              {/* Data Connections / Waves */}
-              <path
-                d="M15 50 Q 80 15, 150 50 T 285 50"
-                stroke="url(#left-wave-grad-1)"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M15 35 Q 90 60, 160 30 T 285 40"
-                stroke="url(#left-wave-grad-2)"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                className="opacity-60"
-              />
-
-              {/* Network Node Circles */}
-              <circle cx="50" cy="30" r="4.5" fill="#1e3a8a" />
-              <circle cx="50" cy="30" r="2.5" fill="#3b82f6" />
-              
-              <circle cx="115" cy="55" r="5.5" fill="#0369a1" />
-              <circle cx="115" cy="55" r="3" fill="#0ea5e9" />
-
-              <circle cx="190" cy="25" r="4" fill="#1d4ed8" />
-              <circle cx="190" cy="25" r="2" fill="#60a5fa" />
-
-              <circle cx="250" cy="45" r="5" fill="#0f172a" />
-              <circle cx="250" cy="45" r="2.5" fill="#64748b" />
-
-              {/* Gradients */}
-              <defs>
-                <linearGradient id="left-grid-grad" x1="0" y1="0" x2="300" y2="80" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#f8fafc" />
-                  <stop offset="100%" stopColor="#f1f5f9" />
-                </linearGradient>
-                <linearGradient id="left-wave-grad-1" x1="15" y1="50" x2="285" y2="50" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#1e3a8a" />
-                  <stop offset="50%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#0ea5e9" />
-                </linearGradient>
-                <linearGradient id="left-wave-grad-2" x1="15" y1="35" x2="285" y2="40" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#3b82f6" opacity="0.5" />
-                  <stop offset="100%" stopColor="#64748b" opacity="0.5" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
+        <div className="relative z-10 my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
             <p className="text-xs text-slate-400 mt-1 font-medium">Log in to start using the Osmos Portal</p>
           </div>
-
           {/* Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
