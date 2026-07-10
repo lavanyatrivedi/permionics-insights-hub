@@ -91,13 +91,8 @@ export default function LoginPage() {
 
       {/* ── Left Side: Bold Branding Panel ── */}
       <div className="relative z-10 flex flex-col justify-between w-full lg:w-[55%] p-8 lg:p-20 text-white min-h-[40vh] lg:min-h-screen">
-        {/* Top: Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 shadow-md backdrop-blur-md">
-            <img src={logoMark} alt="OSMOS" className="h-5 w-5 object-contain" />
-          </div>
-          <span className="text-lg font-bold tracking-wider uppercase text-white/90">OSMOS</span>
-        </div>
+        {/* Empty top space on left since logo is in the white card now */}
+        <div className="h-6" />
 
         {/* Center: Bolder Heading */}
         <div className="my-auto py-12 lg:py-0 space-y-6">
@@ -127,16 +122,22 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right Side: Floating Layered Login Card ── */}
-      <div className="relative z-10 flex items-center justify-center lg:justify-end w-full lg:w-[45%] p-6 lg:p-12 min-h-[50vh] lg:min-h-screen">
-        <div 
-          className="bg-white rounded-[32px] p-8 lg:p-12 w-full max-w-[420px] border border-white/10 relative overflow-hidden"
-          style={{
-            boxShadow: "0 24px 64px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(222 47% 9% / 0.15)",
-          }}
-        >
+      {/* ── Right Side: Curved Full-Height Login Panel ── */}
+      <div 
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] bg-white p-8 lg:p-16 min-h-[60vh] lg:min-h-screen lg:rounded-l-[50px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border-l border-white/15"
+      >
+        {/* Top: OSMOS Logo inside the white panel for better contrast */}
+        <div className="flex items-center gap-3 justify-center lg:justify-start">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-900 shadow-md">
+            <img src={logoMark} alt="OSMOS" className="h-5 w-5 object-contain" />
+          </div>
+          <span className="text-lg font-bold tracking-wider uppercase text-slate-800">OSMOS</span>
+        </div>
+
+        {/* Center: Login Form */}
+        <div className="my-auto w-full max-w-[340px] mx-auto py-10 lg:py-0">
           {/* Card Heading */}
-          <div className="mb-8">
+          <div className="mb-8 text-center lg:text-left">
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Welcome Back</h2>
             <p className="text-xs text-slate-500 mt-2 font-medium">Log in to start using OSMOS BD Intelligence</p>
           </div>
@@ -200,11 +201,12 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-
-          <p className="mt-8 text-[10px] text-center text-slate-400">
-            Authorized personnel only · Permionics Membranes Pvt. Ltd.
-          </p>
         </div>
+
+        {/* Bottom: Footer Info */}
+        <p className="text-[10px] text-center text-slate-400 mt-6">
+          Authorized personnel only · Permionics Membranes Pvt. Ltd.
+        </p>
       </div>
     </div>
   );
