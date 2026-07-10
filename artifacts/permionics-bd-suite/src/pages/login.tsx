@@ -76,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-8 select-none justify-center items-center lg:gap-16">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-6 lg:p-12 select-none justify-center items-center gap-8 lg:gap-12">
       {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
@@ -100,60 +100,27 @@ export default function LoginPage() {
         }}
       />
 
-      {/* ── Left Side: Bold Branding Panel ── */}
-      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] p-6 lg:p-8 text-white min-h-[35vh] lg:min-h-0">
-        {/* Top spacer */}
-        <div className="h-6" />
-
-        {/* Center: Bolder Heading */}
-        <div className="my-auto space-y-6">
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
-            Search Smarter.<br />Extract Faster.<br />Create Anywhere.
-          </h1>
-          <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
-            BD Intelligence Platform for Permionics Membranes - powering smarter business development with AI.
-          </p>
-
-          {/* Feature Pills */}
-          <div className="flex flex-wrap gap-2 pt-4">
-            {["Case Study Library", "AI BD Assistant", "Smart Generator", "Questionnaire Engine"].map(f => (
-              <span
-                key={f}
-                className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 backdrop-blur-sm shadow-sm hover:bg-white/10 hover:text-white transition-all duration-200 cursor-default"
-              >
-                {f}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom footer text for desktop */}
-        <p className="hidden lg:block text-xs text-white/30">
-          © 2026 Permionics Membranes Pvt. Ltd. All rights reserved.
-        </p>
-      </div>
-
-      {/* ── Right Side: Embedded Full-Height Login Card ── */}
+      {/* ── Left Side: Embedded Login Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[35%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[50vh] lg:min-h-[560px] lg:h-[calc(100vh-128px)] max-h-[600px]"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[35%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-128px)] max-h-[580px]"
       >
-        {/* Top: Dope Co-branded Header Layout */}
+        {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
         <div className="flex items-center gap-3.5 justify-center lg:justify-start select-none">
           {/* Left: Permionics P Logo in Navy Square Box */}
           <div 
-            className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
-            style={{ background: "hsl(222 71% 17%)" }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-105"
+            style={{ background: "linear-gradient(135deg, hsl(222 71% 20%), hsl(222 71% 12%))" }}
           >
-            <img src={permionicsP} alt="Permionics" className="h-5 w-5 object-contain" />
+            <img src={permionicsP} alt="Permionics" className="h-6 w-6 object-contain" />
           </div>
           
           {/* Subtle Vertical Divider */}
           <div className="h-5 w-px bg-slate-200" />
           
           {/* Right: OSMOS Brand */}
-          <div className="flex items-center gap-2">
-            <img src={osmosLogo} alt="OSMOS" className="h-8 w-8 object-contain" />
-            <span className="text-base font-extrabold tracking-wider uppercase text-slate-800">OSMOS</span>
+          <div className="flex items-center gap-2.5">
+            <img src={osmosLogo} alt="OSMOS" className="h-10 w-10 object-contain drop-shadow-sm" />
+            <span className="text-lg font-black tracking-widest uppercase text-slate-800">OSMOS</span>
           </div>
         </div>
 
@@ -229,6 +196,50 @@ export default function LoginPage() {
         {/* Bottom: Footer Info */}
         <p className="text-[10px] text-center text-slate-400 mt-4">
           Authorized personnel only · Permionics Membranes Pvt. Ltd.
+        </p>
+      </div>
+
+      {/* ── Right Side: Layered Navy Branding Card ── */}
+      <div 
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[40vh] lg:h-[calc(100vh-128px)] max-h-[580px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
+      >
+        {/* Subtle Tech-Grid Background Layer */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:16px_28px] pointer-events-none z-0" />
+        
+        {/* Subtle glow blob */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-500/10 blur-[80px] pointer-events-none z-0" />
+
+        {/* Top: Small badge label */}
+        <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/5 border border-white/10 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          BD Suite Platform
+        </div>
+
+        {/* Center: Bolder Heading */}
+        <div className="my-auto space-y-6 z-10">
+          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
+            Search Smarter.<br />Extract Faster.<br />Create Anywhere.
+          </h1>
+          <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
+            BD Intelligence Platform for Permionics Membranes - powering smarter business development with AI.
+          </p>
+
+          {/* Feature Pills */}
+          <div className="flex flex-wrap gap-2 pt-4">
+            {["Case Study Library", "AI BD Assistant", "Smart Generator", "Questionnaire Engine"].map(f => (
+              <span
+                key={f}
+                className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 backdrop-blur-sm shadow-sm hover:bg-white/10 hover:text-white transition-all duration-200 cursor-default"
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom footer text for desktop */}
+        <p className="hidden lg:block text-xs text-white/30 z-10">
+          © 2026 Permionics Membranes Pvt. Ltd. All rights reserved.
         </p>
       </div>
     </div>
