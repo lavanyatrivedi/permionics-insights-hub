@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Lock, ArrowRight } from "lucide-react";
-import logoMark from "@assets/permionics_P_exact_1783575144366.png";
-import fullLogo from "@assets/logo-01_(1)_1783575156427.png";
+import logoMark from "@assets/osmos_logo_blue_transparent.png";
 
 const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
@@ -30,10 +29,12 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (user?.authenticated) setLocation("/");
-  }, [user?.authenticated, setLocation]);
+    if (user?.authenticated) {
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
 
-  if (meLoading || user?.authenticated) {
+  if (meLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center" style={{ background: "hsl(222 47% 6%)" }}>
         <div
@@ -46,11 +47,20 @@ export default function LoginPage() {
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     loginMutation.mutate(
-      { data: { password: values.password, remember: false } },
+      { data: { password: values.password } },
       {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-          setLocation("/");
+        onSuccess: async (res) => {
+          if (res.authenticated) {
+            await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+            setLocation("/dashboard");
+          } else {
+            toast({
+              title: "Access Denied",
+              description: "Invalid password. Please try again.",
+              variant: "destructive",
+            });
+            form.setError("password", { message: "Incorrect password" });
+          }
         },
         onError: () => {
           toast({
@@ -65,7 +75,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 select-none">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-6 select-none justify-between">
       {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
@@ -90,12 +100,12 @@ export default function LoginPage() {
       />
 
       {/* ── Left Side: Bold Branding Panel ── */}
-      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[55%] p-8 lg:p-20 text-white min-h-[40vh] lg:min-h-screen">
-        {/* Empty top space on left since logo is in the white card now */}
+      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-6 lg:p-12 text-white min-h-[35vh] lg:min-h-0">
+        {/* Top spacer */}
         <div className="h-6" />
 
         {/* Center: Bolder Heading */}
-        <div className="my-auto py-12 lg:py-0 space-y-6">
+        <div className="my-auto space-y-6">
           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
             Search Smarter.<br />Extract Faster.<br />Create Anywhere.
           </h1>
@@ -122,24 +132,22 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right Side: Curved Full-Height Login Panel ── */}
+      {/* ── Right Side: Embedded Full-Height Login Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] bg-white p-8 lg:p-16 min-h-[60vh] lg:min-h-screen lg:rounded-l-[50px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border-l border-white/15"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border border-slate-100/10 min-h-[50vh] lg:min-h-0"
       >
-        {/* Top: OSMOS Logo inside the white panel for better contrast */}
-        <div className="flex items-center gap-3 justify-center lg:justify-start">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-900 shadow-md">
-            <img src={logoMark} alt="OSMOS" className="h-5 w-5 object-contain" />
-          </div>
-          <span className="text-lg font-bold tracking-wider uppercase text-slate-800">OSMOS</span>
+        {/* Top: OSMOS Logo inside the white panel with clean vertical stack */}
+        <div className="flex flex-col items-center lg:items-start gap-1">
+          <img src={logoMark} alt="OSMOS" className="h-10 w-10 object-contain" />
+          <span className="text-sm font-extrabold tracking-widest uppercase text-slate-800">OSMOS</span>
         </div>
 
         {/* Center: Login Form */}
-        <div className="my-auto w-full max-w-[340px] mx-auto py-10 lg:py-0">
+        <div className="my-auto w-full max-w-[320px] mx-auto py-8 lg:py-0">
           {/* Card Heading */}
-          <div className="mb-8 text-center lg:text-left">
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Welcome Back</h2>
-            <p className="text-xs text-slate-500 mt-2 font-medium">Log in to start using OSMOS BD Intelligence</p>
+          <div className="mb-6 text-center lg:text-left">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Log in to start using OSMOS BD Intelligence</p>
           </div>
 
           {/* Form */}
@@ -204,7 +212,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom: Footer Info */}
-        <p className="text-[10px] text-center text-slate-400 mt-6">
+        <p className="text-[10px] text-center text-slate-400 mt-4">
           Authorized personnel only · Permionics Membranes Pvt. Ltd.
         </p>
       </div>
