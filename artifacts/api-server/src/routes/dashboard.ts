@@ -8,7 +8,7 @@ router.get("/dashboard/stats", requireAuth, async (req, res): Promise<void> => {
   try {
     const [csResult, qResult] = await Promise.all([
       supabase.from("case_studies").select("id, sector, client_name, created_at", { count: "exact" }),
-      supabase.from("questionnaires").select("id, client_name, sector, created_at", { count: "exact" }),
+      supabase.from("questionnaire_projects").select("id, name, company_name, sector, created_at", { count: "exact" }),
     ]);
 
     if (csResult.error) {
@@ -24,7 +24,12 @@ router.get("/dashboard/stats", requireAuth, async (req, res): Promise<void> => {
     }
 
     const caseStudies = csResult.data ?? [];
-    const questionnaires = qResult.data ?? [];
+    const questionnaires = (qResult.data ?? []).map((q) => ({
+      id: q.id,
+      client_name: q.company_name || q.name,
+      sector: q.sector,
+      created_at: q.created_at
+    }));
 
     // Get unique sectors from case studies
     const sectors = new Set(caseStudies.map((cs) => cs.sector));
