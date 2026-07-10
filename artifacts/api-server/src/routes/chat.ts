@@ -198,7 +198,8 @@ Your role:
 - Answer questions about past projects, technical capabilities, and client outcomes using the provided reference documents.
 - When answering broad questions, synthesise information across ALL provided documents.
 - When answering specific questions, focus on the most relevant documents and quote exact metrics/numbers where available.
-- Always cite the document title or client name when you reference it.
+- Cite references inline using clean bracketed numbers like [1], [2] corresponding to the list below.
+- CRITICAL CITATION RULE: Do NOT write verbose names, markdown links (e.g., no [Client](LIBRARY)), or inline source tags (e.g., no (LIBRARY) or (UPLOADED)) inside the text response. Keep references strictly as simple bracketed numbers like [1].
 - If you cannot find specific information, say so clearly.
 
 REFERENCE DOCUMENTS (${modeLabel === "broad_sweep" ? `ALL ${allItems.length} documents — brief excerpts` : `Top ${contextBlocks.length} most relevant documents — detailed`}):
@@ -235,9 +236,17 @@ ${contextBlocks.join("\n\n")}`;
       req.log.error({ err }, "Failed to save chat history to database");
     }
 
+    // Map matched references into clean frontend citations
+    const matchedDocs = modeLabel === "broad_sweep" ? allItems.slice(0, 5) : (allItems.filter(r => r.score > 0).slice(0, 6));
+    const sourcesList = matchedDocs.map(item => ({
+      id: item.id,
+      clientName: item.title,
+      sector: item.type === "uploaded" ? "PDF Document" : item.type === "library" ? "Case Library" : "Project Creator"
+    }));
+
     res.json({
       answer: fullResponse,
-      sources: [],
+      sources: sourcesList,
       contextSummary: {
         uploadedDocs: uploadedDocs.length,
         caseStudies: caseStudies.length,
