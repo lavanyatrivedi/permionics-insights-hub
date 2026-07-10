@@ -31,19 +31,21 @@ export function verifyToken(token: string): SessionPayload | null {
 }
 
 export function setSessionCookie(res: Response, token: string, remember: boolean): void {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : undefined,
   });
 }
 
 export function clearSessionCookie(res: Response): void {
+  const isProd = process.env.NODE_ENV === "production";
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
   });
 }
 
