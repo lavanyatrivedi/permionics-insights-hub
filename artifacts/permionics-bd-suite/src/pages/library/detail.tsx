@@ -1,5 +1,6 @@
 import { useParams, Link, useLocation } from "wouter";
-import { useGetCaseStudy, getGetCaseStudyQueryKey, useDeleteCaseStudy } from "@workspace/api-client-react";
+import { useGetCaseStudy, getGetCaseStudyQueryKey, useDeleteCaseStudy, useUpdateCaseStudy } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CaseStudyPreview } from "../generator/creator_components/CaseStudyPreview";
 import { getPalette } from "../generator/creator_types";
 import { printCaseStudy } from "../generator/creator_utils/print";
@@ -18,13 +19,39 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CaseStudyDetail() {
   const { id } = useParams();
   const numId = id ? parseInt(id, 10) : 0;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    clientName: "",
+    sector: "",
+    location: "",
+    technologyStack: "",
+    capacity: "",
+    challenge: "",
+    solution: "",
+    results: "",
+    testimonial: "",
+    fullText: "",
+  });
   
   const { data, isLoading } = useGetCaseStudy(numId, {
     query: {
@@ -34,6 +61,24 @@ export default function CaseStudyDetail() {
   });
 
   const deleteMutation = useDeleteCaseStudy();
+  const updateMutation = useUpdateCaseStudy();
+
+  useEffect(() => {
+    if (data) {
+      setEditForm({
+        clientName: data.clientName || "",
+        sector: data.sector || "",
+        location: data.location || "",
+        technologyStack: data.technologyStack || "",
+        capacity: data.capacity || "",
+        challenge: data.challenge || "",
+        solution: data.solution || "",
+        results: data.results || "",
+        testimonial: data.testimonial || "",
+        fullText: data.fullText || "",
+      });
+    }
+  }, [data, isEditingModalOpen]);
 
   const isStaticStudy = (clientName: string) => {
     const name = clientName.toLowerCase();
@@ -84,6 +129,21 @@ export default function CaseStudyDetail() {
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateMutation.mutateAsync({ id: numId, data: editForm });
+      toast({ title: "Updated", description: "Case study updated successfully." });
+      setIsEditingModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: getGetCaseStudyQueryKey(numId) });
+    } catch (err: any) {
+      toast({ 
+        title: "Update Failed", 
+        description: err?.message || "Failed to update case study.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -171,9 +231,125 @@ export default function CaseStudyDetail() {
           <Button variant="outline" onClick={handleDownload} className="bg-background">
             <Download className="w-4 h-4 mr-2" /> Export PDF
           </Button>
-          <Button variant="secondary" className="bg-secondary text-secondary-foreground" disabled>
-            <Edit className="w-4 h-4 mr-2" /> Edit Case Study
-          </Button>
+          {isStatic ? (
+            <Button variant="secondary" className="bg-secondary text-secondary-foreground" disabled>
+              <Edit className="w-4 h-4 mr-2" /> Edit Case Study
+            </Button>
+          ) : (
+            <Dialog open={isEditingModalOpen} onOpenChange={setIsEditingModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                  <Edit className="w-4 h-4 mr-2" /> Edit Case Study
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Edit Case Study</DialogTitle>
+                  <DialogDescription>
+                    Modify the text fields and outcomes for this generated case study.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="clientName">Client Name</Label>
+                      <Input
+                        id="clientName"
+                        value={editForm.clientName}
+                        onChange={(e) => setEditForm({ ...editForm, clientName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="sector">Sector</Label>
+                      <Input
+                        id="sector"
+                        value={editForm.sector}
+                        onChange={(e) => setEditForm({ ...editForm, sector: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        value={editForm.location}
+                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="technologyStack">Technology Stack</Label>
+                      <Input
+                        id="technologyStack"
+                        value={editForm.technologyStack}
+                        onChange={(e) => setEditForm({ ...editForm, technologyStack: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="capacity">Capacity</Label>
+                    <Input
+                      id="capacity"
+                      value={editForm.capacity}
+                      onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="challenge">Challenge / Problem</Label>
+                    <Textarea
+                      id="challenge"
+                      rows={3}
+                      value={editForm.challenge}
+                      onChange={(e) => setEditForm({ ...editForm, challenge: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="solution">Solution Design</Label>
+                    <Textarea
+                      id="solution"
+                      rows={3}
+                      value={editForm.solution}
+                      onChange={(e) => setEditForm({ ...editForm, solution: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="results">Results (separated by ' | ')</Label>
+                    <Input
+                      id="results"
+                      value={editForm.results}
+                      onChange={(e) => setEditForm({ ...editForm, results: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="testimonial">Testimonial / Handshake Caption</Label>
+                    <Input
+                      id="testimonial"
+                      value={editForm.testimonial}
+                      onChange={(e) => setEditForm({ ...editForm, testimonial: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="fullText">Full Summary Text</Label>
+                    <Textarea
+                      id="fullText"
+                      rows={4}
+                      value={editForm.fullText}
+                      onChange={(e) => setEditForm({ ...editForm, fullText: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsEditingModalOpen(false)}>Cancel</Button>
+                  <Button 
+                    onClick={handleUpdate} 
+                    disabled={updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
           
           <AlertDialog>
             <AlertDialogTrigger asChild>

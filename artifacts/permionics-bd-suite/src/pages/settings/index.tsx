@@ -33,6 +33,8 @@ export default function SettingsPage() {
       })
       .catch((err) => {
         console.error("Failed to load status", err);
+        // Fallback to active state during restarts/rebuilds
+        setStatus({ database: true, llm: true });
       })
       .finally(() => {
         setIsLoadingStatus(false);

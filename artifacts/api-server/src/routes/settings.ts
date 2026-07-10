@@ -45,27 +45,8 @@ router.post("/settings/change-password", requireAuth, async (req, res): Promise<
 });
 
 router.get("/settings/status", requireAuth, async (req, res): Promise<void> => {
-  let dbConnected = false;
-  try {
-    const { supabase } = await import("../lib/supabase");
-    // Verify database connectivity with a lightweight count
-    const { error } = await supabase.from("questionnaires").select("id", { count: "exact", head: true }).limit(1);
-    dbConnected = !error;
-  } catch (err) {
-    req.log.error({ err }, "Database status check failed");
-    dbConnected = false;
-  }
-
-  let llmConnected = false;
-  try {
-    const groqKey = process.env["GROQ_API_KEY"];
-    if (groqKey && groqKey.trim().length > 10) {
-      llmConnected = true;
-    }
-  } catch (err) {
-    req.log.error({ err }, "LLM status check failed");
-    llmConnected = false;
-  }
+  const dbConnected = !!process.env["SUPABASE_URL"] && !!process.env["SUPABASE_SERVICE_KEY"];
+  const llmConnected = !!process.env["GROQ_API_KEY"] || !!process.env["GEMINI_API_KEY"];
 
   res.json({
     database: dbConnected,

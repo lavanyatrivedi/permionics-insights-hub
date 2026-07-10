@@ -3,6 +3,10 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { supabase } from "../lib/supabase";
 import fs from "fs";
 import path from "path";
+import multer from "multer";
+import os from "os";
+
+const upload = multer({ dest: os.tmpdir() });
 
 const router: IRouter = Router();
 
@@ -142,29 +146,38 @@ router.get("/case-studies/:id/download", requireAuth, async (req, res): Promise<
       return;
     }
 
-    const clientName = (data.client_name || "").toLowerCase();
-    let pdfFile = "";
+    const clientName = data.client_name || "";
+    // Clean and sanitize the client name to check for corresponding local PDF file
+    const sanitizedFilename = clientName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase() + ".pdf";
+    const filePath = path.resolve(process.cwd(), "pdfs", sanitizedFilename);
 
-    if (clientName.includes("gropello") || clientName.includes("european pharmaceutical")) {
-      pdfFile = "gropello.pdf";
-    } else if (clientName.includes("jeedimetla") || clientName.includes("jetl")) {
-      pdfFile = "jeedimetla.pdf";
-    } else if (clientName.includes("stevia")) {
-      pdfFile = "stevia.pdf";
-    } else if (clientName.includes("nandesari") || clientName.includes("nia")) {
-      pdfFile = "nandesari.pdf";
-    } else if (clientName.includes("serratiopeptidase")) {
-      pdfFile = "serratiopeptidase.pdf";
+    // Fallback: also check for legacy files
+    let legacyFile = "";
+    const clientNameLower = clientName.toLowerCase();
+    if (clientNameLower.includes("gropello") || clientNameLower.includes("european pharmaceutical")) {
+      legacyFile = "gropello.pdf";
+    } else if (clientNameLower.includes("jeedimetla") || clientNameLower.includes("jetl")) {
+      legacyFile = "jeedimetla.pdf";
+    } else if (clientNameLower.includes("stevia")) {
+      legacyFile = "stevia.pdf";
+    } else if (clientNameLower.includes("nandesari") || clientNameLower.includes("nia")) {
+      legacyFile = "nandesari.pdf";
+    } else if (clientNameLower.includes("serratiopeptidase")) {
+      legacyFile = "serratiopeptidase.pdf";
     }
 
-    if (pdfFile) {
-      const filePath = path.resolve(process.cwd(), "pdfs", pdfFile);
-      if (fs.existsSync(filePath)) {
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${data.client_name.replace(/[^a-zA-Z0-9]/g, "_")}.pdf"`);
-        fs.createReadStream(filePath).pipe(res);
-        return;
-      }
+    const legacyPath = legacyFile ? path.resolve(process.cwd(), "pdfs", legacyFile) : "";
+
+    if (fs.existsSync(filePath)) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${clientName.replace(/[^a-zA-Z0-9]/g, "_")}.pdf"`);
+      fs.createReadStream(filePath).pipe(res);
+      return;
+    } else if (legacyPath && fs.existsSync(legacyPath)) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${clientName.replace(/[^a-zA-Z0-9]/g, "_")}.pdf"`);
+      fs.createReadStream(legacyPath).pipe(res);
+      return;
     }
 
     res.json({ isStatic: false });
@@ -356,6 +369,109 @@ router.delete("/case-creator/:id", requireAuth, async (req, res): Promise<void> 
   } catch (err) {
     req.log.error({ err }, "DELETE /case-creator/:id error");
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Upload case study PDF directly to Case Library
+router.post("/case-studies/upload", requireAuth, upload.single("file"), async (req, res): Promise<void> => {
+  if (!req.file) {
+    res.status(400).json({ error: "No file uploaded" });
+    return;
+  }
+
+  const tempPath = req.file.path;
+  const originalName = req.file.originalname;
+
+  try {
+    // 1. Sanitize name
+    const parsedName = path.parse(originalName).name;
+    const clientName = parsedName.replace(/[^a-zA-Z0-9\s-_]/g, "").trim() || "Uploaded Case Study";
+    const sanitizedFilename = clientName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase() + ".pdf";
+
+    // 2. Read file to extract plain text
+    let fullText = "";
+    try {
+      const { createRequire } = await import("module");
+      const require = createRequire(import.meta.url);
+      const pdfParse = require("pdf-parse");
+      const dataBuffer = fs.readFileSync(tempPath);
+      const result = await pdfParse(dataBuffer);
+      fullText = (result.text || "").trim();
+    } catch (err) {
+      req.log.warn({ err }, "pdf-parse failed to parse uploaded case study text");
+    }
+
+    // 3. Determine sector and technology from content
+    const textLower = fullText.toLowerCase();
+    let sector = "Pharma/Herbal";
+    if (textLower.includes("textile")) {
+      sector = "Textile";
+    } else if (textLower.includes("cetp") || textLower.includes("municipal") || textLower.includes("effluent")) {
+      sector = "CETP/Municipal";
+    } else if (textLower.includes("food") || textLower.includes("beverage")) {
+      sector = "Food & Beverage";
+    } else if (textLower.includes("dairy") || textLower.includes("milk")) {
+      sector = "Dairy";
+    } else if (textLower.includes("pharma") || textLower.includes("herbal") || textLower.includes("medical")) {
+      sector = "Pharma/Herbal";
+    } else if (textLower.includes("water") || textLower.includes("sewage")) {
+      sector = "Water/Wastewater";
+    }
+
+    let technologyStack = "RO";
+    if (textLower.includes("mbr")) {
+      technologyStack = "MBR";
+    } else if (textLower.includes("zld")) {
+      technologyStack = "ZLD";
+    } else if (textLower.includes("nf")) {
+      technologyStack = "NF";
+    } else if (textLower.includes("uf")) {
+      technologyStack = "UF";
+    }
+
+    // 4. Save file to pdfs/ folder
+    const pdfsDir = path.resolve(process.cwd(), "pdfs");
+    if (!fs.existsSync(pdfsDir)) {
+      fs.mkdirSync(pdfsDir, { recursive: true });
+    }
+    const targetPath = path.join(pdfsDir, sanitizedFilename);
+    fs.copyFileSync(tempPath, targetPath);
+
+    // 5. Insert record into database
+    const insertData = {
+      client_name: clientName,
+      sector: sector,
+      location: "India",
+      challenge: "Technical membrane filtration process implementation.",
+      solution: "Engineered high-performance membrane design.",
+      technology_stack: technologyStack,
+      capacity: "N/A",
+      results: "System operated with compliance and process efficiency.",
+      testimonial: null,
+      tags: [technologyStack, sector.split("/")[0]],
+      full_text: fullText || `Uploaded Case Study Report for ${clientName}`,
+    };
+
+    const { data: row, error } = await supabase
+      .from("case_studies")
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (error) {
+      req.log.error({ err: error }, "Failed to create case study row from upload");
+      res.status(500).json({ error: "Failed to persist database record" });
+      return;
+    }
+
+    res.status(201).json(mapCaseStudyRow(row));
+  } catch (err: any) {
+    req.log.error({ err }, "Error uploading case study");
+    res.status(500).json({ error: err.message || "Failed to process PDF upload" });
+  } finally {
+    if (fs.existsSync(tempPath)) {
+      fs.unlinkSync(tempPath);
+    }
   }
 });
 

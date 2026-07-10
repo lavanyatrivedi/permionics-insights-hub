@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { useListCaseStudies, useDeleteCaseStudy } from "@workspace/api-client-react";
+import { useListCaseStudies, useDeleteCaseStudy, customFetch } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { getSectorColor } from "@/components/case-study/CaseStudyPreview";
-import { Search, Plus, FileText, Loader2, MoreVertical, Download, Trash2 } from "lucide-react";
+import { Search, Plus, FileText, Loader2, MoreVertical, Download, Trash2, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,8 @@ export default function LibraryPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const deleteMutation = useDeleteCaseStudy();
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const caseStudiesQuery = useListCaseStudies({
     search: search || undefined,
@@ -34,6 +36,35 @@ export default function LibraryPage() {
   });
 
   const { data: caseStudies, isLoading } = caseStudiesQuery;
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid File", description: "Only PDF files are supported.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await customFetch("/api/case-studies/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      toast({ title: "Success", description: "Case study uploaded and added to the library." });
+      queryClient.invalidateQueries({ queryKey: caseStudiesQuery.queryKey });
+    } catch (error: any) {
+      toast({ title: "Upload Error", description: error?.message || "Failed to upload case study.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const isStaticStudy = (clientName: string) => {
     const name = clientName.toLowerCase();
@@ -87,9 +118,29 @@ export default function LibraryPage() {
           <h1 className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>Case Study Library</h1>
           <p className="text-muted-foreground mt-1 font-normal text-sm">Browse, filter, and access all client case studies and outcomes.</p>
         </div>
-        <Button onClick={() => setLocation("/generator")}>
-          <Plus className="w-4 h-4 mr-2" /> New Project
-        </Button>
+        <div className="flex items-center gap-3">
+          <input 
+            type="file" 
+            accept="application/pdf"
+            className="hidden" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</>
+            ) : (
+              <><Upload className="w-4 h-4 mr-2" /> Upload Case Study</>
+            )}
+          </Button>
+          <Button onClick={() => setLocation("/generator")}>
+            <Plus className="w-4 h-4 mr-2" /> New Project
+          </Button>
+        </div>
       </div>
 
       <div className="bg-card p-4 rounded-xl border shadow-sm flex flex-col lg:flex-row gap-4">
