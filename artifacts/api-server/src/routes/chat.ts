@@ -206,7 +206,7 @@ REFERENCE DOCUMENTS (${modeLabel === "broad_sweep" ? `ALL ${allItems.length} doc
 
 ${contextBlocks.join("\n\n")}`;
 
-    // ── 5. Call Groq ────────────────────────────────────────────────────────
+    // ── 5. Call Groq with failover mechanism ─────────────────────────────────
     const messages = [
       { role: "system", content: systemContext },
       ...history.slice(-6).map((h: any) => ({
@@ -216,13 +216,40 @@ ${contextBlocks.join("\n\n")}`;
       { role: "user", content: message },
     ];
 
-    const completion = await groq.chat.completions.create({
-      messages: messages as any,
-      model: "llama-3.3-70b-versatile",
-      stream: false,
-      max_tokens: 1200,
-      temperature: 0.3,
-    });
+    let completion;
+    try {
+      completion = await groq.chat.completions.create({
+        messages: messages as any,
+        model: "llama-3.3-70b-versatile",
+        stream: false,
+        max_tokens: 1200,
+        temperature: 0.3,
+      });
+    } catch (err: any) {
+      const isRateLimit = err?.status === 429 || 
+                          err?.message?.includes("429") || 
+                          err?.message?.toLowerCase().includes("rate limit") ||
+                          err?.message?.toLowerCase().includes("limit exceeded") ||
+                          err?.message?.toLowerCase().includes("limit reached");
+      
+      if (isRateLimit) {
+        req.log.warn({ err }, "Groq Llama 3.3 70B rate-limited, falling back to Llama 3.1 8B Instant...");
+        try {
+          completion = await groq.chat.completions.create({
+            messages: messages as any,
+            model: "llama-3.1-8b-instant",
+            stream: false,
+            max_tokens: 1200,
+            temperature: 0.3,
+          });
+        } catch (fallbackErr: any) {
+          req.log.error({ err: fallbackErr }, "Groq fallback model failed");
+          throw fallbackErr;
+        }
+      } else {
+        throw err;
+      }
+    }
 
     const fullResponse = completion.choices[0]?.message?.content || "No response generated.";
 
