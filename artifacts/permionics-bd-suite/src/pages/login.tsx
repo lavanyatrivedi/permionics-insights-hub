@@ -86,19 +86,8 @@ export default function LoginPage() {
       <div 
         className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-[#fafafb] p-6 lg:p-10 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[480px] lg:h-[calc(100vh-80px)] max-h-[660px]"
       >
-        {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
+        {/* Top: Co-branded Header Layout (Osmos logo only) */}
         <div className="relative z-10 flex items-center gap-3.5 justify-center lg:justify-start select-none">
-          {/* Left: Permionics P Logo in Navy Square Box */}
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-105"
-            style={{ background: "linear-gradient(135deg, hsl(222 71% 20%), hsl(222 71% 12%))" }}
-          >
-            <img src={permionicsP} alt="Permionics" className="h-6 w-6 object-contain" />
-          </div>
-          
-          {/* Subtle Vertical Divider */}
-          <div className="h-5 w-px bg-slate-200" />
-          
           {/* Right: OSMOS Brand */}
           <div className="flex items-center gap-2.5">
             <img src={osmosLogo} alt="OSMOS" className="h-10 w-10 object-contain drop-shadow-sm" />
@@ -176,7 +165,7 @@ export default function LoginPage() {
 
         {/* Bottom: Footer Info */}
         <p className="text-[10px] text-center text-slate-400 mt-4">
-          Authorized personnel only · Permionics Membranes Pvt. Ltd.
+          Authorized personnel only
         </p>
       </div>
 
@@ -202,7 +191,7 @@ export default function LoginPage() {
             Search Smarter.<br />Extract Faster.<br />Create Anywhere.
           </h1>
           <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
-            Advanced Knowledge Platform for Permionics Membranes - powering smarter business development with AI.
+            Advanced Knowledge Platform - powering smarter business development with AI.
           </p>
 
           {/* Feature Pills */}
@@ -220,7 +209,7 @@ export default function LoginPage() {
 
         {/* Bottom footer text for desktop */}
         <p className="hidden lg:block text-xs text-white/30 z-10">
-          © 2026 Permionics Membranes Pvt. Ltd. All rights reserved.
+          © 2026 OSMOS. All rights reserved.
         </p>
       </div>
     </div>
