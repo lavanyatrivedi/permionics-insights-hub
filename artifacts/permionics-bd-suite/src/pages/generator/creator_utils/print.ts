@@ -40,13 +40,6 @@ export async function printCaseStudy() {
     const A4_W = 210;
     const A4_H = 297;
 
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-      compress: true,
-    });
-
     const canvasW = canvas.width;
     const canvasH = canvas.height;
 
