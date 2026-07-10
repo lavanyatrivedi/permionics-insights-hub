@@ -183,10 +183,6 @@ export default function EditorPage({ projectId }: Props) {
                 <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: saveColor, display: "flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: saveColor }} />
-              {saveLabel}
-            </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -199,6 +195,10 @@ export default function EditorPage({ projectId }: Props) {
             )}
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: saveColor, display: "flex", alignItems: "center", gap: "4px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: saveColor }} />
+              {saveLabel}
+            </span>
             <button
               onClick={() => printCaseStudy()}
               style={{
