@@ -301,7 +301,7 @@ export default function AssistantPage() {
                     <Button 
                       key={i} 
                       variant="outline" 
-                      className="text-sm rounded-xl py-6 bg-white hover:bg-primary/5 hover:text-primary hover:border-primary/50 transition-all justify-start px-6 shadow-sm" 
+                      className="text-sm rounded-xl py-6 bg-card text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/50 transition-all justify-start px-6 shadow-sm" 
                       onClick={() => handleSend(p)}
                     >
                       {p}
@@ -371,7 +371,7 @@ export default function AssistantPage() {
           {sendChat.isPending && (
             <div className="flex gap-4">
                <img src={botAvatar} alt="Assistant" className="w-9 h-9 object-contain opacity-60" />
-              <div className="bg-white dark:bg-card rounded-2xl p-5 shadow-sm border flex items-center h-[52px]">
+              <div className="bg-card dark:bg-card rounded-2xl p-5 shadow-sm border flex items-center h-[52px]">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary/40 animate-bounce"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-primary/40 animate-bounce" style={{animationDelay: '0.15s'}}></div>

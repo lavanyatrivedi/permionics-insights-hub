@@ -64,10 +64,10 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
     { id: "images", label: "Images" },
   ];
 
-  const inp = "w-full text-[11px] px-2 py-1.5 border border-gray-200 rounded-md bg-white text-gray-800 outline-none focus:border-[#1A5FA8] focus:ring-1 focus:ring-[#1A5FA8] transition-colors";
+  const inp = "w-full text-[11px] px-2 py-1.5 border border-border rounded-md bg-card text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
   const ta = inp + " resize-y font-mono";
-  const lbl = "text-[10px] font-medium text-gray-500 mb-0.5 block";
-  const sec = "text-[9px] font-semibold uppercase tracking-widest text-[#1A5FA8] border-b-2 border-[#1A5FA8] pb-1 mt-3 mb-2";
+  const lbl = "text-[10px] font-medium text-muted-foreground mb-0.5 block";
+  const sec = "text-[9px] font-semibold uppercase tracking-widest text-primary border-b-2 border-primary pb-1 mt-3 mb-2";
   const sel = inp + " cursor-pointer";
 
   function PhotoControls({ label, imgField, cfgField, inputRef }: {
@@ -79,29 +79,29 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
     const cfg = data[cfgField];
     const img = data[imgField];
     return (
-      <div className="border border-gray-200 rounded-lg p-2.5 flex flex-col gap-2 bg-white">
-        <div className="text-[10px] font-semibold text-[#003466]">{label}</div>
-        <div className="relative border-2 border-dashed border-gray-200 rounded-lg p-2 text-center cursor-pointer hover:border-[#1A5FA8] transition-colors" onClick={() => inputRef.current?.click()}>
+      <div className="border border-border rounded-lg p-2.5 flex flex-col gap-2 bg-card">
+        <div className="text-[10px] font-semibold text-foreground">{label}</div>
+        <div className="relative border-2 border-dashed border-border rounded-lg p-2 text-center cursor-pointer hover:border-primary transition-colors" onClick={() => inputRef.current?.click()}>
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImg(e, imgField)} />
           {img ? (
             <div>
               <img src={img} alt="preview" className="mx-auto object-cover rounded mb-1" style={{ height: "56px", width: "100%", objectFit: "cover" }} />
-              <span className="text-[10px] text-[#1A5FA8] font-medium">Click to change</span>
+              <span className="text-[10px] text-primary font-medium">Click to change</span>
             </div>
           ) : (
             <div className="py-1">
-              <div className="text-gray-400 text-[10px] mb-0.5">No photo yet</div>
-              <span className="text-[10px] text-[#1A5FA8] font-medium">Click to upload</span>
+              <div className="text-muted-foreground text-[10px] mb-0.5">No photo yet</div>
+              <span className="text-[10px] text-primary font-medium">Click to upload</span>
             </div>
           )}
         </div>
         <div>
           <div className="flex justify-between items-center mb-1">
             <span className={lbl + " mb-0"}>Height</span>
-            <span className="text-[10px] font-semibold text-[#1A5FA8]">{cfg.height}px</span>
+            <span className="text-[10px] font-semibold text-primary">{cfg.height}px</span>
           </div>
-          <input type="range" min={60} max={360} step={10} value={cfg.height} onChange={(e) => setCfg(cfgField, { height: Number(e.target.value) })} className="w-full accent-[#1A5FA8]" />
-          <div className="flex justify-between text-[9px] text-gray-400 -mt-0.5"><span>60px</span><span>360px</span></div>
+          <input type="range" min={60} max={360} step={10} value={cfg.height} onChange={(e) => setCfg(cfgField, { height: Number(e.target.value) })} className="w-full accent-primary cursor-pointer" />
+          <div className="flex justify-between text-[9px] text-muted-foreground -mt-0.5"><span>60px</span><span>360px</span></div>
         </div>
         <div>
           <label className={lbl}>Fit mode</label>
@@ -118,7 +118,7 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
           </div>
         )}
         {img && (
-          <div className="rounded overflow-hidden border border-gray-200" style={{ height: `${Math.min(cfg.height, 100)}px` }}>
+          <div className="rounded overflow-hidden border border-border" style={{ height: `${Math.min(cfg.height, 100)}px` }}>
             <img src={img} alt="preview" style={{ width: "100%", height: "100%", objectFit: cfg.fit, objectPosition: cfg.position }} />
           </div>
         )}
@@ -136,10 +136,10 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-shrink-0 border-b border-gray-200 bg-gray-50">
+      <div className="flex flex-shrink-0 border-b border-border bg-muted/40">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 py-2 text-[10px] font-medium border-b-2 transition-colors ${tab === t.id ? "text-[#1A5FA8] border-[#1A5FA8]" : "text-gray-400 border-transparent hover:text-gray-600"}`}>
+            className={`flex-1 py-2 text-[10px] font-medium border-b-2 transition-colors border-0 cursor-pointer ${tab === t.id ? "text-primary border-primary font-bold" : "text-muted-foreground border-transparent hover:text-foreground"}`}>
             {t.label}
           </button>
         ))}
@@ -215,7 +215,7 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
         {/* IMAGES TAB */}
         {tab === "images" && <>
           <div className={sec}>Photo Settings</div>
-          <p className="text-[10px] text-gray-500 leading-relaxed">Upload each photo then adjust height, fit mode, and crop anchor to get the perfect look in the case study.</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">Upload each photo then adjust height, fit mode, and crop anchor to get the perfect look in the case study.</p>
           <PhotoControls label="Plant / Facility Photo" imgField="plantImg" cfgField="plantImgCfg" inputRef={plantRef} />
           <PhotoControls label="Partnership / Client Photo" imgField="handshakeImg" cfgField="handshakeImgCfg" inputRef={handshakeRef} />
           <PhotoControls label="Before / After Beakers Photo" imgField="beakersImg" cfgField="beakersImgCfg" inputRef={beakersRef} />
@@ -223,17 +223,17 @@ export function CaseStudySidebar({ data, onChange, onPrint, onSave, isSaving }: 
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-3 border-t border-gray-200 flex flex-col gap-2">
+      <div className="flex-shrink-0 p-3 border-t border-border bg-muted/40 flex flex-col gap-2">
         <button onClick={onSave} disabled={isSaving}
-          className="w-full flex items-center justify-center gap-2 text-[#003466] text-[12px] font-medium py-2.5 px-4 rounded-md transition-colors bg-white border border-[#003466] hover:bg-[#003466] hover:text-white disabled:opacity-50">
+          className="w-full flex items-center justify-center gap-2 text-primary text-[12px] font-medium py-2.5 px-4 rounded-md transition-colors bg-card border border-primary hover:bg-primary hover:text-white disabled:opacity-50 cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
           </svg>
           {isSaving ? "Saving..." : "Save Draft (Local)"}
         </button>
         <button onClick={onPrint}
-          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2.5 px-4 rounded-md transition-colors hover:opacity-90"
-          style={{ background: "#003466" }}>
+          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2.5 px-4 rounded-md transition-colors hover:opacity-90 border-0 cursor-pointer"
+          style={{ background: "var(--primary)" }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" />
           </svg>

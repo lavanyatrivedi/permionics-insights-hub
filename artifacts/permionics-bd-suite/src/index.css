@@ -172,11 +172,11 @@
   --background: 222 47% 6%;
   --foreground: 210 40% 98%;
 
-  --border: 217 30% 18%;
+  --border: 217 30% 22%;
 
-  --card: 222 47% 12%;
+  --card: 222 47% 14%;
   --card-foreground: 210 40% 98%;
-  --card-border: 217 30% 18%;
+  --card-border: 217 30% 22%;
 
   --sidebar: 222 47% 5%;
   --sidebar-foreground: 210 40% 90%;
@@ -187,9 +187,9 @@
   --sidebar-accent-foreground: 217 91% 70%;
   --sidebar-ring: 217 91% 60%;
 
-  --popover: 222 47% 12%;
+  --popover: 222 47% 14%;
   --popover-foreground: 210 40% 98%;
-  --popover-border: 217 30% 18%;
+  --popover-border: 217 30% 22%;
 
   --primary: 217 91% 60%;
   --primary-foreground: 210 40% 98%;
@@ -198,7 +198,7 @@
   --secondary-foreground: 0 0% 100%;
 
   --muted: 217 30% 14%;
-  --muted-foreground: 215 20% 60%;
+  --muted-foreground: 215 20% 65%;
 
   --accent: 217 30% 14%;
   --accent-foreground: 210 40% 98%;
@@ -206,7 +206,7 @@
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --input: 217 30% 18%;
+  --input: 217 30% 22%;
   --ring: 217 91% 60%;
 
   --chart-1: 217 91% 60%;
@@ -323,4 +323,40 @@
     border: none !important;
     box-shadow: none !important;
   }
+}
+
+/* ── Global dark-mode scrollbar theming ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Dark mode override for scrollbars */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(217 91% 60% / 0.5);
+}
+
+/* ── Input / Select dark mode fix ──────────────────────────────────────────── */
+.dark input[type="range"] {
+  accent-color: hsl(var(--primary));
+}
+.dark select option {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
 }
