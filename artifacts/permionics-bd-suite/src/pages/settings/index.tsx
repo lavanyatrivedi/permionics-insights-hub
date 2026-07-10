@@ -1,14 +1,15 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useChangePassword } from "@workspace/api-client-react";
+import { useChangePassword, customFetch } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Shield, KeyRound, Database, CheckCircle2 } from "lucide-react";
+import { Settings, Shield, KeyRound, Database, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -22,6 +23,21 @@ const passwordSchema = z.object({
 export default function SettingsPage() {
   const { toast } = useToast();
   const changePasswordMutation = useChangePassword();
+  const [status, setStatus] = useState<{ database: boolean; llm: boolean } | null>(null);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+
+  useEffect(() => {
+    customFetch<{ database: boolean; llm: boolean }>("/api/settings/status")
+      .then((data) => {
+        setStatus(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load status", err);
+      })
+      .finally(() => {
+        setIsLoadingStatus(false);
+      });
+  }, []);
 
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
@@ -60,28 +76,28 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex-1 space-y-8 p-8 pt-6 max-w-5xl mx-auto">
-      <div className="flex items-center space-x-2">
-        <Settings className="h-6 w-6 text-primary" />
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+    <div className="max-w-4xl mx-auto p-8 space-y-6 animate-fade-in text-foreground">
+      <div className="flex items-center gap-3 mb-6">
+        <Settings className="h-8 w-8 text-primary" />
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>Settings</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Configure security, authentication passphrases, and view system status.</p>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-12">
-        <div className="md:col-span-4 lg:col-span-3">
-          <nav className="flex space-x-2 md:flex-col md:space-x-0 md:space-y-1">
-            <button className="bg-muted text-primary hover:bg-muted font-medium justify-start w-full inline-flex items-center rounded-md px-3 py-2 text-sm transition-colors">
-              <Shield className="mr-2 h-4 w-4" />
-              Security
-            </button>
-            <button className="hover:bg-muted text-muted-foreground hover:text-foreground font-medium justify-start w-full inline-flex items-center rounded-md px-3 py-2 text-sm transition-colors">
-              <Database className="mr-2 h-4 w-4" />
-              System Status
-            </button>
-          </nav>
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="space-y-1">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-primary bg-primary/5 font-semibold rounded-lg"
+          >
+            <Shield className="mr-2 h-4 w-4" />
+            Security
+          </Button>
         </div>
 
-        <div className="md:col-span-8 lg:col-span-9 space-y-6">
-          <Card>
+        <div className="md:col-span-2 space-y-6">
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <KeyRound className="h-5 w-5" />
@@ -145,7 +161,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
@@ -161,18 +177,34 @@ export default function SettingsPage() {
                   <h4 className="font-medium">Core Database</h4>
                   <p className="text-sm text-muted-foreground">PostgreSQL Storage</p>
                 </div>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 flex items-center">
-                  <CheckCircle2 className="h-3 w-3" /> Connected
-                </Badge>
+                {isLoadingStatus ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : status?.database ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 flex items-center">
+                    <CheckCircle2 className="h-3 w-3" /> Connected
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 flex items-center">
+                    <XCircle className="h-3 w-3" /> Disconnected
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <h4 className="font-medium">LLM Assistant API</h4>
-                  <p className="text-sm text-muted-foreground">OpenAI Integration</p>
+                  <p className="text-sm text-muted-foreground">Groq Llama-3 Integration</p>
                 </div>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 flex items-center">
-                  <CheckCircle2 className="h-3 w-3" /> Connected
-                </Badge>
+                {isLoadingStatus ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : status?.llm ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 flex items-center">
+                    <CheckCircle2 className="h-3 w-3" /> Connected
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 flex items-center">
+                    <XCircle className="h-3 w-3" /> Disconnected
+                  </Badge>
+                )}
               </div>
             </CardContent>
             <CardFooter className="bg-muted/50 border-t py-3">
