@@ -169,28 +169,28 @@ export default function DashboardPage() {
     : "N/A";
 
   return (
-    <div className="min-h-full" style={{ background: "hsl(220 25% 97%)" }}>
+    <div className="min-h-full text-foreground" style={{ background: "var(--background)" }}>
       {/* ── Top header bar ── */}
       <div
         className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 print-hide"
         style={{
-          background: "hsl(0 0% 100%)",
-          borderBottom: "1px solid hsl(220 15% 91%)",
-          boxShadow: "0 1px 0 hsl(220 15% 91%)",
+          background: "var(--card)",
+          borderBottom: "1px solid var(--border)",
+          boxShadow: "0 1px 0 var(--border)",
         }}
       >
         <div>
-          <h1 className="text-lg font-extrabold tracking-tight" style={{ color: "hsl(222 47% 11%)" }}>
+          <h1 className="text-lg font-extrabold tracking-tight" style={{ color: "var(--foreground)" }}>
             Overview
           </h1>
-          <p className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>
+          <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
             Permionics BD Intelligence Dashboard
           </p>
         </div>
         {/* Quick actions */}
         <div className="flex items-center gap-2">
-          <ActionBtn href="~/generator" icon={Plus} label="New Case Study" accent="hsl(222 71% 17%)" />
-          <ActionBtn href="~/questionnaire" icon={FileText} label="Questionnaire" accent="hsl(217 91% 50%)" />
+          <ActionBtn href="~/generator" icon={Plus} label="New Case Study" accent="hsl(var(--primary))" />
+          <ActionBtn href="~/questionnaire" icon={FileText} label="Questionnaire" accent="hsl(var(--secondary))" />
         </div>
       </div>
 
@@ -202,14 +202,14 @@ export default function DashboardPage() {
             label="Case Studies"
             value={stats.totalCaseStudies}
             icon={Briefcase}
-            accent="hsl(222 71% 28%)"
+            accent="hsl(var(--primary))"
             sublabel="In BD Library"
           />
           <StatCard
             label="Questionnaires"
             value={stats.totalQuestionnaires}
             icon={ClipboardList}
-            accent="hsl(217 91% 55%)"
+            accent="hsl(var(--secondary))"
             sublabel="Generated"
           />
           <StatCard
@@ -234,56 +234,56 @@ export default function DashboardPage() {
           <div
             className="lg:col-span-4 rounded-2xl overflow-hidden"
             style={{
-              background: "white",
-              border: "1px solid hsl(220 15% 90%)",
-              boxShadow: "0 1px 3px hsl(222 47% 11% / 0.05)",
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              boxShadow: "0 1px 3px var(--border)",
             }}
           >
             {/* Card header */}
             <div
               className="flex items-center justify-between px-6 py-4"
-              style={{ borderBottom: "1px solid hsl(220 15% 92%)" }}
+              style={{ borderBottom: "1px solid var(--border)" }}
             >
               <div className="flex items-center gap-2.5">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: "hsl(222 71% 17% / 0.08)" }}
+                  style={{ background: "hsl(var(--primary) / 0.1)" }}
                 >
-                  <Activity className="w-4 h-4" style={{ color: "hsl(222 71% 28%)" }} />
+                  <Activity className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold" style={{ color: "hsl(222 47% 11%)" }}>Recent Activity</p>
-                  <p className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>Latest BD library additions</p>
+                  <p className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Recent Activity</p>
+                  <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Latest BD library additions</p>
                 </div>
               </div>
               <Link href="~/library">
-                <button className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-70" style={{ color: "hsl(217 91% 50%)" }}>
+                <button className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-70 border-0 bg-transparent cursor-pointer" style={{ color: "hsl(var(--secondary))" }}>
                   View all <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
             </div>
 
             {/* Activity list */}
-            <div className="divide-y" style={{ borderColor: "hsl(220 15% 94%)" }}>
+            <div className="divide-y" style={{ borderColor: "var(--border)" }}>
               {stats.recentActivity.length > 0 ? (
                 stats.recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center gap-4 px-6 py-4 hover:bg-[hsl(220_25%_98%)] transition-colors">
+                  <div key={index} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors">
                     <div
                       className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{
                         background: activity.type === "case_study"
-                          ? "hsl(222 71% 17% / 0.08)"
-                          : "hsl(217 91% 55% / 0.08)",
+                          ? "hsl(var(--primary) / 0.1)"
+                          : "hsl(var(--secondary) / 0.1)",
                       }}
                     >
                       {activity.type === "case_study" ? (
-                        <Briefcase className="w-4 h-4" style={{ color: "hsl(222 71% 28%)" }} />
+                        <Briefcase className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
                       ) : (
-                        <ClipboardList className="w-4 h-4" style={{ color: "hsl(217 91% 50%)" }} />
+                        <ClipboardList className="w-4 h-4" style={{ color: "hsl(var(--secondary))" }} />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: "hsl(222 47% 11%)" }}>
+                      <p className="text-sm font-semibold truncate" style={{ color: "var(--foreground)" }}>
                         {activity.title}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -293,24 +293,24 @@ export default function DashboardPage() {
                         >
                           {activity.sector}
                         </Badge>
-                        <span className="text-xs" style={{ color: "hsl(220 10% 60%)" }}>
+                        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                           {activity.type === "case_study" ? "Case Study" : "Questionnaire"}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-xs" style={{ color: "hsl(220 10% 60%)" }}>
+                      <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                         {format(new Date(activity.createdAt), "MMM d")}
                       </span>
-                      <ArrowUpRight className="w-3.5 h-3.5" style={{ color: "hsl(220 10% 70%)" }} />
+                      <ArrowUpRight className="w-3.5 h-3.5" style={{ color: "var(--muted-foreground)" }} />
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Activity className="w-8 h-8 mb-3" style={{ color: "hsl(220 10% 75%)" }} />
-                  <p className="text-sm font-medium" style={{ color: "hsl(220 10% 55%)" }}>No recent activity</p>
-                  <p className="text-xs mt-1" style={{ color: "hsl(220 10% 65%)" }}>Add case studies to see them here</p>
+                  <Activity className="w-8 h-8 mb-3" style={{ color: "var(--muted-foreground)" }} />
+                  <p className="text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>No recent activity</p>
+                  <p className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>Add case studies to see them here</p>
                 </div>
               )}
             </div>
@@ -320,24 +320,24 @@ export default function DashboardPage() {
           <div
             className="lg:col-span-3 rounded-2xl overflow-hidden"
             style={{
-              background: "white",
-              border: "1px solid hsl(220 15% 90%)",
-              boxShadow: "0 1px 3px hsl(222 47% 11% / 0.05)",
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              boxShadow: "0 1px 3px var(--border)",
             }}
           >
             <div
               className="flex items-center gap-2.5 px-6 py-4"
-              style={{ borderBottom: "1px solid hsl(220 15% 92%)" }}
+              style={{ borderBottom: "1px solid var(--border)" }}
             >
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: "hsl(217 91% 55% / 0.1)" }}
+                style={{ background: "hsl(var(--secondary) / 0.1)" }}
               >
-                <TrendingUp className="w-4 h-4" style={{ color: "hsl(217 91% 50%)" }} />
+                <TrendingUp className="w-4 h-4" style={{ color: "hsl(var(--secondary))" }} />
               </div>
               <div>
-                <p className="text-sm font-bold" style={{ color: "hsl(222 47% 11%)" }}>Sector Breakdown</p>
-                <p className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>Industry distribution</p>
+                <p className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Sector Breakdown</p>
+                <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Industry distribution</p>
               </div>
             </div>
 
@@ -363,10 +363,12 @@ export default function DashboardPage() {
                       formatter={(value: number) => [`${value}%`, "Share"]}
                       contentStyle={{
                         borderRadius: 12,
-                        border: "1px solid hsl(220 15% 90%)",
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
                         fontSize: 12,
                         fontFamily: "Plus Jakarta Sans, sans-serif",
-                        boxShadow: "0 4px 16px hsl(222 47% 11% / 0.08)",
+                        boxShadow: "0 4px 16px var(--border)",
+                        color: "var(--foreground)",
                       }}
                     />
                   </PieChart>
@@ -379,10 +381,10 @@ export default function DashboardPage() {
                       className="h-2 w-2 rounded-full flex-shrink-0"
                       style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
                     />
-                    <span className="text-xs truncate" style={{ color: "hsl(220 10% 50%)" }}>
+                    <span className="text-xs truncate" style={{ color: "var(--muted-foreground)" }}>
                       {item.name}
                     </span>
-                    <span className="text-xs font-bold ml-auto" style={{ color: "hsl(222 47% 11%)" }}>
+                    <span className="text-xs font-bold ml-auto" style={{ color: "var(--foreground)" }}>
                       {item.value}%
                     </span>
                   </div>
@@ -400,24 +402,24 @@ export default function DashboardPage() {
               icon: Briefcase,
               title: "Case Study Library",
               desc: "Browse all client case studies and outcomes",
-              accent: "hsl(222 71% 17%)",
-              bg: "hsl(222 71% 17% / 0.05)",
+              accent: "hsl(var(--primary))",
+              bg: "hsl(var(--primary) / 0.06)",
             },
             {
               href: "~/generator",
               icon: FileText,
               title: "Case Study Generator",
               desc: "Create structured case studies with AI assistance",
-              accent: "hsl(217 91% 50%)",
-              bg: "hsl(217 91% 50% / 0.05)",
+              accent: "hsl(var(--secondary))",
+              bg: "hsl(var(--secondary) / 0.06)",
             },
             {
               href: "~/assistant",
               icon: Activity,
               title: "Osmos AI",
               desc: "Ask OSMOS for BD intelligence from all your documents",
-              accent: "hsl(175 70% 38%)",
-              bg: "hsl(175 70% 38% / 0.05)",
+              accent: "hsl(175 70% 45%)",
+              bg: "hsl(175 70% 45% / 0.08)",
             },
           ].map((item) => (
             <Link key={item.href} href={item.href}>
@@ -425,19 +427,19 @@ export default function DashboardPage() {
                 className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-md"
                 style={{
                   background: item.bg,
-                  border: `1px solid ${item.accent}22`,
+                  border: `1px solid var(--border)`,
                 }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: `${item.accent}15` }}
+                  style={{ background: item.bg }}
                 >
                   <item.icon className="w-5 h-5" style={{ color: item.accent }} />
                 </div>
-                <p className="text-sm font-bold mb-1" style={{ color: "hsl(222 47% 11%)" }}>
+                <p className="text-sm font-bold mb-1" style={{ color: "var(--foreground)" }}>
                   {item.title}
                 </p>
-                <p className="text-xs leading-relaxed" style={{ color: "hsl(220 10% 55%)" }}>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
                   {item.desc}
                 </p>
                 <div className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: item.accent }}>

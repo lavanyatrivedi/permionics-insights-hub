@@ -322,7 +322,7 @@ export default function AssistantPage() {
                     <img src={botAvatar} alt="Assistant" className="w-9 h-9 object-contain" />
                   )}
                 </div>
-                <div className={`max-w-[85%] ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-white dark:bg-card border border-border shadow-sm'} rounded-2xl p-5`}>
+                <div className={`max-w-[85%] ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-white dark:bg-card border border-border shadow-sm text-slate-800 dark:text-slate-100'} rounded-2xl p-5`}>
                   {m.role === 'assistant' ? (
                     <MarkdownContent text={m.content} />
                   ) : (
