@@ -199,7 +199,6 @@ export default function EditorPage({ projectId }: Props) {
             )}
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", color: saveColor, fontWeight: 600 }}>{saveLabel}</span>
             <button
               onClick={() => printCaseStudy()}
               style={{
