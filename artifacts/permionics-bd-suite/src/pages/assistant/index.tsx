@@ -8,6 +8,81 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import botAvatar from "@assets/__(4)_1783575225786.jpeg";
 
+// Lightweight markdown renderer — no external dependency
+function MarkdownContent({ text, className = "" }: { text: string; className?: string }) {
+  const lines = text.split("\n");
+
+  // Parse inline formatting: **bold**, *italic*, `code`
+  function parseInline(line: string): React.ReactNode[] {
+    const parts: React.ReactNode[] = [];
+    const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`/g;
+    let last = 0;
+    let match;
+    let key = 0;
+    while ((match = regex.exec(line)) !== null) {
+      if (match.index > last) parts.push(line.slice(last, match.index));
+      if (match[1] !== undefined) parts.push(<strong key={key++} className="font-semibold">{match[1]}</strong>);
+      else if (match[2] !== undefined) parts.push(<em key={key++}>{match[2]}</em>);
+      else if (match[3] !== undefined) parts.push(<code key={key++} className="bg-muted px-1 py-0.5 rounded text-[13px] font-mono">{match[3]}</code>);
+      last = regex.lastIndex;
+    }
+    if (last < line.length) parts.push(line.slice(last));
+    return parts;
+  }
+
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Heading: ### or ## or #
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const content = parseInline(headingMatch[2]);
+      const cls = level === 1 ? "text-lg font-bold mt-3 mb-1" : level === 2 ? "text-base font-bold mt-2 mb-1" : "text-sm font-semibold mt-2 mb-0.5";
+      elements.push(<p key={i} className={cls}>{content}</p>);
+      i++; continue;
+    }
+
+    // Unordered bullet: * item or - item
+    if (/^[\*\-]\s+/.test(line)) {
+      const items: React.ReactNode[] = [];
+      while (i < lines.length && /^[\*\-]\s+/.test(lines[i])) {
+        const text = lines[i].replace(/^[\*\-]\s+/, "");
+        items.push(<li key={i} className="ml-4 list-disc">{parseInline(text)}</li>);
+        i++;
+      }
+      elements.push(<ul key={`ul-${i}`} className="my-1 space-y-0.5">{items}</ul>);
+      continue;
+    }
+
+    // Numbered list: 1. item
+    if (/^\d+\.\s+/.test(line)) {
+      const items: React.ReactNode[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+        const text = lines[i].replace(/^\d+\.\s+/, "");
+        items.push(<li key={i} className="ml-4 list-decimal">{parseInline(text)}</li>);
+        i++;
+      }
+      elements.push(<ol key={`ol-${i}`} className="my-1 space-y-0.5">{items}</ol>);
+      continue;
+    }
+
+    // Empty line → spacer
+    if (line.trim() === "") {
+      elements.push(<div key={i} className="h-2" />);
+      i++; continue;
+    }
+
+    // Regular paragraph
+    elements.push(<p key={i} className="leading-relaxed">{parseInline(line)}</p>);
+    i++;
+  }
+
+  return <div className={`text-[15px] space-y-0.5 ${className}`}>{elements}</div>;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -228,9 +303,11 @@ export default function AssistantPage() {
                   )}
                 </div>
                 <div className={`max-w-[85%] ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-white dark:bg-card border border-border shadow-sm'} rounded-2xl p-5`}>
-                  <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-medium">
-                    {m.content}
-                  </p>
+                  {m.role === 'assistant' ? (
+                    <MarkdownContent text={m.content} />
+                  ) : (
+                    <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-medium">{m.content}</p>
+                  )}
                   
                   {m.contextSummary && m.contextSummary.total > 0 && (
                     <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center text-xs text-muted-foreground">
