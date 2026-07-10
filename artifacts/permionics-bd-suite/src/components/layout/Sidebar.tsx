@@ -29,7 +29,18 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebar-expanded");
+      return saved !== null ? saved === "true" : true; // default: expanded
+    }
+    return true;
+  });
+
+  const toggleExpanded = (value: boolean) => {
+    setExpanded(value);
+    localStorage.setItem("sidebar-expanded", String(value));
+  };
   const [location, setLocation] = useLocation();
   const logout = useLogout();
   const { toast } = useToast();
@@ -234,7 +245,7 @@ export function Sidebar() {
         {/* Collapse toggle */}
         {expanded ? (
           <button
-            onClick={() => setExpanded(false)}
+            onClick={() => toggleExpanded(false)}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
             title="Collapse sidebar"
           >
@@ -245,7 +256,7 @@ export function Sidebar() {
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setExpanded(true)}
+                onClick={() => toggleExpanded(true)}
                 className="flex items-center justify-center w-full h-10 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-all border-0 cursor-pointer"
                 title="Expand sidebar"
               >
