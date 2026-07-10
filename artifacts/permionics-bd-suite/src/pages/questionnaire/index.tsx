@@ -450,7 +450,7 @@ export default function QuestionnairePage() {
           </div>
 
           {sectorState.sections.length === 0 && sectorState.questions.length === 0 && (
-            <div className="text-center py-16 border border-dashed rounded-xl bg-white">
+            <div className="text-center py-16 border border-dashed rounded-xl bg-card">
               <ClipboardList className="w-8 h-8 mx-auto text-muted-foreground/40 mb-3" />
               <p className="text-muted-foreground">No sections yet. Click "Add Section" to start building.</p>
             </div>
@@ -482,7 +482,7 @@ export default function QuestionnairePage() {
 
           {/* Unsectioned questions */}
           {sectorState.questions.filter((q) => !q.sectionId).length > 0 && (
-            <div className="mt-4 bg-white border border-border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div className="mt-4 bg-card border border-border rounded-lg shadow-sm overflow-hidden mb-6">
               <div className="bg-secondary/30 p-3 border-b border-border">
                 <h3 className="text-sm font-semibold text-primary">Other Questions</h3>
               </div>

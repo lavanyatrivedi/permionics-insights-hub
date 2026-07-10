@@ -470,7 +470,9 @@ export default function AssistantPage() {
                   ) : (
                     documents.map(doc => (
                       <div key={doc.id} className={`flex items-center justify-between border p-3 rounded-lg shadow-sm ${
-                        doc.hasContent ? 'bg-white' : 'bg-amber-50 border-amber-200'
+                        doc.hasContent 
+                          ? 'bg-card text-foreground border-border' 
+                          : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-300'
                       }`}>
                         <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
                           {doc.hasContent ? (
@@ -480,7 +482,7 @@ export default function AssistantPage() {
                           )}
                           <div className="truncate text-sm font-medium">{doc.title}</div>
                           {!doc.hasContent && (
-                            <span className="text-[10px] bg-amber-100 text-amber-700 border border-amber-200 rounded px-1.5 py-0.5 flex-shrink-0">No text</span>
+                            <span className="text-[10px] bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 rounded px-1.5 py-0.5 flex-shrink-0">No text</span>
                           )}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
@@ -488,7 +490,7 @@ export default function AssistantPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 text-xs text-amber-700 hover:text-amber-900 hover:bg-amber-100 px-2"
+                              className="h-7 text-xs text-amber-700 hover:text-amber-900 hover:bg-amber-100 dark:text-amber-400 dark:hover:text-amber-300 dark:hover:bg-amber-950/40 px-2"
                               disabled={reprocessingId === doc.id}
                               onClick={() => handleReprocessClick(doc.id)}
                               title="Re-upload and OCR this document with Gemini Vision"

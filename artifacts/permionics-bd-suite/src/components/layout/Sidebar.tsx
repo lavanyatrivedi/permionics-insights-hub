@@ -66,13 +66,13 @@ export function Sidebar() {
 
   return (
     <div
-      className={`sidebar-transition flex h-screen flex-col print-hide flex-shrink-0 ${
+      className={`sidebar-transition flex h-screen flex-col print-hide flex-shrink-0 relative ${
         expanded ? "w-56" : "w-[72px]"
       }`}
       style={{ background: "hsl(var(--sidebar))" }}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
+      <div className="flex h-16 items-center px-4 border-b relative" style={{ borderColor: "hsl(var(--sidebar-border))" }}>
         <Link href="~/">
           <div className="flex items-center gap-3 cursor-pointer group">
             <img src={osmosLogo} alt="OSMOS" className="h-8.5 w-8.5 object-contain flex-shrink-0" />
@@ -86,15 +86,15 @@ export function Sidebar() {
           </div>
         </Link>
 
-        {/* Toggle button */}
+        {/* Toggle button - positioned absolutely on the right border */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all hover:bg-white/10"
-          style={{ color: "hsl(var(--sidebar-foreground))" }}
+          className="absolute -right-3 top-5 w-6 h-6 rounded-full flex items-center justify-center transition-all shadow-md border-0 cursor-pointer bg-[#182235] text-white hover:bg-[#202d44] hover:scale-105"
+          style={{ zIndex: 50 }}
           title={expanded ? "Collapse sidebar" : "Expand sidebar"}
         >
           <ChevronRight
-            className={`w-4 h-4 transition-transform duration-250 ${expanded ? "rotate-180" : ""}`}
+            className={`w-3.5 h-3.5 transition-transform duration-250 ${expanded ? "rotate-180" : ""}`}
           />
         </button>
       </div>

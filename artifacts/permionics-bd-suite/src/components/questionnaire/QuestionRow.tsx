@@ -71,7 +71,7 @@ export function QuestionRow({
 
   return (
     <div
-      className="flex items-start gap-3 p-3 bg-white border border-border rounded-md hover:border-primary/40 transition-colors group relative"
+      className="flex items-start gap-3 p-3 bg-card border border-border rounded-md hover:border-primary/40 transition-colors group relative"
       draggable
       onDragStart={(e) => onDragStart(e, question.id)}
       onDragOver={(e) => onDragOver(e, question.id)}

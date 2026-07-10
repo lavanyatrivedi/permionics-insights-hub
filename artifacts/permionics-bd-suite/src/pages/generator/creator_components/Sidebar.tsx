@@ -77,10 +77,10 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
     { id: "style", label: "Style" },
   ];
 
-  const inp = "w-full text-[11px] px-2 py-1.5 border border-gray-200 rounded-md bg-white text-gray-800 outline-none focus:border-[#1A5FA8] focus:ring-1 focus:ring-[#1A5FA8] transition-colors";
+  const inp = "w-full text-[11px] px-2 py-1.5 border border-border rounded-md bg-card text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
   const ta = inp + " resize-y font-mono";
-  const lbl = "text-[10px] font-medium text-gray-500 mb-0.5 block";
-  const sec = "text-[9px] font-semibold uppercase tracking-widest text-[#1A5FA8] border-b-2 border-[#1A5FA8] pb-1 mt-3 mb-2";
+  const lbl = "text-[10px] font-medium text-muted-foreground mb-0.5 block";
+  const sec = "text-[9px] font-semibold uppercase tracking-widest text-primary border-b-2 border-primary pb-1 mt-3 mb-2";
   const sel = inp + " cursor-pointer";
 
   function PhotoControls({
@@ -168,10 +168,10 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-shrink-0 border-b border-gray-200 bg-gray-50 overflow-x-auto">
+      <div className="flex flex-shrink-0 border-b border-border bg-muted/40 overflow-x-auto">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 py-2 text-[10px] font-medium border-b-2 transition-colors whitespace-nowrap px-1 ${tab === t.id ? "text-[#1A5FA8] border-[#1A5FA8]" : "text-gray-400 border-transparent hover:text-gray-600"}`}>
+            className={`flex-1 py-2 text-[10px] font-medium border-b-2 transition-colors whitespace-nowrap px-1 border-0 cursor-pointer ${tab === t.id ? "text-primary border-primary font-bold" : "text-muted-foreground border-transparent hover:text-foreground"}`}>
             {t.label}
           </button>
         ))}
@@ -256,7 +256,7 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
         {/* STYLE TAB */}
         {tab === "style" && <>
           <div className={sec}>Colour Palette</div>
-          <p className="text-[10px] text-gray-500 leading-relaxed mb-1">Choose a colour scheme for the case study. Changes are reflected instantly in the preview.</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mb-1">Choose a colour scheme for the case study. Changes are reflected instantly in the preview.</p>
           <div className="flex flex-col gap-2">
             {PALETTES.map((p: Palette) => (
               <button
@@ -267,9 +267,9 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
                   alignItems: "center",
                   gap: "10px",
                   padding: "10px 12px",
-                  border: palette === p.id ? `2px solid ${p.accent}` : "2px solid #e5e7eb",
+                  border: palette === p.id ? `2px solid ${p.accent}` : "2px solid var(--border)",
                   borderRadius: "8px",
-                  background: palette === p.id ? p.light : "white",
+                  background: palette === p.id ? p.light : "var(--card)",
                   cursor: "pointer",
                   textAlign: "left",
                   transition: "all 0.15s",
@@ -281,7 +281,7 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
                   <div style={{ width: "20px", height: "20px", borderRadius: "50%", background: p.light, border: "1px solid rgba(0,0,0,0.1)" }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px", fontWeight: palette === p.id ? 700 : 500, color: palette === p.id ? p.primary : "#374151" }}>{p.name}</div>
+                  <div style={{ fontSize: "12px", fontWeight: palette === p.id ? 700 : 500, color: palette === p.id ? p.primary : "var(--foreground)" }}>{p.name}</div>
                 </div>
                 {palette === p.id && (
                   <div style={{ marginLeft: "auto" }}>
@@ -295,7 +295,7 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
           </div>
 
           <div className={sec} style={{ marginTop: "16px" }}>Inline Editing</div>
-          <p className="text-[10px] text-gray-500 leading-relaxed mb-1">When click-to-edit is on, you can click directly on text in the preview to edit it in place.</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mb-1">When click-to-edit is on, you can click directly on text in the preview to edit it in place.</p>
           <button
             onClick={onToggleEditable}
             style={{
@@ -303,15 +303,15 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
               alignItems: "center",
               justifyContent: "space-between",
               padding: "10px 12px",
-              border: editableMode ? "2px solid #f59e0b" : "2px solid #e5e7eb",
+              border: editableMode ? "2px solid #f59e0b" : "2px solid var(--border)",
               borderRadius: "8px",
-              background: editableMode ? "#fef3c7" : "white",
+              background: editableMode ? "#fef3c7" : "var(--card)",
               cursor: "pointer",
               width: "100%",
               transition: "all 0.15s",
             }}
           >
-            <span style={{ fontSize: "12px", fontWeight: 600, color: editableMode ? "#92400e" : "#374151" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: editableMode ? "#92400e" : "var(--foreground)" }}>
               Click-to-edit mode
             </span>
             <div style={{
@@ -332,11 +332,11 @@ export function Sidebar({ data, palette, onPaletteChange, onChange, onPrint, onB
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-3 border-t border-gray-200 flex flex-col gap-2 bg-gray-50">
+      <div className="flex-shrink-0 p-3 border-t border-border flex flex-col gap-2 bg-muted/40">
         <button
           onClick={onPrint}
-          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2 px-4 rounded-md transition-colors hover:opacity-90"
-          style={{ background: "#003466" }}
+          className="w-full flex items-center justify-center gap-2 text-white text-[12px] font-medium py-2 px-4 rounded-md transition-colors hover:opacity-90 border-0 cursor-pointer animate-none"
+          style={{ background: "var(--primary)" }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" />

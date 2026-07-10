@@ -73,7 +73,7 @@ export function SectionBlock({
   };
 
   return (
-    <div className="bg-white border border-border rounded-lg shadow-sm overflow-hidden mb-6">
+    <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden mb-6">
       <div className="bg-secondary/30 flex items-center justify-between p-2 pl-3 border-b border-border group">
         <div className="flex items-center gap-2 flex-1">
           <button
@@ -134,7 +134,7 @@ export function SectionBlock({
       {section.isExpanded && (
         <div className="p-4 space-y-3 bg-muted/5">
           {questions.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-border rounded-md bg-white">
+            <div className="text-center py-6 border border-dashed border-border rounded-md bg-card">
               <p className="text-sm text-muted-foreground">No questions in this section.</p>
             </div>
           ) : (

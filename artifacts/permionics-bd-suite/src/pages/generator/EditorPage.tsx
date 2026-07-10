@@ -120,8 +120,8 @@ export default function EditorPage({ projectId }: Props) {
 
   if (isLoading || !data) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f4f8" }}>
-        <div style={{ color: "#94a3b8", fontSize: "13px" }}>Loading project...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--background)" }}>
+        <div style={{ color: "var(--muted-foreground)", fontSize: "13px" }}>Loading project...</div>
       </div>
     );
   }
@@ -131,16 +131,17 @@ export default function EditorPage({ projectId }: Props) {
   const saveColor = saveStatus === "saving" ? "#f59e0b" : saveStatus === "saved" ? "#22c55e" : "#ef4444";
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div className="text-foreground" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--background)" }}>
       {/* Collapsible sidebar */}
       <div style={{
         flexShrink: 0,
         width: sidebarCollapsed ? "0px" : "320px",
         overflow: "hidden",
         transition: "width 0.25s ease",
-        borderRight: sidebarCollapsed ? "none" : "1px solid #e5e7eb",
+        borderRight: sidebarCollapsed ? "none" : "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
+        background: "var(--card)",
       }}>
         {!sidebarCollapsed && (
           <Sidebar
@@ -162,7 +163,7 @@ export default function EditorPage({ projectId }: Props) {
       </div>
 
       {/* Preview area */}
-      <div style={{ flex: 1, overflowY: "auto", background: "#dde3ea", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 16px", gap: "10px", minWidth: 0 }}>
+      <div style={{ flex: 1, overflowY: "auto", background: "var(--background)", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 16px", gap: "10px", minWidth: 0 }}>
         {/* Top bar */}
         <div style={{ width: "100%", maxWidth: "860px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -171,20 +172,24 @@ export default function EditorPage({ projectId }: Props) {
               onClick={() => setSidebarCollapsed((v) => !v)}
               title={sidebarCollapsed ? "Show panel" : "Collapse panel"}
               style={{
-                width: "32px", height: "32px", border: "none", borderRadius: "6px",
-                background: "rgba(255,255,255,0.7)", backdropFilter: "blur(4px)",
+                width: "32px", height: "32px", borderRadius: "6px",
+                background: "var(--card)", border: "1px solid var(--border)",
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, color: "#64748b",
+                flexShrink: 0, color: "var(--muted-foreground)",
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
-            <div style={{ fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#666", fontWeight: 600 }}>OSMOS</div>
-            <div style={{ width: "1px", height: "16px", background: "#ccc" }} />
+            <span style={{ fontSize: "11px", fontWeight: 700, color: saveColor, display: "flex", alignItems: "center", gap: "4px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: saveColor }} />
+              {saveLabel}
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "1px", height: "16px", background: "var(--border)" }} />
             <span style={{ fontSize: "12px", color: "#666", fontWeight: 500 }}>Live Preview</span>
             {editableMode && (
               <span style={{ fontSize: "11px", background: "#fef3c7", color: "#92400e", padding: "2px 8px", borderRadius: "20px", fontWeight: 600, border: "1px solid #fcd34d" }}>
