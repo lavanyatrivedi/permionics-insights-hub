@@ -88,7 +88,7 @@ export default function SettingsPage() {
                 Change Password
               </CardTitle>
               <CardDescription>
-                Update the master access passphrase for the BD Suite.
+                Update the master access password for the BD Suite.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
                     name="currentPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Passphrase</FormLabel>
+                        <FormLabel>Current Password</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -112,7 +112,7 @@ export default function SettingsPage() {
                     name="newPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>New Passphrase</FormLabel>
+                        <FormLabel>New Password</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm New Passphrase</FormLabel>
+                        <FormLabel>Confirm New Password</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>

@@ -261,6 +261,20 @@
   66%       { transform: translateY(3px) scale(0.97); }
 }
 
+@keyframes blob-random-move-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  25% { transform: translate(40px, -60px) scale(1.1); }
+  50% { transform: translate(-50px, 30px) scale(0.92); }
+  75% { transform: translate(30px, 50px) scale(1.06); }
+}
+
+@keyframes blob-random-move-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  30% { transform: translate(-60px, 50px) scale(0.88); }
+  60% { transform: translate(50px, -30px) scale(1.14); }
+  80% { transform: translate(-30px, -50px) scale(0.94); }
+}
+
 @keyframes blob-rotate {
   from { filter: hue-rotate(0deg); }
   to   { filter: hue-rotate(30deg); }
