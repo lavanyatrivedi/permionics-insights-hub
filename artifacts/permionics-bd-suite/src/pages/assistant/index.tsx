@@ -17,6 +17,7 @@ interface Message {
     caseStudies: number;
     creatorProjects: number;
     total: number;
+    mode?: string;
   };
 }
 
@@ -194,22 +195,25 @@ export default function AssistantPage() {
                   
                   {m.contextSummary && m.contextSummary.total > 0 && (
                     <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center text-xs text-muted-foreground">
-                      <span className="font-semibold mr-1">Context sources:</span>
+                      <span className="font-semibold mr-1">Searched:</span>
                       {m.contextSummary.uploadedDocs > 0 && (
                         <span className="bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full">
-                          {m.contextSummary.uploadedDocs} Uploaded PDF{m.contextSummary.uploadedDocs !== 1 ? 's' : ''}
+                          {m.contextSummary.uploadedDocs} PDF{m.contextSummary.uploadedDocs !== 1 ? 's' : ''}
                         </span>
                       )}
                       {m.contextSummary.caseStudies > 0 && (
                         <span className="bg-violet-50 text-violet-700 border border-violet-100 px-2 py-0.5 rounded-full">
-                          {m.contextSummary.caseStudies} Library Case{m.contextSummary.caseStudies !== 1 ? 's' : ''}
+                          {m.contextSummary.caseStudies} Library
                         </span>
                       )}
                       {m.contextSummary.creatorProjects > 0 && (
                         <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full">
-                          {m.contextSummary.creatorProjects} Creator Project{m.contextSummary.creatorProjects !== 1 ? 's' : ''}
+                          {m.contextSummary.creatorProjects} Projects
                         </span>
                       )}
+                      <span className="bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 rounded-full font-medium">
+                        {m.contextSummary.mode === 'broad_sweep' ? '📚 Full scan' : '🎯 Targeted'}
+                      </span>
                     </div>
                   )}
                   

@@ -8,41 +8,45 @@ const router: IRouter = Router();
 const apiKey = process.env["GROQ_API_KEY"] ?? "";
 const groq = new Groq({ apiKey });
 
-// List of common English stop words and general UI/context words to exclude from keyword scoring
+// Stop words — excluded from keyword scoring so they don't inflate irrelevant docs
 const STOP_WORDS = new Set([
-  "what", "where", "how", "why", "when", "who", "which", "whose", "whom", 
-  "that", "this", "these", "those", "have", "has", "had", "do", "does", "did", 
-  "shall", "will", "should", "would", "may", "might", "must", "can", "could", 
-  "about", "above", "across", "after", "against", "along", "among", "around", "at", 
-  "before", "behind", "below", "beneath", "beside", "between", "beyond", "but", "by", 
-  "down", "during", "except", "for", "from", "in", "inside", "into", "like", "near", 
-  "of", "off", "on", "onto", "out", "outside", "over", "past", "through", "throughout", 
-  "till", "to", "toward", "under", "underneath", "until", "up", "upon", "with", "within", 
-  "without", "give", "show", "tell", "summarize", "summary", "case", "study", "studies", 
-  "project", "projects", "client", "clients", "information", "detail", "details", 
-  "document", "documents", "file", "files", "pdf", "pdfs", "please", "you", "our", 
-  "their", "them", "they", "we", "us", "i", "a", "an", "the", "and", "or", "but", "is", 
+  "what", "where", "how", "why", "when", "who", "which", "whose", "whom",
+  "that", "this", "these", "those", "have", "has", "had", "do", "does", "did",
+  "shall", "will", "should", "would", "may", "might", "must", "can", "could",
+  "about", "above", "across", "after", "against", "along", "among", "around", "at",
+  "before", "behind", "below", "beneath", "beside", "between", "beyond", "but", "by",
+  "down", "during", "except", "for", "from", "in", "inside", "into", "like", "near",
+  "of", "off", "on", "onto", "out", "outside", "over", "past", "through", "throughout",
+  "till", "to", "toward", "under", "underneath", "until", "up", "upon", "with", "within",
+  "without", "give", "show", "tell", "summarize", "summary", "all", "list",
+  "document", "documents", "file", "files", "pdf", "pdfs", "please", "you", "our",
+  "their", "them", "they", "we", "us", "i", "a", "an", "the", "and", "or", "but", "is",
   "are", "was", "were", "be", "been", "being", "get", "got", "make", "made", "take", "took"
 ]);
 
-// Helper to compute keyword relevance score
+// Compute keyword relevance score for a chunk of text
 function computeRelevanceScore(text: string, searchTerms: string[]): number {
   if (!text || searchTerms.length === 0) return 0;
   const lowerText = text.toLowerCase();
   let score = 0;
-  
   searchTerms.forEach(term => {
-    // Exact word boundary matching gets very high weight (10 points)
-    const regex = new RegExp(`\\b${term}\\b`, 'g');
-    const wordMatches = lowerText.match(regex);
-    if (wordMatches) {
-      score += wordMatches.length * 10;
+    const regex = new RegExp(`\\b${term}\\b`, "g");
+    const matches = lowerText.match(regex);
+    if (matches) {
+      score += matches.length * 10; // strong: exact word boundary
     } else if (lowerText.includes(term)) {
-      // Substring match gets low weight (2 points)
-      score += 2;
+      score += 2; // weak: substring
     }
   });
   return score;
+}
+
+// Safe truncate at a word boundary
+function safeTruncate(text: string, maxChars: number): string {
+  if (!text) return "";
+  if (text.length <= maxChars) return text;
+  const cut = text.lastIndexOf(" ", maxChars);
+  return (cut > 0 ? text.slice(0, cut) : text.slice(0, maxChars)) + "…";
 }
 
 router.post("/chat", requireAuth, async (req, res): Promise<void> => {
@@ -54,144 +58,154 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       return;
     }
 
-    // Extract search terms (words of length >= 3, excluding common stop words)
+    // Extract meaningful search terms
     const searchTerms = message
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
       .filter((w: string) => w.length >= 3 && !STOP_WORDS.has(w));
 
-    // ── 1. Pull all uploaded PDF documents ─────────────────────────────────
-    const { data: uploadedDocs } = await supabase
-      .from("assistant_documents")
-      .select("id, title, content, created_at")
-      .order("created_at", { ascending: false });
+    // ── 1. Fetch ALL documents from all sources ─────────────────────────────
+    const [uploadsResult, caseStudiesResult, creatorResult] = await Promise.all([
+      supabase
+        .from("assistant_documents")
+        .select("id, title, content, created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("case_studies")
+        .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text, updated_at")
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("case_creator_projects")
+        .select("id, name, data, updated_at")
+        .order("updated_at", { ascending: false }),
+    ]);
 
-    // ── 2. Pull all case studies from the Library ───────────────────────────
-    const { data: caseStudies } = await supabase
-      .from("case_studies")
-      .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text, updated_at")
-      .order("updated_at", { ascending: false });
+    const uploadedDocs = uploadsResult.data ?? [];
+    const caseStudies = caseStudiesResult.data ?? [];
+    const creatorProjects = creatorResult.data ?? [];
 
-    // ── 3. Pull all Case Study Creator projects ─────────────────────────────
-    const { data: creatorProjects } = await supabase
-      .from("case_creator_projects")
-      .select("id, name, data, updated_at")
-      .order("updated_at", { ascending: false });
+    // ── 2. Build scored items ────────────────────────────────────────────────
+    interface ScoredItem {
+      id: string;
+      type: "uploaded" | "library" | "creator";
+      title: string;
+      fullContent: string;
+      score: number;
+    }
+    const allItems: ScoredItem[] = [];
 
-    // ── 4. Score all documents in the entire database ───────────────────────
-    const allScoredItems: any[] = [];
-
-    // Score uploaded PDFs
-    (uploadedDocs ?? []).forEach(doc => {
-      const score = computeRelevanceScore(`${doc.title} ${doc.content}`, searchTerms);
-      allScoredItems.push({
-        id: doc.id,
-        type: "uploaded",
-        title: doc.title,
-        content: doc.content,
-        score,
-        date: doc.created_at || ""
-      });
+    uploadedDocs.forEach(doc => {
+      const fullContent = `DOCUMENT: ${doc.title}\n${doc.content}`;
+      const score = computeRelevanceScore(fullContent, searchTerms);
+      allItems.push({ id: String(doc.id), type: "uploaded", title: doc.title, fullContent, score });
     });
 
-    // Score Library Case Studies
-    (caseStudies ?? []).forEach(cs => {
-      const fullTextToSearch = `${cs.client_name} ${cs.sector} ${cs.challenge} ${cs.solution} ${cs.results} ${cs.full_text} ${cs.technology_stack}`;
-      const score = computeRelevanceScore(fullTextToSearch, searchTerms);
-      
-      let formatted = `CLIENT: ${cs.client_name || "Unnamed"}
-SECTOR: ${cs.sector || "Unknown"}
-LOCATION: ${cs.location || ""}
-CAPACITY: ${cs.capacity || ""}
-TECH STACK: ${cs.technology_stack || ""}
-CHALLENGE: ${cs.challenge || ""}
-SOLUTION: ${cs.solution || ""}
-RESULTS: ${cs.results || ""}
-TESTIMONIAL: ${cs.testimonial || ""}
-DETAILS: ${cs.full_text || ""}`;
-
-      allScoredItems.push({
-        id: String(cs.id),
-        type: "library",
-        title: cs.client_name,
-        content: formatted,
-        score,
-        date: cs.updated_at || ""
-      });
+    caseStudies.forEach(cs => {
+      const fullContent = [
+        `CLIENT: ${cs.client_name || ""}`,
+        `SECTOR: ${cs.sector || ""}`,
+        `LOCATION: ${cs.location || ""}`,
+        `CAPACITY: ${cs.capacity || ""}`,
+        `TECH: ${cs.technology_stack || ""}`,
+        `CHALLENGE: ${cs.challenge || ""}`,
+        `SOLUTION: ${cs.solution || ""}`,
+        `RESULTS: ${cs.results || ""}`,
+        `TESTIMONIAL: ${cs.testimonial || ""}`,
+        `DETAIL: ${cs.full_text || ""}`,
+      ].join("\n");
+      const score = computeRelevanceScore(fullContent, searchTerms);
+      allItems.push({ id: String(cs.id), type: "library", title: cs.client_name || "Unnamed", fullContent, score });
     });
 
-    // Score Creator Projects
-    (creatorProjects ?? []).forEach(proj => {
+    creatorProjects.forEach(proj => {
       if (!proj.data) return;
       const d = proj.data as any;
-      const fullTextToSearch = `${proj.name} ${d.client} ${d.sector} ${d.challenge} ${d.solution} ${d.application} ${d.capacity} ${(d.bullets || []).join(" ")}`;
-      const score = computeRelevanceScore(fullTextToSearch, searchTerms);
-
-      let formatted = `PROJECT: ${proj.name}
-CLIENT: ${d.client || ""}
-SECTOR: ${d.sector || ""}
-APPLICATION: ${d.application || ""}
-CAPACITY: ${d.capacity || ""}
-CHALLENGE: ${d.challenge || ""}
-SOLUTION: ${d.solution || ""}
-KEY OUTCOMES: ${(d.bullets || []).join(" | ")}
-TECHNOLOGIES: ${(d.technologies || []).join(", ")}`;
-
-      allScoredItems.push({
-        id: String(proj.id),
-        type: "creator",
-        title: proj.name,
-        content: formatted,
-        score,
-        date: proj.updated_at || ""
-      });
+      const fullContent = [
+        `PROJECT: ${proj.name}`,
+        `CLIENT: ${d.client || ""}`,
+        `SECTOR: ${d.sector || ""}`,
+        `APPLICATION: ${d.application || ""}`,
+        `CAPACITY: ${d.capacity || ""}`,
+        `CHALLENGE: ${d.challenge || ""}`,
+        `SOLUTION: ${d.solution || ""}`,
+        `OUTCOMES: ${(d.bullets || []).join(" | ")}`,
+        `TECH: ${(d.technologies || []).join(", ")}`,
+      ].join("\n");
+      const score = computeRelevanceScore(fullContent, searchTerms);
+      allItems.push({ id: String(proj.id), type: "creator", title: proj.name, fullContent, score });
     });
 
-    // ── 5. Select the best context matches ─────────────────────────────────
-    const selectedItemsMap = new Map<string, any>();
+    // ── 3. Two-mode context building ─────────────────────────────────────────
+    //
+    // MODE A — Broad query (≤1 meaningful search term):
+    //   Include ALL documents but with a short 250-char snippet each.
+    //   This covers "summarize capabilities", "list all case studies", etc.
+    //
+    // MODE B — Specific query (≥2 meaningful search terms):
+    //   Score every document and pick the top 6 highest-scoring ones,
+    //   giving each 1500 chars so the AI has rich detail to answer from.
+    //
+    // Both modes stay well within Groq's 128k context window and TPM limits.
 
-    // A. Add high-relevance matched items first (score > 0)
-    // Sort all scored items descending by relevance
-    const rankedMatches = allScoredItems
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score);
+    let contextBlocks: string[] = [];
+    let modeLabel: string;
 
-    // Pick top 4 best matches from the entire database
-    const topMatches = rankedMatches.slice(0, 4);
-    topMatches.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+    if (searchTerms.length <= 1) {
+      // ── MODE A: broad sweep ─────────────────────────────────────────────
+      modeLabel = "broad_sweep";
+      allItems.forEach((item, i) => {
+        contextBlocks.push(
+          `--- [${i + 1}] ${item.title} (${item.type.toUpperCase()}) ---\n${safeTruncate(item.fullContent, 300)}`
+        );
+      });
+    } else {
+      // ── MODE B: keyword-ranked deep dive ───────────────────────────────
+      modeLabel = "keyword_ranked";
+      const ranked = [...allItems].sort((a, b) => b.score - a.score);
 
-    // B. If context space permits, fill the remaining space with the most recent entries
-    if (selectedItemsMap.size < 3) {
-      // Pull recent uploaded document
-      const recentUpload = allScoredItems.filter(item => item.type === "uploaded" && !selectedItemsMap.has(`${item.type}-${item.id}`)).slice(0, 1);
-      recentUpload.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+      // Top 6 by relevance score (can be from any source)
+      const topRanked = ranked.filter(r => r.score > 0).slice(0, 6);
 
-      // Pull recent library case
-      const recentLib = allScoredItems.filter(item => item.type === "library" && !selectedItemsMap.has(`${item.type}-${item.id}`)).slice(0, 1);
-      recentLib.forEach(item => selectedItemsMap.set(`${item.type}-${item.id}`, item));
+      // If fewer than 3 matched, pad with most recent uploads (so at least uploads are seen)
+      if (topRanked.length < 3) {
+        const recentUploads = uploadedDocs
+          .slice(0, 5)
+          .filter(doc => !topRanked.find(r => r.id === String(doc.id)));
+        recentUploads.forEach(doc => {
+          topRanked.push({
+            id: String(doc.id),
+            type: "uploaded",
+            title: doc.title,
+            fullContent: `DOCUMENT: ${doc.title}\n${doc.content}`,
+            score: 0,
+          });
+        });
+      }
+
+      const selected = topRanked.slice(0, 6);
+      selected.forEach((item, i) => {
+        contextBlocks.push(
+          `--- [${i + 1}] ${item.title} (${item.type.toUpperCase()}) ---\n${safeTruncate(item.fullContent, 1500)}`
+        );
+      });
     }
 
-    const finalSelectedItems = Array.from(selectedItemsMap.values());
-
-    // ── 6. Build system prompt ──────────────────────────────────────────────
-    let systemContext = `You are OSMOS BD Assistant — an expert Business Development AI for Permionics Membranes Pvt. Ltd., a leading membrane technology company specialising in Reverse Osmosis (RO), Ultrafiltration (UF), Nanofiltration (NF), MBR, and Zero Liquid Discharge (ZLD) systems.
+    // ── 4. Build system prompt ──────────────────────────────────────────────
+    const systemContext = `You are OSMOS BD Assistant — an expert Business Development AI for Permionics Membranes Pvt. Ltd., a leading membrane technology company specialising in Reverse Osmosis (RO), Ultrafiltration (UF), Nanofiltration (NF), MBR, and Zero Liquid Discharge (ZLD) systems.
 
 Your role:
 - Answer questions about past projects, technical capabilities, and client outcomes using the provided reference documents.
-- If a specific case isn't in the reference documents, say so clearly and suggest what general capability data is available.
+- When answering broad questions, synthesise information across ALL provided documents.
+- When answering specific questions, focus on the most relevant documents and quote exact metrics/numbers where available.
+- Always cite the document title or client name when you reference it.
+- If you cannot find specific information, say so clearly.
 
-Always be concise, professional, and specific. Prefer bullet points for technical specs. Cite client names and capacity numbers from the reference documents.`;
+REFERENCE DOCUMENTS (${modeLabel === "broad_sweep" ? `ALL ${allItems.length} documents — brief excerpts` : `Top ${contextBlocks.length} most relevant documents — detailed`}):
 
-    if (finalSelectedItems.length > 0) {
-      systemContext += `\n\nUse the following provided reference documents (most relevant to the user query) to answer the user's questions:\n`;
-      finalSelectedItems.forEach((item, idx) => {
-        // Keep document snippet size safe (max 2500 chars) to prevent context token overflow
-        systemContext += `\n--- Document ${idx + 1}: ${item.title} (${item.type.toUpperCase()}) ---\n${item.content.slice(0, 2500)}\n`;
-      });
-    }
+${contextBlocks.join("\n\n")}`;
 
-    // ── 7. Build messages ───────────────────────────────────────────────────
+    // ── 5. Call Groq ────────────────────────────────────────────────────────
     const messages = [
       { role: "system", content: systemContext },
       ...history.slice(-6).map((h: any) => ({
@@ -205,13 +219,13 @@ Always be concise, professional, and specific. Prefer bullet points for technica
       messages: messages as any,
       model: "llama-3.3-70b-versatile",
       stream: false,
-      max_tokens: 1000,
+      max_tokens: 1200,
       temperature: 0.3,
     });
 
     const fullResponse = completion.choices[0]?.message?.content || "No response generated.";
 
-    // Save to chat history
+    // ── 6. Save to chat history ─────────────────────────────────────────────
     try {
       await supabase.from("chats").insert([
         { role: "user", content: message },
@@ -225,10 +239,11 @@ Always be concise, professional, and specific. Prefer bullet points for technica
       answer: fullResponse,
       sources: [],
       contextSummary: {
-        uploadedDocs: finalSelectedItems.filter(d => d.type === "uploaded").length,
-        caseStudies: finalSelectedItems.filter(d => d.type === "library").length,
-        creatorProjects: finalSelectedItems.filter(d => d.type === "creator").length,
-        total: finalSelectedItems.length,
+        uploadedDocs: uploadedDocs.length,
+        caseStudies: caseStudies.length,
+        creatorProjects: creatorProjects.length,
+        total: allItems.length,
+        mode: modeLabel,
       },
     });
   } catch (err: any) {
