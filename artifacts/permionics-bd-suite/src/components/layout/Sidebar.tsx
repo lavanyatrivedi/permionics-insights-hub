@@ -9,6 +9,7 @@ import {
   Settings, 
   LogOut,
   ChevronRight,
+  Monitor,
 } from "lucide-react";
 import { useLogout, useGetMe } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/generator", label: "Generator", icon: FileText },
   { href: "/questionnaire", label: "Questionnaire", icon: ClipboardList },
+  { href: "https://pace-permionics.up.railway.app/index.html", label: "PACE", icon: Monitor, external: true },
   { href: "/assistant", label: "Osmos AI", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -81,6 +83,37 @@ export function Sidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
+
+          if (item.external) {
+            return expanded ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-white/60 hover:text-white hover:bg-white/8 cursor-pointer"
+              >
+                <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </a>
+            ) : (
+              <Tooltip key={item.href} delayDuration={200}>
+                <TooltipTrigger asChild>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full h-10 rounded-xl transition-all text-white/50 hover:text-white hover:bg-white/8 cursor-pointer"
+                  >
+                    <Icon className="h-5 w-5" />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-medium">
+                  {item.label}
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
 
           return expanded ? (
             <Link
