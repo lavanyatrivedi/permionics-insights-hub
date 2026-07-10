@@ -50,7 +50,15 @@ interface Msg { role: "user" | "assistant"; content: string; }
 // ── OsmosChat floating component ──────────────────────────────────────────────
 export function OsmosChat() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    try {
+      const saved = localStorage.getItem("osmos_chat_widget_history");
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  });
   const [input, setInput] = useState("");
   const sendChat = useSendChatMessage();
   const { toast } = useToast();
@@ -59,6 +67,10 @@ export function OsmosChat() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem("osmos_chat_widget_history", JSON.stringify(messages));
   }, [messages]);
 
   useEffect(() => {
@@ -132,6 +144,21 @@ export function OsmosChat() {
               <p className="text-[11px] text-white/50">BD Intelligence Assistant</p>
             </div>
             <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (confirm("Clear this conversation?")) {
+                      setMessages([]);
+                    }
+                  }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                  title="Clear conversation"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                  </svg>
+                </button>
+              )}
               <Link href="~/assistant">
                 <button
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"

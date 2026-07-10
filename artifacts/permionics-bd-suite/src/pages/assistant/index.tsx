@@ -105,7 +105,15 @@ interface Document {
 
 export default function AssistantPage() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem("osmos_ai_chat_history");
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  });
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [reprocessingId, setReprocessingId] = useState<string | null>(null);
@@ -123,6 +131,10 @@ export default function AssistantPage() {
 
   useEffect(() => {
     scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem("osmos_ai_chat_history", JSON.stringify(messages));
   }, [messages]);
 
   useEffect(() => {
@@ -258,9 +270,23 @@ export default function AssistantPage() {
             <img src={botAvatar} alt="Osmos AI" className="w-8 h-8 object-contain" />
             Osmos AI
           </h2>
-          <span className="text-primary-foreground/70 text-sm font-medium flex items-center gap-1.5">
-            <Activity className="w-4 h-4" /> Connected to Knowledge Base
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-primary-foreground/70 text-sm font-medium flex items-center gap-1.5">
+              <Activity className="w-4 h-4" /> Connected to Knowledge Base
+            </span>
+            {messages.length > 0 && (
+              <button
+                onClick={() => {
+                  if (confirm("Are you sure you want to clear this conversation?")) {
+                    setMessages([]);
+                  }
+                }}
+                className="text-[11px] font-semibold text-primary-foreground/75 hover:text-white bg-white/10 hover:bg-white/20 transition-all px-2.5 py-1.5 rounded-lg border-0 cursor-pointer"
+              >
+                Clear Chat
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50 dark:bg-background">
