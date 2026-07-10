@@ -4,7 +4,13 @@ import { format } from "date-fns";
 import { customFetch } from "@workspace/api-client-react";
 import { DEFAULT_DATA, PALETTES, getPalette } from "./creator_types";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, ClipboardList } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, FolderOpen, Trash2, MoreVertical, Calendar, ClipboardList } from "lucide-react";
 
 export default function ProjectsPage() {
   const [, navigate] = useLocation();
@@ -70,29 +76,16 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="text-foreground" style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
-
-      {/* Content */}
-      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px" }}>
-
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
+    <div className="min-h-full text-foreground" style={{ background: "hsl(var(--background))" }}>
+      <div className="max-w-5xl mx-auto p-8 space-y-8">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 style={{ fontSize: "26px", fontWeight: 800, color: "var(--foreground)", margin: 0, letterSpacing: "-0.5px" }}>Case Study Projects</h1>
-            <p style={{ fontSize: "13px", color: "var(--muted-foreground)", marginTop: "5px" }}>
-              {projects.length} project{projects.length !== 1 ? "s" : ""} saved
-            </p>
+            <h1 className="text-3xl font-extrabold tracking-tight">Case Study Projects</h1>
+            <p className="text-muted-foreground mt-1">Create and customize structured client case studies with AI assistance.</p>
           </div>
-          <button
-            onClick={() => setIsCreating(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 flex items-center gap-2 cursor-pointer border-0"
-            style={{
-              boxShadow: "0 2px 8px rgba(12,74,140,0.15)",
-            }}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Project
-          </button>
+          <Button onClick={() => setIsCreating(true)}>
+            <Plus className="w-4 h-4 mr-2" /> New Project
+          </Button>
         </div>
 
         {/* Create panel modal */}
@@ -151,16 +144,9 @@ export default function ProjectsPage() {
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleCreate}
-                  disabled={isSubmitting}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 cursor-pointer disabled:opacity-50 border-0"
-                  style={{
-                    boxShadow: "0 2px 8px rgba(12,74,140,0.15)",
-                  }}
-                >
+                <Button onClick={handleCreate} disabled={isSubmitting}>
                   {isSubmitting ? "Creating..." : "Create Project"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -176,87 +162,58 @@ export default function ProjectsPage() {
             <ClipboardList className="w-10 h-10 mx-auto text-muted-foreground/40 mb-4" />
             <p className="font-semibold text-muted-foreground mb-2 text-sm">No projects yet</p>
             <p className="text-xs text-muted-foreground mb-6">Create your first case study to get started.</p>
-            <button
-              onClick={() => setIsCreating(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2.5 rounded-lg text-xs shadow-sm transition-all duration-150 inline-flex items-center gap-1.5 cursor-pointer border-0"
-              style={{
-                boxShadow: "0 2px 8px rgba(12,74,140,0.15)"
-              }}
-            >
+            <Button onClick={() => setIsCreating(true)}>
               <Plus className="w-3.5 h-3.5" />
               Create Project
-            </button>
+            </Button>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "18px" }}>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {(projects ?? []).map((project) => {
               const palette = getPalette(project.palette);
               return (
-                <div
+                <Card
                   key={project.id}
-                  role="button"
-                  tabIndex={0}
-                  style={{
-                    background: "hsl(var(--card))", borderRadius: "14px", overflow: "hidden",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)", border: "1px solid hsl(var(--border))",
-                    transition: "all 0.18s", cursor: "pointer", userSelect: "none",
-                  }}
+                  className="hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
                   onClick={() => openProject(project.id)}
-                  onKeyDown={(e) => e.key === "Enter" && openProject(project.id)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.1)";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.borderColor = palette.primary;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "hsl(var(--border))";
-                  }}
                 >
                   {/* Color bar */}
-                  <div style={{ background: palette.primary, height: "5px" }} />
-
-                  <div style={{ padding: "20px 22px" }}>
-                    {/* Name + delete */}
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "14px" }}>
-                      <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--foreground)", margin: 0, lineHeight: 1.3 }}>{project.name}</h3>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteId(project.id); }}
-                        title="Delete project"
-                        style={{
-                          flexShrink: 0, padding: "5px", border: "none", background: "none",
-                          cursor: "pointer", color: "var(--muted-foreground)", borderRadius: "5px",
-                          transition: "color 0.15s", opacity: 0.5,
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = "#ef4444";
-                          e.currentTarget.style.opacity = "1";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = "var(--muted-foreground)";
-                          e.currentTarget.style.opacity = "0.5";
-                        }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Footer */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-                        <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: palette.primary }} />
-                        <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: palette.accent }} />
-                        <span style={{ fontSize: "11px", color: "var(--muted-foreground)", marginLeft: "5px" }}>{palette.name}</span>
+                  <div style={{ background: palette.primary, height: "4px" }} />
+                  
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-base leading-tight truncate">{project.name}</CardTitle>
+                        <div className="flex items-center gap-1 mt-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ background: palette.primary }} />
+                          <span className="w-2 h-2 rounded-full" style={{ background: palette.accent }} />
+                          <span className="text-[11px] text-muted-foreground ml-1">{palette.name}</span>
+                        </div>
                       </div>
-                      <span style={{ fontSize: "11px", color: "var(--muted-foreground)" }}>
-                        {new Date(project.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                      </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openProject(project.id); }}>
+                            <FolderOpen className="w-4 h-4 mr-2" /> Open
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(project.id); }}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-3 border-t border-border/50">
+                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Updated {format(new Date(project.updated_at), 'MMM d, yyyy')}</span>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

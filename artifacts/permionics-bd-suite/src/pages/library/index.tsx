@@ -36,11 +36,14 @@ export default function LibraryPage() {
   const safeCaseStudies = Array.isArray(caseStudies) ? caseStudies : [];
 
   return (
-    <div className="p-8 pt-6 space-y-6 max-w-[1400px] mx-auto">
+    <div className="max-w-5xl mx-auto p-8 space-y-8 text-foreground">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Case Study Library</h1>
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Case Study Library</h1>
+          <p className="text-muted-foreground mt-1 font-normal text-sm">Browse, filter, and access all client case studies and outcomes.</p>
+        </div>
         <Button onClick={() => setLocation("/generator")}>
-          <Plus className="w-4 h-4 mr-2" /> Add New
+          <Plus className="w-4 h-4 mr-2" /> New Project
         </Button>
       </div>
 

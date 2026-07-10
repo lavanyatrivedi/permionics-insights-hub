@@ -238,13 +238,13 @@ export default function QuestionnairePage() {
   // ── RENDER: Project list ───────────────────────────────────────────────────
   if (view === 'list') {
     return (
-      <div className="max-w-5xl mx-auto p-8 space-y-8">
+      <div className="max-w-5xl mx-auto p-8 space-y-8 text-foreground">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary">Questionnaire Builder</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">Questionnaire Builder</h1>
             <p className="text-muted-foreground mt-1">Build and manage sector-specific technical questionnaires for clients.</p>
           </div>
-          <Button onClick={() => setNewProjectOpen(true)} className="bg-primary hover:bg-primary/90">
+          <Button onClick={() => setNewProjectOpen(true)}>
             <Plus className="w-4 h-4 mr-2" /> New Project
           </Button>
         </div>
