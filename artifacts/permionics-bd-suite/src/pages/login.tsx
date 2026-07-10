@@ -106,8 +106,17 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Subtle Header Divider Line */}
+        <div className="w-full h-px bg-slate-100 mt-5 mb-2 pointer-events-none" />
+
         {/* Center: Login Form */}
         <div className="relative z-10 my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
+          {/* Access Pill Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100/80 border border-slate-200/40 w-fit mb-3.5 mx-auto lg:mx-0 select-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Secure Gateway</span>
+          </div>
+
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "'Outfit', sans-serif" }}>Welcome Back</h2>
@@ -121,25 +130,33 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock
-                          className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
-                        />
-                        <Input
-                          type="password"
-                          placeholder="Enter password"
-                          className="pl-10 h-12 rounded-xl border border-slate-200 text-sm font-semibold"
-                          style={{
-                            background: "hsl(220 15% 97%)",
-                            color: "hsl(222 47% 11%)",
-                          }}
-                          autoComplete="current-password"
-                          autoFocus
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
+                    <div className="flex flex-col">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 select-none">
+                        Access Password
+                      </label>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock
+                            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
+                          />
+                          <Input
+                            type="password"
+                            placeholder="Enter portal password"
+                            className="pl-10 h-12 rounded-xl border border-slate-200 text-sm font-semibold transition-all duration-200 focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                            style={{
+                              background: "hsl(220 15% 97%)",
+                              color: "hsl(222 47% 11%)",
+                            }}
+                            autoComplete="current-password"
+                            autoFocus
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <p className="text-[10px] text-slate-400 mt-2 leading-relaxed select-none">
+                        Enter your security access key to authenticate.
+                      </p>
+                    </div>
                     <FormMessage className="text-xs mt-1" />
                   </FormItem>
                 )}
