@@ -3,7 +3,7 @@ import { X, Send, Minimize2, Maximize2, Loader2, ExternalLink } from "lucide-rea
 import { useSendChatMessage, ChatSource, customFetch } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import botAvatar from "@assets/osmos_logo_blue.png";
+import botAvatar from "@assets/osmos_logo_blue_transparent.png";
 
 // ── Minimal inline markdown renderer ──────────────────────────────────────────
 function MiniMarkdown({ text }: { text: string }) {
@@ -100,13 +100,7 @@ export function OsmosChat() {
             <X className="w-6 h-6" />
           </div>
         ) : (
-          <div className="w-20 h-20 overflow-hidden flex items-center justify-center rounded-full">
-            <img 
-              src={botAvatar} 
-              alt="OSMOS" 
-              className="w-[350%] h-[350%] max-w-none object-contain drop-shadow-xl mix-blend-multiply" 
-            />
-          </div>
+          <img src={botAvatar} alt="OSMOS" className="w-16 h-16 object-contain drop-shadow-xl" />
         )}
       </button>
 
@@ -130,9 +124,7 @@ export function OsmosChat() {
             }}
           >
             <div className="relative">
-              <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-transparent">
-                <img src={botAvatar} alt="OSMOS" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
-              </div>
+              <img src={botAvatar} alt="OSMOS" className="w-9 h-9 object-contain" />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[hsl(222_47%_9%)]" />
             </div>
             <div className="flex-1 min-w-0">
@@ -162,12 +154,7 @@ export function OsmosChat() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-3 px-4">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ background: "hsl(217 91% 60% / 0.15)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>
-                  <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-transparent">
-                    <img src={botAvatar} alt="OSMOS" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply osmos-blob" />
-                  </div>
-                </div>
+                <img src={botAvatar} alt="OSMOS" className="w-16 h-16 object-contain osmos-blob" />
                 <div>
                   <p className="text-white/80 font-semibold text-sm">Hi, I'm OSMOS</p>
                   <p className="text-white/40 text-xs mt-1">Ask me anything about Permionics' case studies, technical capabilities, or BD intelligence.</p>
@@ -193,9 +180,7 @@ export function OsmosChat() {
               messages.map((m, i) => (
                 <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
                   {m.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center bg-transparent flex-shrink-0 mt-0.5">
-                      <img src={botAvatar} alt="OSMOS" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
-                    </div>
+                    <img src={botAvatar} alt="OSMOS" className="w-7 h-7 object-contain flex-shrink-0 mt-0.5" />
                   )}
                   <div
                     className={`max-w-[85%] px-3 py-2.5 rounded-2xl text-white ${
@@ -219,9 +204,7 @@ export function OsmosChat() {
             )}
             {sendChat.isPending && (
               <div className="flex gap-2.5">
-                <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center bg-transparent flex-shrink-0 mt-0.5">
-                  <img src={botAvatar} alt="OSMOS" className="w-[350%] h-[350%] max-w-none object-contain mix-blend-multiply" />
-                </div>
+                <img src={botAvatar} alt="OSMOS" className="w-7 h-7 object-contain flex-shrink-0 mt-0.5" />
                 <div
                   className="px-3 py-2.5 rounded-2xl rounded-tl-sm flex items-center gap-2"
                   style={{ background: "hsl(222 30% 14%)", border: "1px solid hsl(222 30% 20%)" }}
