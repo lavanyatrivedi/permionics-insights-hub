@@ -129,7 +129,7 @@ export default function LoginPage() {
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Log in to start using OSMOS BD Intelligence</p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Log in to start using the Osmos Portal</p>
           </div>
 
           {/* Form */}
@@ -212,7 +212,7 @@ export default function LoginPage() {
         {/* Top: Small badge label */}
         <div className="z-10 flex items-center gap-2 w-max px-3 py-1 rounded-full bg-white/5 border border-white/10 select-none text-[10px] font-bold uppercase tracking-wider text-indigo-300">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-          BD Suite Platform
+          Osmos Platform
         </div>
 
         {/* Center: Bolder Heading */}
@@ -221,7 +221,7 @@ export default function LoginPage() {
             Search Smarter.<br />Extract Faster.<br />Create Anywhere.
           </h1>
           <p className="text-sm lg:text-base text-white/50 max-w-md leading-relaxed">
-            BD Intelligence Platform for Permionics Membranes - powering smarter business development with AI.
+            Advanced Knowledge Platform for Permionics Membranes - powering smarter business development with AI.
           </p>
 
           {/* Feature Pills */}
