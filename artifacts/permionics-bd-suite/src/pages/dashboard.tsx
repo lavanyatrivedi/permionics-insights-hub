@@ -401,44 +401,44 @@ export default function DashboardPage() {
               icon: Briefcase,
               title: "Case Study Library",
               desc: "Browse all client case studies and outcomes",
-              accent: "#60a5fa",
-              bg: "hsl(222 47% 11%)",
+              accent: "#3b82f6",
+              accentBg: "rgba(59,130,246,0.08)",
             },
             {
               href: "~/generator",
               icon: FileText,
               title: "Case Study Generator",
               desc: "Create structured case studies with AI assistance",
-              accent: "#60a5fa",
-              bg: "hsl(222 47% 11%)",
+              accent: "#6366f1",
+              accentBg: "rgba(99,102,241,0.08)",
             },
             {
               href: "~/assistant",
               icon: Activity,
               title: "Osmos AI",
               desc: "Ask OSMOS for BD intelligence from all your documents",
-              accent: "#34d399",
-              bg: "hsl(222 47% 11%)",
+              accent: "#10b981",
+              accentBg: "rgba(16,185,129,0.08)",
             },
           ].map((item) => (
             <Link key={item.href} href={item.href}>
               <div
-                className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-lg"
+                className="rounded-2xl p-5 cursor-pointer group transition-all hover:scale-[1.01] hover:shadow-lg dark:hover:shadow-xl"
                 style={{
-                  background: item.bg,
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
                 }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: "rgba(255,255,255,0.06)" }}
+                  style={{ background: item.accentBg }}
                 >
                   <item.icon className="w-5 h-5" style={{ color: item.accent }} />
                 </div>
-                <p className="text-sm font-bold mb-1" style={{ color: "#f1f5f9" }}>
+                <p className="text-sm font-bold mb-1 text-foreground">
                   {item.title}
                 </p>
-                <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   {item.desc}
                 </p>
                 <div className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: item.accent }}>
