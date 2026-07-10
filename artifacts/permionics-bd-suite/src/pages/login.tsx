@@ -76,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-6 lg:p-12 select-none justify-center items-center gap-8 lg:gap-12">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-6 select-none justify-center items-center gap-6 lg:gap-8">
       {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
       {/* ── Left Side: Embedded Login Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[35%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-128px)] max-h-[580px]"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-8 lg:p-12 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[520px] lg:h-[calc(100vh-48px)] max-h-[720px]"
       >
         {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
         <div className="flex items-center gap-3.5 justify-center lg:justify-start select-none">
@@ -201,7 +201,7 @@ export default function LoginPage() {
 
       {/* ── Right Side: Layered Navy Branding Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[50%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[40vh] lg:h-[calc(100vh-128px)] max-h-[580px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[56%] p-10 lg:p-14 text-white rounded-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.5)] border border-indigo-500/10 min-h-[40vh] lg:h-[calc(100vh-48px)] max-h-[720px] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80"
       >
         {/* Subtle Tech-Grid Background Layer (Brightened for high visibility on dark background) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:16px_28px] pointer-events-none z-0" />
