@@ -16,15 +16,17 @@ export type SessionPayload = {
   exp: number;
 };
 
-export function signToken(): string {
-  return jwt.sign({ authenticated: true }, SESSION_SECRET!, {
+export async function signToken(): Promise<string> {
+  const adminPassword = await getAdminPassword();
+  return jwt.sign({ authenticated: true }, SESSION_SECRET! + adminPassword, {
     expiresIn: TOKEN_EXPIRY,
   });
 }
 
-export function verifyToken(token: string): SessionPayload | null {
+export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    return jwt.verify(token, SESSION_SECRET!) as SessionPayload;
+    const adminPassword = await getAdminPassword();
+    return jwt.verify(token, SESSION_SECRET! + adminPassword) as SessionPayload;
   } catch {
     return null;
   }
@@ -136,10 +138,10 @@ export async function hashPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, 12);
 }
 
-export function isAuthenticated(req: Request): boolean {
+export async function isAuthenticated(req: Request): Promise<boolean> {
   const token = getTokenFromRequest(req);
   if (!token) return false;
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   return payload !== null;
 }
 

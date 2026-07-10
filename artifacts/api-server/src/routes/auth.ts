@@ -30,7 +30,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const token = signToken();
+  const token = await signToken();
   setSessionCookie(res, token, !!remember);
   res.json({ authenticated: true, message: "Login successful" });
 });
@@ -46,7 +46,7 @@ router.get("/auth/me", async (req, res): Promise<void> => {
     res.json({ authenticated: false });
     return;
   }
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   if (!payload) {
     res.json({ authenticated: false });
     return;
