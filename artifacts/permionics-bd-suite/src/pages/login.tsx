@@ -76,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-6 select-none justify-between">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-hidden bg-slate-950 p-4 lg:p-8 select-none justify-center items-center lg:gap-16">
       {/* ── Background: Deep navy gradient with moving mesh blobs ── */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 
@@ -101,7 +101,7 @@ export default function LoginPage() {
       />
 
       {/* ── Left Side: Bold Branding Panel ── */}
-      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[60%] p-6 lg:p-12 text-white min-h-[35vh] lg:min-h-0">
+      <div className="relative z-10 flex flex-col justify-between w-full lg:w-[45%] p-6 lg:p-8 text-white min-h-[35vh] lg:min-h-0">
         {/* Top spacer */}
         <div className="h-6" />
 
@@ -135,12 +135,17 @@ export default function LoginPage() {
 
       {/* ── Right Side: Embedded Full-Height Login Card ── */}
       <div 
-        className="relative z-10 flex flex-col justify-between w-full lg:w-[38%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[-16px_0_48px_rgba(0,0,0,0.3)] border border-slate-100/10 min-h-[50vh] lg:min-h-0"
+        className="relative z-10 flex flex-col justify-between w-full lg:w-[35%] bg-white p-8 lg:p-10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[50vh] lg:min-h-[560px] lg:h-[calc(100vh-128px)] max-h-[600px]"
       >
         {/* Top: Dope Co-branded Header Layout */}
         <div className="flex items-center gap-3.5 justify-center lg:justify-start select-none">
-          {/* Left: Permionics P Logo */}
-          <img src={permionicsP} alt="Permionics" className="h-7 w-7 object-contain opacity-90" />
+          {/* Left: Permionics P Logo in Navy Square Box */}
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
+            style={{ background: "hsl(222 71% 17%)" }}
+          >
+            <img src={permionicsP} alt="Permionics" className="h-5 w-5 object-contain" />
+          </div>
           
           {/* Subtle Vertical Divider */}
           <div className="h-5 w-px bg-slate-200" />
@@ -153,7 +158,7 @@ export default function LoginPage() {
         </div>
 
         {/* Center: Login Form */}
-        <div className="my-auto w-full max-w-[320px] mx-auto py-8 lg:py-0">
+        <div className="my-auto w-full max-w-[320px] mx-auto py-6 lg:py-0">
           {/* Card Heading */}
           <div className="mb-6 text-center lg:text-left">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">Welcome Back</h2>
