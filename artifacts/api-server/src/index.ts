@@ -22,4 +22,16 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // Keep Render backend awake by self-pinging every 10 minutes
+  const PUBLIC_URL = "https://permionics-insights-hub.onrender.com/api/healthz";
+  setInterval(() => {
+    fetch(PUBLIC_URL)
+      .then((res) => {
+        logger.info({ status: res.status }, "keep-alive: Self-ping successful");
+      })
+      .catch((err) => {
+        logger.warn({ err: err.message }, "keep-alive: Self-ping failed");
+      });
+  }, 600000); // 10 minutes
 });
