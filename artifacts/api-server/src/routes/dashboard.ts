@@ -4,8 +4,18 @@ import { supabase } from "../lib/supabase";
 
 const router: IRouter = Router();
 
+let cachedStats: any = null;
+let lastStatsFetched = 0;
+const STATS_CACHE_TTL_MS = 10000; // 10 seconds
+
 router.get("/dashboard/stats", requireAuth, async (req, res): Promise<void> => {
   try {
+    const now = Date.now();
+    if (cachedStats && (now - lastStatsFetched < STATS_CACHE_TTL_MS)) {
+      res.json(cachedStats);
+      return;
+    }
+
     const [csResult, qResult] = await Promise.all([
       supabase.from("case_studies").select("id, sector, client_name, created_at", { count: "exact" }),
       supabase.from("questionnaire_projects").select("id, name, company_name, sector, created_at", { count: "exact" }),
@@ -77,14 +87,17 @@ router.get("/dashboard/stats", requireAuth, async (req, res): Promise<void> => {
       value: totalSectors > 0 ? Math.round((count / totalSectors) * 100) : 0,
     })).sort((a, b) => b.value - a.value);
 
-    res.json({
+    cachedStats = {
       totalCaseStudies: csResult.count ?? caseStudies.length,
       totalQuestionnaires: qResult.count ?? questionnaires.length,
       sectorsCount,
       lastUpdated,
       recentActivity,
       sectorBreakdown,
-    });
+    };
+    lastStatsFetched = now;
+
+    res.json(cachedStats);
   } catch (err) {
     req.log.error({ err }, "Dashboard stats error");
     res.status(500).json({ error: "Internal server error" });

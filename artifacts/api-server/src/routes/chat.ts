@@ -49,6 +49,47 @@ function safeTruncate(text: string, maxChars: number): string {
   return (cut > 0 ? text.slice(0, cut) : text.slice(0, maxChars)) + "…";
 }
 
+interface ChatCache {
+  uploads: any[];
+  caseStudies: any[];
+  creatorProjects: any[];
+  lastFetched: number;
+}
+
+let cachedChatData: ChatCache | null = null;
+const CACHE_TTL_MS = 15000; // 15 seconds
+
+async function getChatData() {
+  const now = Date.now();
+  if (cachedChatData && (now - cachedChatData.lastFetched < CACHE_TTL_MS)) {
+    return cachedChatData;
+  }
+
+  const [uploadsResult, caseStudiesResult, creatorResult] = await Promise.all([
+    supabase
+      .from("assistant_documents")
+      .select("id, title, content, created_at")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("case_studies")
+      .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text, updated_at")
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("case_creator_projects")
+      .select("id, name, data, updated_at")
+      .order("updated_at", { ascending: false }),
+  ]);
+
+  cachedChatData = {
+    uploads: uploadsResult.data ?? [],
+    caseStudies: caseStudiesResult.data ?? [],
+    creatorProjects: creatorResult.data ?? [],
+    lastFetched: now,
+  };
+
+  return cachedChatData;
+}
+
 router.post("/chat", requireAuth, async (req, res): Promise<void> => {
   try {
     const { message, history = [] } = req.body;
@@ -65,25 +106,11 @@ router.post("/chat", requireAuth, async (req, res): Promise<void> => {
       .split(/\s+/)
       .filter((w: string) => w.length >= 3 && !STOP_WORDS.has(w));
 
-    // ── 1. Fetch ALL documents from all sources ─────────────────────────────
-    const [uploadsResult, caseStudiesResult, creatorResult] = await Promise.all([
-      supabase
-        .from("assistant_documents")
-        .select("id, title, content, created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("case_studies")
-        .select("id, client_name, sector, location, challenge, solution, technology_stack, capacity, results, testimonial, tags, full_text, updated_at")
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("case_creator_projects")
-        .select("id, name, data, updated_at")
-        .order("updated_at", { ascending: false }),
-    ]);
-
-    const uploadedDocs = uploadsResult.data ?? [];
-    const caseStudies = caseStudiesResult.data ?? [];
-    const creatorProjects = creatorResult.data ?? [];
+    // ── 1. Fetch documents from cache/database ─────────────────────────────
+    const chatData = await getChatData();
+    const uploadedDocs = chatData.uploads;
+    const caseStudies = chatData.caseStudies;
+    const creatorProjects = chatData.creatorProjects;
 
     // ── 2. Build scored items ────────────────────────────────────────────────
     interface ScoredItem {
