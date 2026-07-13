@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoWhite from "@assets/logo_white.png";
 import permionicsP from "@assets/permionics_P_exact_1783575144366.png";
+import osmosLogo from "@assets/osmos_logo_blue_transparent.png";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -102,9 +103,16 @@ export function Sidebar() {
         style={{ borderColor: "hsl(var(--sidebar-border))" }}
       >
         <Link href="~/">
-          <div className="flex items-center cursor-pointer group justify-center w-full">
+          <div className={`flex items-center cursor-pointer group justify-center w-full ${expanded ? "px-1" : ""}`}>
             {expanded ? (
-              <img src={logoWhite} alt="Permionics" className="h-7 w-auto object-contain transition-all duration-200" />
+              <div className="flex flex-col gap-1 items-start w-full">
+                <img src={logoWhite} alt="Permionics" className="h-6 w-auto object-contain transition-all duration-200" />
+                <div className="flex items-center gap-1.5 mt-0.5 select-none">
+                  <span className="text-[8px] font-bold tracking-widest uppercase text-white/45">powered by</span>
+                  <img src={osmosLogo} alt="OSMOS" className="h-4.5 w-4.5 object-contain" />
+                  <span className="text-[9px] font-black tracking-widest uppercase text-white/70">OSMOS</span>
+                </div>
+              </div>
             ) : (
               <img 
                 src={permionicsP} 
