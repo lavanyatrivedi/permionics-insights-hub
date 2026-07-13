@@ -16,7 +16,8 @@ import {
 import { useLogout, useGetMe } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import osmosLogo from "@assets/osmos_logo_blue_transparent.png";
+import logoWhite from "@assets/logo_white.png";
+import permionicsP from "@assets/permionics_P_exact_1783575144366.png";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -101,15 +102,17 @@ export function Sidebar() {
         style={{ borderColor: "hsl(var(--sidebar-border))" }}
       >
         <Link href="~/">
-          <div className={`flex items-center cursor-pointer group ${expanded ? "gap-3" : "gap-0"}`}>
-            <img src={osmosLogo} alt="OSMOS" className="h-8.5 w-8.5 object-contain flex-shrink-0" />
-            <span
-              className={`font-extrabold tracking-tight text-xl text-white transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                expanded ? "opacity-100 w-auto ml-0" : "opacity-0 w-0"
-              }`}
-            >
-              OSMOS
-            </span>
+          <div className="flex items-center cursor-pointer group justify-center w-full">
+            {expanded ? (
+              <img src={logoWhite} alt="Permionics" className="h-7 w-auto object-contain transition-all duration-200" />
+            ) : (
+              <img 
+                src={permionicsP} 
+                alt="P" 
+                className="h-8 w-8 object-contain transition-all duration-200" 
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+            )}
           </div>
         </Link>
       </div>

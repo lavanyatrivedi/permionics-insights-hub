@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Lock, ArrowRight } from "lucide-react";
 import osmosLogo from "@assets/osmos_logo_blue_transparent.png";
-import permionicsP from "@assets/permionics_P_exact_1783575144366.png";
+import permionicsLogo from "@assets/permionics_logo_blue.png";
 
 const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
@@ -91,22 +91,12 @@ export default function LoginPage() {
         className="relative z-10 flex flex-col justify-between w-full lg:w-[40%] bg-white p-6 lg:p-10 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-slate-100/10 min-h-[480px] lg:h-[calc(100vh-80px)] max-h-[660px]"
       >
         {/* Top: Dope Co-branded Header Layout (Bolder Sizing) */}
-        <div className="relative z-10 flex items-center gap-3.5 justify-center lg:justify-start select-none">
-          {/* Left: Permionics P Logo in Navy Square Box */}
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-105"
-            style={{ background: "linear-gradient(135deg, hsl(222 71% 20%), hsl(222 71% 12%))" }}
-          >
-            <img src={permionicsP} alt="Permionics" className="h-6 w-6 object-contain" />
-          </div>
-          
-          {/* Subtle Vertical Divider */}
-          <div className="h-5 w-px bg-slate-200" />
-          
-          {/* Right: OSMOS Brand */}
-          <div className="flex items-center gap-2.5">
-            <img src={osmosLogo} alt="OSMOS" className="h-10 w-10 object-contain drop-shadow-sm" />
-            <span className="text-lg font-black tracking-widest uppercase text-slate-800">OSMOS</span>
+        <div className="relative z-10 flex flex-col gap-3 justify-center lg:justify-start items-center lg:items-start select-none">
+          <img src={permionicsLogo} alt="Permionics Logo" className="h-14 w-auto object-contain" />
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Insights Portal powered by</span>
+            <img src={osmosLogo} alt="OSMOS" className="h-4.5 w-4.5 object-contain" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-600">OSMOS</span>
           </div>
         </div>
 
