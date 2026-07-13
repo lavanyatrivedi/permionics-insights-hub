@@ -105,12 +105,17 @@ export function Sidebar() {
         <Link href="~/">
           <div className={`flex items-center cursor-pointer group justify-center w-full ${expanded ? "px-1" : ""}`}>
             {expanded ? (
-              <div className="flex flex-col gap-1 items-start w-full">
-                <img src={logoWhite} alt="Permionics" className="h-6 w-auto object-contain transition-all duration-200" />
-                <div className="flex items-center gap-1.5 mt-0.5 select-none">
-                  <span className="text-[8px] font-bold tracking-widest uppercase text-white/45">powered by</span>
-                  <img src={osmosLogo} alt="OSMOS" className="h-4.5 w-4.5 object-contain" />
-                  <span className="text-[9px] font-black tracking-widest uppercase text-white/70">OSMOS</span>
+              <div className="flex items-center justify-between w-full select-none">
+                {/* Permionics logo (increased size) */}
+                <img src={logoWhite} alt="Permionics" className="h-7 w-auto object-contain flex-shrink-0" />
+                
+                {/* Dim straight vertical divider line */}
+                <div className="h-4.5 w-px bg-white/10 mx-2 flex-shrink-0" />
+                
+                {/* OSMOS logo and name */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <img src={osmosLogo} alt="OSMOS" className="h-4 w-4 object-contain" />
+                  <span className="text-[10px] font-black tracking-widest uppercase text-white/60">OSMOS</span>
                 </div>
               </div>
             ) : (
