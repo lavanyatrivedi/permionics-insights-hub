@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm --filter @workspace/permionics-bd-suite run build",
-  "outputDirectory": "artifacts/permionics-bd-suite/dist",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
